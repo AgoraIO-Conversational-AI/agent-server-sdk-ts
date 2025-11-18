@@ -6,4 +6,4 @@
  * @example
  *     {}
  */
-export interface AgentInterruptRequest {}
+export interface AgentManagementInterruptRequest {}

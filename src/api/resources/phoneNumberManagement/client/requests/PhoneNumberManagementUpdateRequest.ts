@@ -13,14 +13,14 @@
  *         }
  *     }
  */
-export interface UpdateNumberConfigurationRequest {
+export interface PhoneNumberManagementUpdateRequest {
     /** Update inbound call configuration. Passing `null` will clear the configuration. */
-    inbound_config?: UpdateNumberConfigurationRequest.InboundConfig;
+    inbound_config?: PhoneNumberManagementUpdateRequest.InboundConfig;
     /** Update outbound call configuration. Passing `null` will clear the configuration. */
-    outbound_config?: UpdateNumberConfigurationRequest.OutboundConfig;
+    outbound_config?: PhoneNumberManagementUpdateRequest.OutboundConfig;
 }
 
-export namespace UpdateNumberConfigurationRequest {
+export namespace PhoneNumberManagementUpdateRequest {
     /**
      * Update inbound call configuration. Passing `null` will clear the configuration.
      */

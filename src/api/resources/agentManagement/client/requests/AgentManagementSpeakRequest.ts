@@ -10,7 +10,7 @@
  *         interruptable: false
  *     }
  */
-export interface AgentSpeakRequest {
+export interface AgentManagementSpeakRequest {
     /** The broadcast message text. The maximum length of the text content is 512 bytes. */
     text: string;
     /**
@@ -19,7 +19,7 @@ export interface AgentSpeakRequest {
      * - `APPEND`: Medium priority. The agent announces the message after the current interaction ends.
      * - `IGNORE`: Low priority. If the agent is busy interacting, it ignores and discards the broadcast; the message is only announced if the agent is not interacting.
      */
-    priority?: AgentSpeakRequest.Priority;
+    priority?: AgentManagementSpeakRequest.Priority;
     /**
      * Whether to allow users to interrupt the agent's broadcast by speaking:
      * - `true`: Allow
@@ -28,7 +28,7 @@ export interface AgentSpeakRequest {
     interruptable?: boolean;
 }
 
-export namespace AgentSpeakRequest {
+export namespace AgentManagementSpeakRequest {
     /**
      * Sets the priority of the message broadcast:
      * - `INTERRUPT`: High priority. The agent immediately interrupts the current interaction to announce the message.

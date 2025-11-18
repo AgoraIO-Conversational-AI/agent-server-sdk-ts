@@ -15,7 +15,7 @@ import * as Agora from "../../../../index.js";
  *         cursor: "cursor"
  *     }
  */
-export interface RetrieveCallRecordsRequest {
+export interface TelephonyListRequest {
     /**
      * Filter by phone number. Can be either the calling number or the called number.
      */
@@ -35,7 +35,7 @@ export interface RetrieveCallRecordsRequest {
      *
      * If not specified, all call types are returned.
      */
-    type?: Agora.RetrieveCallRecordsRequestType;
+    type?: Agora.TelephonyListRequestType;
     /**
      * Maximum number of items returned in a single page.
      */

@@ -6,7 +6,7 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 import { AgoraClient } from "../../src/Client";
 
 describe("AgentManagement", () => {
-    test("start-agent", async () => {
+    test("start", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
@@ -48,7 +48,7 @@ describe("AgentManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.agentManagement.startAgent("appid", {
+        const response = await client.agentManagement.start("appid", {
             name: "unique_name",
             properties: {
                 channel: "channel_name",
@@ -95,54 +95,7 @@ describe("AgentManagement", () => {
         });
     });
 
-    test("list-agents", async () => {
-        const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
-
-        const rawResponseBody = {
-            data: {
-                count: 1,
-                list: [{ start_ts: 1735035893, status: "RUNNING", agent_id: "1234567890ABCDE1CVGZNU80BEIN56XF" }],
-            },
-            meta: { cursor: "", total: 1 },
-            status: "ok",
-        };
-        server
-            .mockEndpoint()
-            .get("/v2/projects/appid/agents")
-            .respondWith()
-            .statusCode(200)
-            .jsonBody(rawResponseBody)
-            .build();
-
-        const response = await client.agentManagement.listAgents("appid", {
-            channel: "channel",
-            from_time: 1.1,
-            to_time: 1.1,
-            state: "0",
-            limit: 1,
-            cursor: "cursor",
-        });
-        expect(response).toEqual({
-            data: {
-                count: 1,
-                list: [
-                    {
-                        start_ts: 1735035893,
-                        status: "RUNNING",
-                        agent_id: "1234567890ABCDE1CVGZNU80BEIN56XF",
-                    },
-                ],
-            },
-            meta: {
-                cursor: "",
-                total: 1,
-            },
-            status: "ok",
-        });
-    });
-
-    test("query-agent-status", async () => {
+    test("get", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
@@ -161,7 +114,7 @@ describe("AgentManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.agentManagement.queryAgentStatus("appid", "agentId");
+        const response = await client.agentManagement.get("appid", "agentId");
         expect(response).toEqual({
             message: "agent exits with reason: xxxx",
             start_ts: 1735035893,
@@ -171,7 +124,7 @@ describe("AgentManagement", () => {
         });
     });
 
-    test("get-agent-history", async () => {
+    test("getHistory", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
@@ -192,7 +145,7 @@ describe("AgentManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.agentManagement.getAgentHistory("appid", "agentId");
+        const response = await client.agentManagement.getHistory("appid", "agentId");
         expect(response).toEqual({
             agent_id: "xxxx",
             start_ts: 123,
@@ -210,17 +163,17 @@ describe("AgentManagement", () => {
         });
     });
 
-    test("stop-agent", async () => {
+    test("stop", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         server.mockEndpoint().post("/v2/projects/appid/agents/agentId/leave").respondWith().statusCode(200).build();
 
-        const response = await client.agentManagement.stopAgent("appid", "agentId");
+        const response = await client.agentManagement.stop("appid", "agentId");
         expect(response).toEqual(undefined);
     });
 
-    test("update-agent", async () => {
+    test("update", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
@@ -249,7 +202,7 @@ describe("AgentManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.agentManagement.updateAgent("appid", "agentId", {
+        const response = await client.agentManagement.update("appid", "agentId", {
             properties: {
                 token: "007eJxTYxxxxxxxxxxIaHMLAAAA0ex66",
                 llm: {
@@ -278,7 +231,7 @@ describe("AgentManagement", () => {
         });
     });
 
-    test("agent-speak", async () => {
+    test("speak", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
@@ -296,7 +249,7 @@ describe("AgentManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.agentManagement.agentSpeak("appid", "agentId", {
+        const response = await client.agentManagement.speak("appid", "agentId", {
             text: "Sorry, the conversation content is not compliant.",
             priority: "INTERRUPT",
             interruptable: false,
@@ -308,7 +261,7 @@ describe("AgentManagement", () => {
         });
     });
 
-    test("agent-interrupt", async () => {
+    test("interrupt", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {};
@@ -322,7 +275,7 @@ describe("AgentManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.agentManagement.agentInterrupt("appid", "agentId");
+        const response = await client.agentManagement.interrupt("appid", "agentId");
         expect(response).toEqual({
             agent_id: "1NT29XxxxxxxxxELWEHC8OS",
             channel: "test_channel",

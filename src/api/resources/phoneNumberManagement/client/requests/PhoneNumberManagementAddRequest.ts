@@ -35,13 +35,13 @@
  *         }
  *     }
  */
-export interface ImportNumberRequest {
+export interface PhoneNumberManagementAddRequest {
     /**
      * Number provider:
      * - `byo`: BYO (Bring Your Own)
      * - `twilio`: Twilio
      */
-    provider: ImportNumberRequest.Provider;
+    provider: PhoneNumberManagementAddRequest.Provider;
     /** Telephone number in E.164 format. */
     phone_number: string;
     /** A label used to identify the number. */
@@ -51,12 +51,12 @@ export interface ImportNumberRequest {
     /** Whether the number supports outbound calls. */
     outbound?: boolean;
     /** SIP inbound call configuration. */
-    inbound_config: ImportNumberRequest.InboundConfig;
+    inbound_config: PhoneNumberManagementAddRequest.InboundConfig;
     /** SIP outbound call configuration. */
-    outbound_config: ImportNumberRequest.OutboundConfig;
+    outbound_config: PhoneNumberManagementAddRequest.OutboundConfig;
 }
 
-export namespace ImportNumberRequest {
+export namespace PhoneNumberManagementAddRequest {
     /**
      * Number provider:
      * - `byo`: BYO (Bring Your Own)

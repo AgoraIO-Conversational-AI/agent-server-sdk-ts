@@ -1,3 +1,3 @@
-export { type RetrieveCallRecordsRequest } from "./RetrieveCallRecordsRequest.js";
-export { type InitiateOutboundCallRequest } from "./InitiateOutboundCallRequest.js";
-export { type HangupCallRequest } from "./HangupCallRequest.js";
+export { type TelephonyListRequest } from "./TelephonyListRequest.js";
+export { type TelephonyCallRequest } from "./TelephonyCallRequest.js";
+export { type TelephonyHangupRequest } from "./TelephonyHangupRequest.js";

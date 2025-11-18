@@ -49,17 +49,17 @@ export class PhoneNumberManagement {
      * @param {PhoneNumberManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.phoneNumberManagement.retrieveNumberList()
+     *     await client.phoneNumberManagement.list()
      */
-    public retrieveNumberList(
+    public list(
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.RetrieveNumberListResponseItem[]> {
-        return core.HttpResponsePromise.fromPromise(this.__retrieveNumberList(requestOptions));
+    ): core.HttpResponsePromise<Agora.PhoneNumberManagementListResponseItem[]> {
+        return core.HttpResponsePromise.fromPromise(this.__list(requestOptions));
     }
 
-    private async __retrieveNumberList(
+    private async __list(
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.RetrieveNumberListResponseItem[]>> {
+    ): Promise<core.WithRawResponse<Agora.PhoneNumberManagementListResponseItem[]>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -80,7 +80,7 @@ export class PhoneNumberManagement {
         });
         if (_response.ok) {
             return {
-                data: _response.body as Agora.RetrieveNumberListResponseItem[],
+                data: _response.body as Agora.PhoneNumberManagementListResponseItem[],
                 rawResponse: _response.rawResponse,
             };
         }
@@ -113,11 +113,11 @@ export class PhoneNumberManagement {
     /**
      * Import a pre-configured phone number that can be used for inbound or outbound calls.
      *
-     * @param {Agora.ImportNumberRequest} request
+     * @param {Agora.PhoneNumberManagementAddRequest} request
      * @param {PhoneNumberManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.phoneNumberManagement.importNumber({
+     *     await client.phoneNumberManagement.add({
      *         provider: "byo",
      *         phone_number: "+19876543210",
      *         label: "Sales Hotline",
@@ -132,17 +132,17 @@ export class PhoneNumberManagement {
      *         }
      *     })
      */
-    public importNumber(
-        request: Agora.ImportNumberRequest,
+    public add(
+        request: Agora.PhoneNumberManagementAddRequest,
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.ImportNumberResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__importNumber(request, requestOptions));
+    ): core.HttpResponsePromise<Agora.PhoneNumberManagementAddResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__add(request, requestOptions));
     }
 
-    private async __importNumber(
-        request: Agora.ImportNumberRequest,
+    private async __add(
+        request: Agora.PhoneNumberManagementAddRequest,
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.ImportNumberResponse>> {
+    ): Promise<core.WithRawResponse<Agora.PhoneNumberManagementAddResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -165,7 +165,10 @@ export class PhoneNumberManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.ImportNumberResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as Agora.PhoneNumberManagementAddResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
@@ -200,19 +203,19 @@ export class PhoneNumberManagement {
      * @param {PhoneNumberManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.phoneNumberManagement.retrieveNumberInformation("phone_number")
+     *     await client.phoneNumberManagement.get("phone_number")
      */
-    public retrieveNumberInformation(
+    public get(
         phoneNumber: string,
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.RetrieveNumberInformationResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__retrieveNumberInformation(phoneNumber, requestOptions));
+    ): core.HttpResponsePromise<Agora.PhoneNumberManagementGetResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__get(phoneNumber, requestOptions));
     }
 
-    private async __retrieveNumberInformation(
+    private async __get(
         phoneNumber: string,
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.RetrieveNumberInformationResponse>> {
+    ): Promise<core.WithRawResponse<Agora.PhoneNumberManagementGetResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -233,7 +236,7 @@ export class PhoneNumberManagement {
         });
         if (_response.ok) {
             return {
-                data: _response.body as Agora.RetrieveNumberInformationResponse,
+                data: _response.body as Agora.PhoneNumberManagementGetResponse,
                 rawResponse: _response.rawResponse,
             };
         }
@@ -274,16 +277,16 @@ export class PhoneNumberManagement {
      * @param {PhoneNumberManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.phoneNumberManagement.deleteNumber("phone_number")
+     *     await client.phoneNumberManagement.delete("phone_number")
      */
-    public deleteNumber(
+    public delete(
         phoneNumber: string,
         requestOptions?: PhoneNumberManagement.RequestOptions,
     ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__deleteNumber(phoneNumber, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__delete(phoneNumber, requestOptions));
     }
 
-    private async __deleteNumber(
+    private async __delete(
         phoneNumber: string,
         requestOptions?: PhoneNumberManagement.RequestOptions,
     ): Promise<core.WithRawResponse<void>> {
@@ -340,11 +343,11 @@ export class PhoneNumberManagement {
      * Update the configuration for a phone number.
      *
      * @param {string} phoneNumber - Telephone number in E.164 format. For example, +11234567890.
-     * @param {Agora.UpdateNumberConfigurationRequest} request
+     * @param {Agora.PhoneNumberManagementUpdateRequest} request
      * @param {PhoneNumberManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.phoneNumberManagement.updateNumberConfiguration("phone_number", {
+     *     await client.phoneNumberManagement.update("phone_number", {
      *         inbound_config: {
      *             pipeline_id: "xxxxx"
      *         },
@@ -353,21 +356,19 @@ export class PhoneNumberManagement {
      *         }
      *     })
      */
-    public updateNumberConfiguration(
+    public update(
         phoneNumber: string,
-        request: Agora.UpdateNumberConfigurationRequest = {},
+        request: Agora.PhoneNumberManagementUpdateRequest = {},
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.UpdateNumberConfigurationResponse> {
-        return core.HttpResponsePromise.fromPromise(
-            this.__updateNumberConfiguration(phoneNumber, request, requestOptions),
-        );
+    ): core.HttpResponsePromise<Agora.PhoneNumberManagementUpdateResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__update(phoneNumber, request, requestOptions));
     }
 
-    private async __updateNumberConfiguration(
+    private async __update(
         phoneNumber: string,
-        request: Agora.UpdateNumberConfigurationRequest = {},
+        request: Agora.PhoneNumberManagementUpdateRequest = {},
         requestOptions?: PhoneNumberManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.UpdateNumberConfigurationResponse>> {
+    ): Promise<core.WithRawResponse<Agora.PhoneNumberManagementUpdateResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -391,7 +392,7 @@ export class PhoneNumberManagement {
         });
         if (_response.ok) {
             return {
-                data: _response.body as Agora.UpdateNumberConfigurationResponse,
+                data: _response.body as Agora.PhoneNumberManagementUpdateResponse,
                 rawResponse: _response.rawResponse,
             };
         }

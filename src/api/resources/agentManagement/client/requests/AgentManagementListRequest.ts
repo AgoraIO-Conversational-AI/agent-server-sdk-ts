@@ -15,7 +15,7 @@ import * as Agora from "../../../../index.js";
  *         cursor: "cursor"
  *     }
  */
-export interface ListAgentsRequest {
+export interface AgentManagementListRequest {
     /**
      * The channel to query for a list of agents.
      */
@@ -38,7 +38,7 @@ export interface ListAgentsRequest {
      * - `RECOVERING` (5): The agent is recovering.
      * - `FAILED` (6): The agent failed to execute.
      */
-    state?: Agora.ListAgentsRequestState;
+    state?: Agora.AgentManagementListRequestState;
     /**
      * The maximum number of entries returned per page.
      */

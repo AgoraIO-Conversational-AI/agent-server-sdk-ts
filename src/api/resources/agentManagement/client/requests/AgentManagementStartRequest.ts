@@ -43,14 +43,14 @@
  *         }
  *     }
  */
-export interface StartAgentRequest {
+export interface AgentManagementStartRequest {
     /** The unique identifier of the agent. The same identifier cannot be used repeatedly. */
     name: string;
     /** Configuration details of the agent. */
-    properties: StartAgentRequest.Properties;
+    properties: AgentManagementStartRequest.Properties;
 }
 
-export namespace StartAgentRequest {
+export namespace AgentManagementStartRequest {
     /**
      * Configuration details of the agent.
      */

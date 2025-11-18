@@ -1,5 +1,5 @@
-export { type StartAgentRequest } from "./StartAgentRequest.js";
-export { type ListAgentsRequest } from "./ListAgentsRequest.js";
-export { type UpdateAgentRequest } from "./UpdateAgentRequest.js";
-export { type AgentSpeakRequest } from "./AgentSpeakRequest.js";
-export { type AgentInterruptRequest } from "./AgentInterruptRequest.js";
+export { type AgentManagementStartRequest } from "./AgentManagementStartRequest.js";
+export { type AgentManagementListRequest } from "./AgentManagementListRequest.js";
+export { type AgentManagementUpdateRequest } from "./AgentManagementUpdateRequest.js";
+export { type AgentManagementSpeakRequest } from "./AgentManagementSpeakRequest.js";
+export { type AgentManagementInterruptRequest } from "./AgentManagementInterruptRequest.js";

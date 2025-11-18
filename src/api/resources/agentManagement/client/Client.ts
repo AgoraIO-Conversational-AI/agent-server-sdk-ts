@@ -47,11 +47,11 @@ export class AgentManagement {
      * Create and start a Conversational AI agent instance.
      *
      * @param {string} appid - The App ID of the project.
-     * @param {Agora.StartAgentRequest} request
+     * @param {Agora.AgentManagementStartRequest} request
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.startAgent("appid", {
+     *     await client.agentManagement.start("appid", {
      *         name: "unique_name",
      *         properties: {
      *             channel: "channel_name",
@@ -90,19 +90,19 @@ export class AgentManagement {
      *         }
      *     })
      */
-    public startAgent(
+    public start(
         appid: string,
-        request: Agora.StartAgentRequest,
+        request: Agora.AgentManagementStartRequest,
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.StartAgentResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__startAgent(appid, request, requestOptions));
+    ): core.HttpResponsePromise<Agora.AgentManagementStartResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__start(appid, request, requestOptions));
     }
 
-    private async __startAgent(
+    private async __start(
         appid: string,
-        request: Agora.StartAgentRequest,
+        request: Agora.AgentManagementStartRequest,
         requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.StartAgentResponse>> {
+    ): Promise<core.WithRawResponse<Agora.AgentManagementStartResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -125,7 +125,7 @@ export class AgentManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.StartAgentResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.AgentManagementStartResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -157,11 +157,11 @@ export class AgentManagement {
      * Retrieve a list of agents that meet the specified conditions.
      *
      * @param {string} appid - The App ID of the project.
-     * @param {Agora.ListAgentsRequest} request
+     * @param {Agora.AgentManagementListRequest} request
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.listAgents("appid", {
+     *     await client.agentManagement.list("appid", {
      *         channel: "channel",
      *         from_time: 1.1,
      *         to_time: 1.1,
@@ -170,90 +170,98 @@ export class AgentManagement {
      *         cursor: "cursor"
      *     })
      */
-    public listAgents(
+    public async list(
         appid: string,
-        request: Agora.ListAgentsRequest = {},
+        request: Agora.AgentManagementListRequest = {},
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.ListAgentsResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__listAgents(appid, request, requestOptions));
-    }
-
-    private async __listAgents(
-        appid: string,
-        request: Agora.ListAgentsRequest = {},
-        requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.ListAgentsResponse>> {
-        const { channel, from_time: fromTime, to_time: toTime, state, limit, cursor } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (channel != null) {
-            _queryParams["channel"] = channel;
-        }
-
-        if (fromTime != null) {
-            _queryParams["from_time"] = fromTime.toString();
-        }
-
-        if (toTime != null) {
-            _queryParams["to_time"] = toTime.toString();
-        }
-
-        if (state != null) {
-            _queryParams["state"] = state;
-        }
-
-        if (limit != null) {
-            _queryParams["limit"] = limit.toString();
-        }
-
-        if (cursor != null) {
-            _queryParams["cursor"] = cursor;
-        }
-
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.AgoraEnvironment.Default,
-                `v2/projects/${encodeURIComponent(appid)}/agents`,
-            ),
-            method: "GET",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+    ): Promise<core.Page<Agora.AgentManagementListResponseDataListItem>> {
+        const list = core.HttpResponsePromise.interceptFunction(
+            async (
+                request: Agora.AgentManagementListRequest,
+            ): Promise<core.WithRawResponse<Agora.AgentManagementListResponse>> => {
+                const { channel, from_time: fromTime, to_time: toTime, state, limit, cursor } = request;
+                const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+                if (channel != null) {
+                    _queryParams["channel"] = channel;
+                }
+                if (fromTime != null) {
+                    _queryParams["from_time"] = fromTime.toString();
+                }
+                if (toTime != null) {
+                    _queryParams["to_time"] = toTime.toString();
+                }
+                if (state != null) {
+                    _queryParams["state"] = state;
+                }
+                if (limit != null) {
+                    _queryParams["limit"] = limit.toString();
+                }
+                if (cursor != null) {
+                    _queryParams["cursor"] = cursor;
+                }
+                const _response = await core.fetcher({
+                    url: core.url.join(
+                        (await core.Supplier.get(this._options.baseUrl)) ??
+                            (await core.Supplier.get(this._options.environment)) ??
+                            environments.AgoraEnvironment.Default,
+                        `v2/projects/${encodeURIComponent(appid)}/agents`,
+                    ),
+                    method: "GET",
+                    headers: mergeHeaders(
+                        this._options?.headers,
+                        mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                        requestOptions?.headers,
+                    ),
+                    queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+                    timeoutMs:
+                        requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+                    maxRetries: requestOptions?.maxRetries,
+                    abortSignal: requestOptions?.abortSignal,
+                });
+                if (_response.ok) {
+                    return {
+                        data: _response.body as Agora.AgentManagementListResponse,
+                        rawResponse: _response.rawResponse,
+                    };
+                }
+                if (_response.error.reason === "status-code") {
+                    throw new errors.AgoraError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+                }
+                switch (_response.error.reason) {
+                    case "non-json":
+                        throw new errors.AgoraError({
+                            statusCode: _response.error.statusCode,
+                            body: _response.error.rawBody,
+                            rawResponse: _response.rawResponse,
+                        });
+                    case "timeout":
+                        throw new errors.AgoraTimeoutError(
+                            "Timeout exceeded when calling GET /v2/projects/{appid}/agents.",
+                        );
+                    case "unknown":
+                        throw new errors.AgoraError({
+                            message: _response.error.errorMessage,
+                            rawResponse: _response.rawResponse,
+                        });
+                }
+            },
+        );
+        const dataWithRawResponse = await list(request).withRawResponse();
+        return new core.Pageable<Agora.AgentManagementListResponse, Agora.AgentManagementListResponseDataListItem>({
+            response: dataWithRawResponse.data,
+            rawResponse: dataWithRawResponse.rawResponse,
+            hasNextPage: (response) =>
+                response?.meta?.cursor != null &&
+                !(typeof response?.meta?.cursor === "string" && response?.meta?.cursor === ""),
+            getItems: (response) => response?.data?.list ?? [],
+            loadPage: (response) => {
+                return list(core.setObjectProperty(request, "cursor", response?.meta?.cursor));
+            },
         });
-        if (_response.ok) {
-            return { data: _response.body as Agora.ListAgentsResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.AgoraError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.AgoraError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.AgoraTimeoutError("Timeout exceeded when calling GET /v2/projects/{appid}/agents.");
-            case "unknown":
-                throw new errors.AgoraError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
     }
 
     /**
@@ -264,21 +272,21 @@ export class AgentManagement {
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.queryAgentStatus("appid", "agentId")
+     *     await client.agentManagement.get("appid", "agentId")
      */
-    public queryAgentStatus(
+    public get(
         appid: string,
         agentId: string,
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.QueryAgentStatusResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__queryAgentStatus(appid, agentId, requestOptions));
+    ): core.HttpResponsePromise<Agora.AgentManagementGetResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__get(appid, agentId, requestOptions));
     }
 
-    private async __queryAgentStatus(
+    private async __get(
         appid: string,
         agentId: string,
         requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.QueryAgentStatusResponse>> {
+    ): Promise<core.WithRawResponse<Agora.AgentManagementGetResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -298,7 +306,7 @@ export class AgentManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.QueryAgentStatusResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.AgentManagementGetResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -338,21 +346,21 @@ export class AgentManagement {
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.getAgentHistory("appid", "agentId")
+     *     await client.agentManagement.getHistory("appid", "agentId")
      */
-    public getAgentHistory(
+    public getHistory(
         appid: string,
         agentId: string,
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.GetAgentHistoryResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__getAgentHistory(appid, agentId, requestOptions));
+    ): core.HttpResponsePromise<Agora.AgentManagementGetHistoryResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__getHistory(appid, agentId, requestOptions));
     }
 
-    private async __getAgentHistory(
+    private async __getHistory(
         appid: string,
         agentId: string,
         requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.GetAgentHistoryResponse>> {
+    ): Promise<core.WithRawResponse<Agora.AgentManagementGetHistoryResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -372,7 +380,10 @@ export class AgentManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.GetAgentHistoryResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as Agora.AgentManagementGetHistoryResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {
@@ -410,17 +421,17 @@ export class AgentManagement {
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.stopAgent("appid", "agentId")
+     *     await client.agentManagement.stop("appid", "agentId")
      */
-    public stopAgent(
+    public stop(
         appid: string,
         agentId: string,
         requestOptions?: AgentManagement.RequestOptions,
     ): core.HttpResponsePromise<void> {
-        return core.HttpResponsePromise.fromPromise(this.__stopAgent(appid, agentId, requestOptions));
+        return core.HttpResponsePromise.fromPromise(this.__stop(appid, agentId, requestOptions));
     }
 
-    private async __stopAgent(
+    private async __stop(
         appid: string,
         agentId: string,
         requestOptions?: AgentManagement.RequestOptions,
@@ -479,11 +490,11 @@ export class AgentManagement {
      *
      * @param {string} appid - The App ID of the project.
      * @param {string} agentId - The agent instance ID you obtained after successfully calling `join` to start a conversational AI agent.
-     * @param {Agora.UpdateAgentRequest} request
+     * @param {Agora.AgentManagementUpdateRequest} request
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.updateAgent("appid", "agentId", {
+     *     await client.agentManagement.update("appid", "agentId", {
      *         properties: {
      *             token: "007eJxTYxxxxxxxxxxIaHMLAAAA0ex66",
      *             llm: {
@@ -502,21 +513,21 @@ export class AgentManagement {
      *         }
      *     })
      */
-    public updateAgent(
+    public update(
         appid: string,
         agentId: string,
-        request: Agora.UpdateAgentRequest = {},
+        request: Agora.AgentManagementUpdateRequest = {},
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.UpdateAgentResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__updateAgent(appid, agentId, request, requestOptions));
+    ): core.HttpResponsePromise<Agora.AgentManagementUpdateResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__update(appid, agentId, request, requestOptions));
     }
 
-    private async __updateAgent(
+    private async __update(
         appid: string,
         agentId: string,
-        request: Agora.UpdateAgentRequest = {},
+        request: Agora.AgentManagementUpdateRequest = {},
         requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.UpdateAgentResponse>> {
+    ): Promise<core.WithRawResponse<Agora.AgentManagementUpdateResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -539,7 +550,7 @@ export class AgentManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.UpdateAgentResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.AgentManagementUpdateResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -578,31 +589,31 @@ export class AgentManagement {
      *
      * @param {string} appid - The App ID of the project.
      * @param {string} agentId - The agent instance ID you obtained after successfully calling `join` to start a conversational AI agent.
-     * @param {Agora.AgentSpeakRequest} request
+     * @param {Agora.AgentManagementSpeakRequest} request
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.agentSpeak("appid", "agentId", {
+     *     await client.agentManagement.speak("appid", "agentId", {
      *         text: "Sorry, the conversation content is not compliant.",
      *         priority: "INTERRUPT",
      *         interruptable: false
      *     })
      */
-    public agentSpeak(
+    public speak(
         appid: string,
         agentId: string,
-        request: Agora.AgentSpeakRequest,
+        request: Agora.AgentManagementSpeakRequest,
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.AgentSpeakResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__agentSpeak(appid, agentId, request, requestOptions));
+    ): core.HttpResponsePromise<Agora.AgentManagementSpeakResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__speak(appid, agentId, request, requestOptions));
     }
 
-    private async __agentSpeak(
+    private async __speak(
         appid: string,
         agentId: string,
-        request: Agora.AgentSpeakRequest,
+        request: Agora.AgentManagementSpeakRequest,
         requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.AgentSpeakResponse>> {
+    ): Promise<core.WithRawResponse<Agora.AgentManagementSpeakResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -625,7 +636,7 @@ export class AgentManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.AgentSpeakResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.AgentManagementSpeakResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -660,27 +671,27 @@ export class AgentManagement {
      *
      * @param {string} appid - The App ID of the project.
      * @param {string} agentId - The agent instance ID you obtained after successfully calling `join` to start a conversational AI agent.
-     * @param {Agora.AgentInterruptRequest} request
+     * @param {Agora.AgentManagementInterruptRequest} request
      * @param {AgentManagement.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.agentManagement.agentInterrupt("appid", "agentId")
+     *     await client.agentManagement.interrupt("appid", "agentId")
      */
-    public agentInterrupt(
+    public interrupt(
         appid: string,
         agentId: string,
-        request: Agora.AgentInterruptRequest = {},
+        request: Agora.AgentManagementInterruptRequest = {},
         requestOptions?: AgentManagement.RequestOptions,
-    ): core.HttpResponsePromise<Agora.AgentInterruptResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__agentInterrupt(appid, agentId, request, requestOptions));
+    ): core.HttpResponsePromise<Agora.AgentManagementInterruptResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__interrupt(appid, agentId, request, requestOptions));
     }
 
-    private async __agentInterrupt(
+    private async __interrupt(
         appid: string,
         agentId: string,
-        request: Agora.AgentInterruptRequest = {},
+        request: Agora.AgentManagementInterruptRequest = {},
         requestOptions?: AgentManagement.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.AgentInterruptResponse>> {
+    ): Promise<core.WithRawResponse<Agora.AgentManagementInterruptResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -703,7 +714,10 @@ export class AgentManagement {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.AgentInterruptResponse, rawResponse: _response.rawResponse };
+            return {
+                data: _response.body as Agora.AgentManagementInterruptResponse,
+                rawResponse: _response.rawResponse,
+            };
         }
 
         if (_response.error.reason === "status-code") {

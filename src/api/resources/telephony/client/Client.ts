@@ -47,11 +47,11 @@ export class Telephony {
      * Query historical call records for a specified appid based on the filter criteria.
      *
      * @param {string} appid - The App ID of the project.
-     * @param {Agora.RetrieveCallRecordsRequest} request
+     * @param {Agora.TelephonyListRequest} request
      * @param {Telephony.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.telephony.retrieveCallRecords("appid", {
+     *     await client.telephony.list("appid", {
      *         number: "number",
      *         from_time: 1,
      *         to_time: 1,
@@ -60,90 +60,93 @@ export class Telephony {
      *         cursor: "cursor"
      *     })
      */
-    public retrieveCallRecords(
+    public async list(
         appid: string,
-        request: Agora.RetrieveCallRecordsRequest = {},
+        request: Agora.TelephonyListRequest = {},
         requestOptions?: Telephony.RequestOptions,
-    ): core.HttpResponsePromise<Agora.RetrieveCallRecordsResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__retrieveCallRecords(appid, request, requestOptions));
-    }
-
-    private async __retrieveCallRecords(
-        appid: string,
-        request: Agora.RetrieveCallRecordsRequest = {},
-        requestOptions?: Telephony.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.RetrieveCallRecordsResponse>> {
-        const { number: number_, from_time: fromTime, to_time: toTime, type: type_, limit, cursor } = request;
-        const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
-        if (number_ != null) {
-            _queryParams["number"] = number_;
-        }
-
-        if (fromTime != null) {
-            _queryParams["from_time"] = fromTime.toString();
-        }
-
-        if (toTime != null) {
-            _queryParams["to_time"] = toTime.toString();
-        }
-
-        if (type_ != null) {
-            _queryParams["type"] = type_;
-        }
-
-        if (limit != null) {
-            _queryParams["limit"] = limit.toString();
-        }
-
-        if (cursor != null) {
-            _queryParams["cursor"] = cursor;
-        }
-
-        const _response = await core.fetcher({
-            url: core.url.join(
-                (await core.Supplier.get(this._options.baseUrl)) ??
-                    (await core.Supplier.get(this._options.environment)) ??
-                    environments.AgoraEnvironment.Default,
-                `v2/projects/${encodeURIComponent(appid)}/call`,
-            ),
-            method: "GET",
-            headers: mergeHeaders(
-                this._options?.headers,
-                mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
-                requestOptions?.headers,
-            ),
-            queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
-            timeoutMs: requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
-            maxRetries: requestOptions?.maxRetries,
-            abortSignal: requestOptions?.abortSignal,
+    ): Promise<core.Page<Agora.TelephonyListResponseDataListItem>> {
+        const list = core.HttpResponsePromise.interceptFunction(
+            async (request: Agora.TelephonyListRequest): Promise<core.WithRawResponse<Agora.TelephonyListResponse>> => {
+                const { number: number_, from_time: fromTime, to_time: toTime, type: type_, limit, cursor } = request;
+                const _queryParams: Record<string, string | string[] | object | object[] | null> = {};
+                if (number_ != null) {
+                    _queryParams["number"] = number_;
+                }
+                if (fromTime != null) {
+                    _queryParams["from_time"] = fromTime.toString();
+                }
+                if (toTime != null) {
+                    _queryParams["to_time"] = toTime.toString();
+                }
+                if (type_ != null) {
+                    _queryParams["type"] = type_;
+                }
+                if (limit != null) {
+                    _queryParams["limit"] = limit.toString();
+                }
+                if (cursor != null) {
+                    _queryParams["cursor"] = cursor;
+                }
+                const _response = await core.fetcher({
+                    url: core.url.join(
+                        (await core.Supplier.get(this._options.baseUrl)) ??
+                            (await core.Supplier.get(this._options.environment)) ??
+                            environments.AgoraEnvironment.Default,
+                        `v2/projects/${encodeURIComponent(appid)}/call`,
+                    ),
+                    method: "GET",
+                    headers: mergeHeaders(
+                        this._options?.headers,
+                        mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                        requestOptions?.headers,
+                    ),
+                    queryParameters: { ..._queryParams, ...requestOptions?.queryParams },
+                    timeoutMs:
+                        requestOptions?.timeoutInSeconds != null ? requestOptions.timeoutInSeconds * 1000 : 60000,
+                    maxRetries: requestOptions?.maxRetries,
+                    abortSignal: requestOptions?.abortSignal,
+                });
+                if (_response.ok) {
+                    return { data: _response.body as Agora.TelephonyListResponse, rawResponse: _response.rawResponse };
+                }
+                if (_response.error.reason === "status-code") {
+                    throw new errors.AgoraError({
+                        statusCode: _response.error.statusCode,
+                        body: _response.error.body,
+                        rawResponse: _response.rawResponse,
+                    });
+                }
+                switch (_response.error.reason) {
+                    case "non-json":
+                        throw new errors.AgoraError({
+                            statusCode: _response.error.statusCode,
+                            body: _response.error.rawBody,
+                            rawResponse: _response.rawResponse,
+                        });
+                    case "timeout":
+                        throw new errors.AgoraTimeoutError(
+                            "Timeout exceeded when calling GET /v2/projects/{appid}/call.",
+                        );
+                    case "unknown":
+                        throw new errors.AgoraError({
+                            message: _response.error.errorMessage,
+                            rawResponse: _response.rawResponse,
+                        });
+                }
+            },
+        );
+        const dataWithRawResponse = await list(request).withRawResponse();
+        return new core.Pageable<Agora.TelephonyListResponse, Agora.TelephonyListResponseDataListItem>({
+            response: dataWithRawResponse.data,
+            rawResponse: dataWithRawResponse.rawResponse,
+            hasNextPage: (response) =>
+                response?.meta?.cursor != null &&
+                !(typeof response?.meta?.cursor === "string" && response?.meta?.cursor === ""),
+            getItems: (response) => response?.data?.list ?? [],
+            loadPage: (response) => {
+                return list(core.setObjectProperty(request, "cursor", response?.meta?.cursor));
+            },
         });
-        if (_response.ok) {
-            return { data: _response.body as Agora.RetrieveCallRecordsResponse, rawResponse: _response.rawResponse };
-        }
-
-        if (_response.error.reason === "status-code") {
-            throw new errors.AgoraError({
-                statusCode: _response.error.statusCode,
-                body: _response.error.body,
-                rawResponse: _response.rawResponse,
-            });
-        }
-
-        switch (_response.error.reason) {
-            case "non-json":
-                throw new errors.AgoraError({
-                    statusCode: _response.error.statusCode,
-                    body: _response.error.rawBody,
-                    rawResponse: _response.rawResponse,
-                });
-            case "timeout":
-                throw new errors.AgoraTimeoutError("Timeout exceeded when calling GET /v2/projects/{appid}/call.");
-            case "unknown":
-                throw new errors.AgoraError({
-                    message: _response.error.errorMessage,
-                    rawResponse: _response.rawResponse,
-                });
-        }
     }
 
     /**
@@ -152,11 +155,11 @@ export class Telephony {
      * Use this endpoint to initiate an outbound call to the specified number and create an agent that joins the target RTC channel. The agent waits for the callee to answer.
      *
      * @param {string} appid - The App ID of the project.
-     * @param {Agora.InitiateOutboundCallRequest} request
+     * @param {Agora.TelephonyCallRequest} request
      * @param {Telephony.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.telephony.initiateOutboundCall("appid", {
+     *     await client.telephony.call("appid", {
      *         name: "customer_service",
      *         sip: {
      *             to_number: "+19876543210",
@@ -173,7 +176,7 @@ export class Telephony {
      *     })
      *
      * @example
-     *     await client.telephony.initiateOutboundCall("appid", {
+     *     await client.telephony.call("appid", {
      *         name: "customer_service",
      *         sip: {
      *             to_number: "+19876543210",
@@ -188,19 +191,19 @@ export class Telephony {
      *         }
      *     })
      */
-    public initiateOutboundCall(
+    public call(
         appid: string,
-        request: Agora.InitiateOutboundCallRequest,
+        request: Agora.TelephonyCallRequest,
         requestOptions?: Telephony.RequestOptions,
-    ): core.HttpResponsePromise<Agora.InitiateOutboundCallResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__initiateOutboundCall(appid, request, requestOptions));
+    ): core.HttpResponsePromise<Agora.TelephonyCallResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__call(appid, request, requestOptions));
     }
 
-    private async __initiateOutboundCall(
+    private async __call(
         appid: string,
-        request: Agora.InitiateOutboundCallRequest,
+        request: Agora.TelephonyCallRequest,
         requestOptions?: Telephony.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.InitiateOutboundCallResponse>> {
+    ): Promise<core.WithRawResponse<Agora.TelephonyCallResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -223,7 +226,7 @@ export class Telephony {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.InitiateOutboundCallResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.TelephonyCallResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -259,21 +262,21 @@ export class Telephony {
      * @param {Telephony.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.telephony.retrieveCallStatus("appid", "agent_id")
+     *     await client.telephony.get("appid", "agent_id")
      */
-    public retrieveCallStatus(
+    public get(
         appid: string,
         agentId: string,
         requestOptions?: Telephony.RequestOptions,
-    ): core.HttpResponsePromise<Agora.RetrieveCallStatusResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__retrieveCallStatus(appid, agentId, requestOptions));
+    ): core.HttpResponsePromise<Agora.TelephonyGetResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__get(appid, agentId, requestOptions));
     }
 
-    private async __retrieveCallStatus(
+    private async __get(
         appid: string,
         agentId: string,
         requestOptions?: Telephony.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.RetrieveCallStatusResponse>> {
+    ): Promise<core.WithRawResponse<Agora.TelephonyGetResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -293,7 +296,7 @@ export class Telephony {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.RetrieveCallStatusResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.TelephonyGetResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {
@@ -328,27 +331,27 @@ export class Telephony {
      *
      * @param {string} appid - The App ID of the project.
      * @param {string} agentId - The agent ID you obtained after successfully calling the API to initiate an outbound call.
-     * @param {Agora.HangupCallRequest} request
+     * @param {Agora.TelephonyHangupRequest} request
      * @param {Telephony.RequestOptions} requestOptions - Request-specific configuration.
      *
      * @example
-     *     await client.telephony.hangupCall("appid", "agent_id")
+     *     await client.telephony.hangup("appid", "agent_id")
      */
-    public hangupCall(
+    public hangup(
         appid: string,
         agentId: string,
-        request: Agora.HangupCallRequest = {},
+        request: Agora.TelephonyHangupRequest = {},
         requestOptions?: Telephony.RequestOptions,
-    ): core.HttpResponsePromise<Agora.HangupCallResponse> {
-        return core.HttpResponsePromise.fromPromise(this.__hangupCall(appid, agentId, request, requestOptions));
+    ): core.HttpResponsePromise<Agora.TelephonyHangupResponse> {
+        return core.HttpResponsePromise.fromPromise(this.__hangup(appid, agentId, request, requestOptions));
     }
 
-    private async __hangupCall(
+    private async __hangup(
         appid: string,
         agentId: string,
-        request: Agora.HangupCallRequest = {},
+        request: Agora.TelephonyHangupRequest = {},
         requestOptions?: Telephony.RequestOptions,
-    ): Promise<core.WithRawResponse<Agora.HangupCallResponse>> {
+    ): Promise<core.WithRawResponse<Agora.TelephonyHangupResponse>> {
         const _response = await core.fetcher({
             url: core.url.join(
                 (await core.Supplier.get(this._options.baseUrl)) ??
@@ -371,7 +374,7 @@ export class Telephony {
             abortSignal: requestOptions?.abortSignal,
         });
         if (_response.ok) {
-            return { data: _response.body as Agora.HangupCallResponse, rawResponse: _response.rawResponse };
+            return { data: _response.body as Agora.TelephonyHangupResponse, rawResponse: _response.rawResponse };
         }
 
         if (_response.error.reason === "status-code") {

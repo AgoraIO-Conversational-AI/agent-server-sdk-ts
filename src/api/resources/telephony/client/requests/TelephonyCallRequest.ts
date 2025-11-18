@@ -36,11 +36,11 @@
  *         }
  *     }
  */
-export interface InitiateOutboundCallRequest {
+export interface TelephonyCallRequest {
     /** The name identifier of the call session. */
     name: string;
     /** SIP (Session Initiation Protocol) call configuration object. */
-    sip: InitiateOutboundCallRequest.Sip;
+    sip: TelephonyCallRequest.Sip;
     /** The unique ID of a published project in AI Studio. */
     pipeline_id?: string;
     /**
@@ -48,10 +48,10 @@ export interface InitiateOutboundCallRequest {
      * - **Using pipeline ID**: Simply pass in `channel`, `token`, and `agent_rtc_uid`.
      * - **Using complete configuration**: Pass in the complete parameters of the [Start a conversational AI agent](https://docs.agora.io/en/conversational-ai/rest-api/agent/join) `properties`, including all required fields such as `channel`, `token`, `agent_rtc_uid`, `remote_rtc_uids`, `tts`, and `llm`.
      */
-    properties: InitiateOutboundCallRequest.Properties;
+    properties: TelephonyCallRequest.Properties;
 }
 
-export namespace InitiateOutboundCallRequest {
+export namespace TelephonyCallRequest {
     /**
      * SIP (Session Initiation Protocol) call configuration object.
      */

@@ -6,70 +6,7 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 import { AgoraClient } from "../../src/Client";
 
 describe("Telephony", () => {
-    test("retrieve-call-records", async () => {
-        const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
-
-        const rawResponseBody = {
-            data: {
-                count: 1,
-                list: [
-                    {
-                        to_number: "2222",
-                        from_number: "111",
-                        pipeline_id: "28",
-                        type: "inbound",
-                        agent_id: "A42AA22ATxxxxx4RH76AM92W",
-                        channel: "channel_1111",
-                        create_ts: 1758498988,
-                        state: "answered",
-                    },
-                ],
-            },
-            meta: { cursor: "A42AA22AT45LDxxxxxH76AM92W", total: 1 },
-            status: "ok",
-        };
-        server
-            .mockEndpoint()
-            .get("/v2/projects/appid/call")
-            .respondWith()
-            .statusCode(200)
-            .jsonBody(rawResponseBody)
-            .build();
-
-        const response = await client.telephony.retrieveCallRecords("appid", {
-            number: "number",
-            from_time: 1,
-            to_time: 1,
-            type: "inbound",
-            limit: 1,
-            cursor: "cursor",
-        });
-        expect(response).toEqual({
-            data: {
-                count: 1,
-                list: [
-                    {
-                        to_number: "2222",
-                        from_number: "111",
-                        pipeline_id: "28",
-                        type: "inbound",
-                        agent_id: "A42AA22ATxxxxx4RH76AM92W",
-                        channel: "channel_1111",
-                        create_ts: 1758498988,
-                        state: "answered",
-                    },
-                ],
-            },
-            meta: {
-                cursor: "A42AA22AT45LDxxxxxH76AM92W",
-                total: 1,
-            },
-            status: "ok",
-        });
-    });
-
-    test("initiate-outbound-call", async () => {
+    test("call", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
@@ -93,7 +30,7 @@ describe("Telephony", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.telephony.initiateOutboundCall("appid", {
+        const response = await client.telephony.call("appid", {
             name: "customer_service",
             sip: {
                 to_number: "+19876543210",
@@ -113,7 +50,7 @@ describe("Telephony", () => {
         });
     });
 
-    test("retrieve-call-status", async () => {
+    test("get", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
@@ -137,7 +74,7 @@ describe("Telephony", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.telephony.retrieveCallStatus("appid", "agent_id");
+        const response = await client.telephony.get("appid", "agent_id");
         expect(response).toEqual({
             to_number: "1300000000",
             from_number: "1330000000",
@@ -152,7 +89,7 @@ describe("Telephony", () => {
         });
     });
 
-    test("hangup-call", async () => {
+    test("hangup", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {};
@@ -166,7 +103,7 @@ describe("Telephony", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.telephony.hangupCall("appid", "agent_id");
+        const response = await client.telephony.hangup("appid", "agent_id");
         expect(response).toEqual({});
     });
 });

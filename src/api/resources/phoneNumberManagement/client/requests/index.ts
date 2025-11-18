@@ -1,2 +1,2 @@
-export { type ImportNumberRequest } from "./ImportNumberRequest.js";
-export { type UpdateNumberConfigurationRequest } from "./UpdateNumberConfigurationRequest.js";
+export { type PhoneNumberManagementAddRequest } from "./PhoneNumberManagementAddRequest.js";
+export { type PhoneNumberManagementUpdateRequest } from "./PhoneNumberManagementUpdateRequest.js";

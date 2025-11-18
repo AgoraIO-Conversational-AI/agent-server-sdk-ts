@@ -7,6 +7,25 @@ The Agoraio TypeScript library provides convenient access to the Agoraio APIs fr
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
+- [Installation](#installation)
+- [Reference](#reference)
+- [Usage](#usage)
+- [Request and Response Types](#request-and-response-types)
+- [Exception Handling](#exception-handling)
+- [Pagination](#pagination)
+- [Advanced](#advanced)
+    - [Additional Headers](#additional-headers)
+    - [Additional Query String Parameters](#additional-query-string-parameters)
+    - [Retries](#retries)
+    - [Timeouts](#timeouts)
+    - [Aborting Requests](#aborting-requests)
+    - [Access Raw Response Data](#access-raw-response-data)
+    - [Runtime Compatibility](#runtime-compatibility)
+- [Contributing](#contributing)
+
+## Table of Contents
+
 - [Installation](#installation)
 - [Reference](#reference)
 - [Usage](#usage)
@@ -40,7 +59,7 @@ Instantiate and use the client with the following:
 import { AgoraClient } from "agora-sdk";
 
 const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
-await client.agentManagement.startAgent("appid", {
+await client.agentManagement.start("appid", {
     name: "unique_name",
     properties: {
         channel: "channel_name",
@@ -90,7 +109,7 @@ following namespace:
 ```typescript
 import { Agora } from "agora-sdk";
 
-const request: Agora.StartAgentRequest = {
+const request: Agora.AgentManagementStartRequest = {
     ...
 };
 ```
@@ -104,7 +123,7 @@ will be thrown.
 import { AgoraError } from "agora-sdk";
 
 try {
-    await client.agentManagement.startAgent(...);
+    await client.agentManagement.start(...);
 } catch (err) {
     if (err instanceof AgoraError) {
         console.log(err.statusCode);
@@ -115,6 +134,40 @@ try {
 }
 ```
 
+## Pagination
+
+List endpoints are paginated. The SDK provides an iterator so that you can simply loop over the items:
+
+```typescript
+import { AgoraClient } from "agora-sdk";
+
+const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
+const response = await client.agentManagement.list("appid", {
+    channel: "channel",
+    from_time: 1.1,
+    to_time: 1.1,
+    state: "0",
+    limit: 1,
+    cursor: "cursor",
+});
+for await (const item of response) {
+    console.log(item);
+}
+
+// Or you can manually iterate page-by-page
+let page = await client.agentManagement.list("appid", {
+    channel: "channel",
+    from_time: 1.1,
+    to_time: 1.1,
+    state: "0",
+    limit: 1,
+    cursor: "cursor",
+});
+while (page.hasNextPage()) {
+    page = page.getNextPage();
+}
+```
+
 ## Advanced
 
 ### Additional Headers
@@ -122,7 +175,7 @@ try {
 If you would like to send additional headers as part of the request, use the `headers` request option.
 
 ```typescript
-const response = await client.agentManagement.startAgent(..., {
+const response = await client.agentManagement.start(..., {
     headers: {
         'X-Custom-Header': 'custom value'
     }
@@ -134,7 +187,7 @@ const response = await client.agentManagement.startAgent(..., {
 If you would like to send additional query string parameters as part of the request, use the `queryParams` request option.
 
 ```typescript
-const response = await client.agentManagement.startAgent(..., {
+const response = await client.agentManagement.start(..., {
     queryParams: {
         'customQueryParamKey': 'custom query param value'
     }
@@ -156,7 +209,7 @@ A request is deemed retryable when any of the following HTTP status codes is ret
 Use the `maxRetries` request option to configure this behavior.
 
 ```typescript
-const response = await client.agentManagement.startAgent(..., {
+const response = await client.agentManagement.start(..., {
     maxRetries: 0 // override maxRetries at the request level
 });
 ```
@@ -166,7 +219,7 @@ const response = await client.agentManagement.startAgent(..., {
 The SDK defaults to a 60 second timeout. Use the `timeoutInSeconds` option to configure this behavior.
 
 ```typescript
-const response = await client.agentManagement.startAgent(..., {
+const response = await client.agentManagement.start(..., {
     timeoutInSeconds: 30 // override timeout to 30s
 });
 ```
@@ -177,7 +230,7 @@ The SDK allows users to abort requests at any point by passing in an abort signa
 
 ```typescript
 const controller = new AbortController();
-const response = await client.agentManagement.startAgent(..., {
+const response = await client.agentManagement.start(..., {
     abortSignal: controller.signal
 });
 controller.abort(); // aborts the request
@@ -189,7 +242,7 @@ The SDK provides access to raw response data, including headers, through the `.w
 The `.withRawResponse()` method returns a promise that results to an object with a `data` and a `rawResponse` property.
 
 ```typescript
-const { data, rawResponse } = await client.agentManagement.startAgent(...).withRawResponse();
+const { data, rawResponse } = await client.agentManagement.start(...).withRawResponse();
 
 console.log(data);
 console.log(rawResponse.headers['X-My-Header']);

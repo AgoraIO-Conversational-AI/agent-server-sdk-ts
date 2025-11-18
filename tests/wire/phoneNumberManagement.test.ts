@@ -6,7 +6,7 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 import { AgoraClient } from "../../src/Client";
 
 describe("PhoneNumberManagement", () => {
-    test("retrieve-number-list", async () => {
+    test("list", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
@@ -34,7 +34,7 @@ describe("PhoneNumberManagement", () => {
         ];
         server.mockEndpoint().get("/v2/phone-numbers").respondWith().statusCode(200).jsonBody(rawResponseBody).build();
 
-        const response = await client.phoneNumberManagement.retrieveNumberList();
+        const response = await client.phoneNumberManagement.list();
         expect(response).toEqual([
             {
                 provider: "twilio",
@@ -73,7 +73,7 @@ describe("PhoneNumberManagement", () => {
         ]);
     });
 
-    test("import-number", async () => {
+    test("add", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
@@ -102,7 +102,7 @@ describe("PhoneNumberManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.phoneNumberManagement.importNumber({
+        const response = await client.phoneNumberManagement.add({
             provider: "byo",
             phone_number: "+19876543210",
             label: "Sales Hotline",
@@ -129,7 +129,7 @@ describe("PhoneNumberManagement", () => {
         });
     });
 
-    test("retrieve-number-information", async () => {
+    test("get", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
@@ -151,7 +151,7 @@ describe("PhoneNumberManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.phoneNumberManagement.retrieveNumberInformation("phone_number");
+        const response = await client.phoneNumberManagement.get("phone_number");
         expect(response).toEqual({
             provider: "byo",
             phone_number: "+11234567890",
@@ -171,17 +171,17 @@ describe("PhoneNumberManagement", () => {
         });
     });
 
-    test("delete-number", async () => {
+    test("delete", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         server.mockEndpoint().delete("/v2/phone-numbers/phone_number").respondWith().statusCode(200).build();
 
-        const response = await client.phoneNumberManagement.deleteNumber("phone_number");
+        const response = await client.phoneNumberManagement.delete("phone_number");
         expect(response).toEqual(undefined);
     });
 
-    test("update-number-configuration", async () => {
+    test("update", async () => {
         const server = mockServerPool.createServer();
         const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = { inbound_config: { pipeline_id: "xxxxx" }, outbound_config: { pipeline_id: "xxxxx" } };
@@ -204,7 +204,7 @@ describe("PhoneNumberManagement", () => {
             .jsonBody(rawResponseBody)
             .build();
 
-        const response = await client.phoneNumberManagement.updateNumberConfiguration("phone_number", {
+        const response = await client.phoneNumberManagement.update("phone_number", {
             inbound_config: {
                 pipeline_id: "xxxxx",
             },

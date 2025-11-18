@@ -23,12 +23,12 @@
  *         }
  *     }
  */
-export interface UpdateAgentRequest {
+export interface AgentManagementUpdateRequest {
     /** Configuration properties to update. */
-    properties?: UpdateAgentRequest.Properties;
+    properties?: AgentManagementUpdateRequest.Properties;
 }
 
-export namespace UpdateAgentRequest {
+export namespace AgentManagementUpdateRequest {
     /**
      * Configuration properties to update.
      */
