@@ -1,5 +1,8 @@
-export { type AgentManagementStartRequest } from "./AgentManagementStartRequest.js";
-export { type AgentManagementListRequest } from "./AgentManagementListRequest.js";
-export { type AgentManagementUpdateRequest } from "./AgentManagementUpdateRequest.js";
-export { type AgentManagementSpeakRequest } from "./AgentManagementSpeakRequest.js";
-export { type AgentManagementInterruptRequest } from "./AgentManagementInterruptRequest.js";
+export type { GetAgentManagementRequest } from "./GetAgentManagementRequest.js";
+export type { GetHistoryAgentManagementRequest } from "./GetHistoryAgentManagementRequest.js";
+export type { InterruptAgentManagementRequest } from "./InterruptAgentManagementRequest.js";
+export type { ListAgentManagementRequest } from "./ListAgentManagementRequest.js";
+export type { SpeakAgentManagementRequest } from "./SpeakAgentManagementRequest.js";
+export type { StartAgentManagementRequest } from "./StartAgentManagementRequest.js";
+export type { StopAgentManagementRequest } from "./StopAgentManagementRequest.js";
+export type { UpdateAgentManagementRequest } from "./UpdateAgentManagementRequest.js";
