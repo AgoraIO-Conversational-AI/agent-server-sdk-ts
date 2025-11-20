@@ -23,7 +23,7 @@ Instantiate and use the client with the following:
 import { AgoraClient } from "agora-sdk";
 
 const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
-await client.agentManagement.start({
+await client.agents.start({
     appid: "appid",
     name: "unique_name",
     properties: {
@@ -72,7 +72,7 @@ following namespace:
 ```typescript
 import { Agora } from "agora-sdk";
 
-const request: Agora.StartAgentManagementRequest = {
+const request: Agora.StartAgentsRequest = {
     ...
 };
 ```
@@ -86,7 +86,7 @@ will be thrown.
 import { AgoraError } from "agora-sdk";
 
 try {
-    await client.agentManagement.start(...);
+    await client.agents.start(...);
 } catch (err) {
     if (err instanceof AgoraError) {
         console.log(err.statusCode);
@@ -105,7 +105,7 @@ List endpoints are paginated. The SDK provides an iterator so that you can simpl
 import { AgoraClient } from "agora-sdk";
 
 const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
-const pageableResponse = await client.agentManagement.list({
+const pageableResponse = await client.agents.list({
     appid: "appid"
 });
 for await (const item of pageableResponse) {
@@ -113,7 +113,7 @@ for await (const item of pageableResponse) {
 }
 
 // Or you can manually iterate page-by-page
-let page = await client.agentManagement.list({
+let page = await client.agents.list({
     appid: "appid"
 });
 while (page.hasNextPage()) {
@@ -131,7 +131,7 @@ const response = page.response;
 If you would like to send additional headers as part of the request, use the `headers` request option.
 
 ```typescript
-const response = await client.agentManagement.start(..., {
+const response = await client.agents.start(..., {
     headers: {
         'X-Custom-Header': 'custom value'
     }
@@ -143,7 +143,7 @@ const response = await client.agentManagement.start(..., {
 If you would like to send additional query string parameters as part of the request, use the `queryParams` request option.
 
 ```typescript
-const response = await client.agentManagement.start(..., {
+const response = await client.agents.start(..., {
     queryParams: {
         'customQueryParamKey': 'custom query param value'
     }
@@ -165,7 +165,7 @@ A request is deemed retryable when any of the following HTTP status codes is ret
 Use the `maxRetries` request option to configure this behavior.
 
 ```typescript
-const response = await client.agentManagement.start(..., {
+const response = await client.agents.start(..., {
     maxRetries: 0 // override maxRetries at the request level
 });
 ```
@@ -175,7 +175,7 @@ const response = await client.agentManagement.start(..., {
 The SDK defaults to a 60 second timeout. Use the `timeoutInSeconds` option to configure this behavior.
 
 ```typescript
-const response = await client.agentManagement.start(..., {
+const response = await client.agents.start(..., {
     timeoutInSeconds: 30 // override timeout to 30s
 });
 ```
@@ -186,7 +186,7 @@ The SDK allows users to abort requests at any point by passing in an abort signa
 
 ```typescript
 const controller = new AbortController();
-const response = await client.agentManagement.start(..., {
+const response = await client.agents.start(..., {
     abortSignal: controller.signal
 });
 controller.abort(); // aborts the request
@@ -198,7 +198,7 @@ The SDK provides access to raw response data, including headers, through the `.w
 The `.withRawResponse()` method returns a promise that results to an object with a `data` and a `rawResponse` property.
 
 ```typescript
-const { data, rawResponse } = await client.agentManagement.start(...).withRawResponse();
+const { data, rawResponse } = await client.agents.start(...).withRawResponse();
 
 console.log(data);
 console.log(rawResponse.headers['X-My-Header']);

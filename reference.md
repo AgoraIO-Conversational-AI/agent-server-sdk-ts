@@ -1,6 +1,6 @@
 # Reference
-## Agent Management
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">start</a>({ ...params }) -> Agora.StartAgentManagementResponse</code></summary>
+## Agents
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">start</a>({ ...params }) -> Agora.StartAgentsResponse</code></summary>
 <dl>
 <dd>
 
@@ -27,7 +27,7 @@ Create and start a Conversational AI agent instance.
 <dd>
 
 ```typescript
-await client.agentManagement.start({
+await client.agents.start({
     appid: "appid",
     name: "unique_name",
     properties: {
@@ -81,7 +81,7 @@ await client.agentManagement.start({
 <dl>
 <dd>
 
-**request:** `Agora.StartAgentManagementRequest` 
+**request:** `Agora.StartAgentsRequest` 
     
 </dd>
 </dl>
@@ -89,7 +89,7 @@ await client.agentManagement.start({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -101,7 +101,7 @@ await client.agentManagement.start({
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">list</a>({ ...params }) -> core.Page<Agora.ListAgentManagementResponse.Data | undefined.List.Item, Agora.ListAgentManagementResponse></code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">list</a>({ ...params }) -> core.Page<Agora.ListAgentsResponse.Data | undefined.List.Item, Agora.ListAgentsResponse></code></summary>
 <dl>
 <dd>
 
@@ -128,7 +128,7 @@ Retrieve a list of agents that meet the specified conditions.
 <dd>
 
 ```typescript
-const pageableResponse = await client.agentManagement.list({
+const pageableResponse = await client.agents.list({
     appid: "appid"
 });
 for await (const item of pageableResponse) {
@@ -136,7 +136,7 @@ for await (const item of pageableResponse) {
 }
 
 // Or you can manually iterate page-by-page
-let page = await client.agentManagement.list({
+let page = await client.agents.list({
     appid: "appid"
 });
 while (page.hasNextPage()) {
@@ -160,7 +160,7 @@ const response = page.response;
 <dl>
 <dd>
 
-**request:** `Agora.ListAgentManagementRequest` 
+**request:** `Agora.ListAgentsRequest` 
     
 </dd>
 </dl>
@@ -168,7 +168,7 @@ const response = page.response;
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -180,7 +180,7 @@ const response = page.response;
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">get</a>({ ...params }) -> Agora.GetAgentManagementResponse</code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">get</a>({ ...params }) -> Agora.GetAgentsResponse</code></summary>
 <dl>
 <dd>
 
@@ -207,7 +207,7 @@ Get the current state information of the specified agent instance.
 <dd>
 
 ```typescript
-await client.agentManagement.get({
+await client.agents.get({
     appid: "appid",
     agentId: "agentId"
 });
@@ -226,7 +226,7 @@ await client.agentManagement.get({
 <dl>
 <dd>
 
-**request:** `Agora.GetAgentManagementRequest` 
+**request:** `Agora.GetAgentsRequest` 
     
 </dd>
 </dl>
@@ -234,7 +234,7 @@ await client.agentManagement.get({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -246,7 +246,7 @@ await client.agentManagement.get({
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">getHistory</a>({ ...params }) -> Agora.GetHistoryAgentManagementResponse</code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">getHistory</a>({ ...params }) -> Agora.GetHistoryAgentsResponse</code></summary>
 <dl>
 <dd>
 
@@ -275,7 +275,7 @@ Call this endpoint while the agent is running to retrieve the conversation histo
 <dd>
 
 ```typescript
-await client.agentManagement.getHistory({
+await client.agents.getHistory({
     appid: "appid",
     agentId: "agentId"
 });
@@ -294,7 +294,7 @@ await client.agentManagement.getHistory({
 <dl>
 <dd>
 
-**request:** `Agora.GetHistoryAgentManagementRequest` 
+**request:** `Agora.GetHistoryAgentsRequest` 
     
 </dd>
 </dl>
@@ -302,7 +302,7 @@ await client.agentManagement.getHistory({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -314,7 +314,7 @@ await client.agentManagement.getHistory({
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">stop</a>({ ...params }) -> void</code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">stop</a>({ ...params }) -> void</code></summary>
 <dl>
 <dd>
 
@@ -341,7 +341,7 @@ Stop the specified conversational agent instance.
 <dd>
 
 ```typescript
-await client.agentManagement.stop({
+await client.agents.stop({
     appid: "appid",
     agentId: "agentId"
 });
@@ -360,7 +360,7 @@ await client.agentManagement.stop({
 <dl>
 <dd>
 
-**request:** `Agora.StopAgentManagementRequest` 
+**request:** `Agora.StopAgentsRequest` 
     
 </dd>
 </dl>
@@ -368,7 +368,7 @@ await client.agentManagement.stop({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -380,7 +380,7 @@ await client.agentManagement.stop({
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">update</a>({ ...params }) -> Agora.UpdateAgentManagementResponse</code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">update</a>({ ...params }) -> Agora.UpdateAgentsResponse</code></summary>
 <dl>
 <dd>
 
@@ -407,7 +407,7 @@ Adjust Conversation AI Engine parameters at runtime.
 <dd>
 
 ```typescript
-await client.agentManagement.update({
+await client.agents.update({
     appid: "appid",
     agentId: "agentId",
     properties: {
@@ -442,7 +442,7 @@ await client.agentManagement.update({
 <dl>
 <dd>
 
-**request:** `Agora.UpdateAgentManagementRequest` 
+**request:** `Agora.UpdateAgentsRequest` 
     
 </dd>
 </dl>
@@ -450,7 +450,7 @@ await client.agentManagement.update({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -462,7 +462,7 @@ await client.agentManagement.update({
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">speak</a>({ ...params }) -> Agora.SpeakAgentManagementResponse</code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">speak</a>({ ...params }) -> Agora.SpeakAgentsResponse</code></summary>
 <dl>
 <dd>
 
@@ -493,7 +493,7 @@ Note: The speak API is not supported when using `mllm` configuration.
 <dd>
 
 ```typescript
-await client.agentManagement.speak({
+await client.agents.speak({
     appid: "appid",
     agentId: "agentId",
     text: "Sorry, the conversation content is not compliant.",
@@ -515,7 +515,7 @@ await client.agentManagement.speak({
 <dl>
 <dd>
 
-**request:** `Agora.SpeakAgentManagementRequest` 
+**request:** `Agora.SpeakAgentsRequest` 
     
 </dd>
 </dl>
@@ -523,7 +523,7 @@ await client.agentManagement.speak({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -535,7 +535,7 @@ await client.agentManagement.speak({
 </dl>
 </details>
 
-<details><summary><code>client.agentManagement.<a href="/src/api/resources/agentManagement/client/Client.ts">interrupt</a>({ ...params }) -> Agora.InterruptAgentManagementResponse</code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">interrupt</a>({ ...params }) -> Agora.InterruptAgentsResponse</code></summary>
 <dl>
 <dd>
 
@@ -562,7 +562,7 @@ Interrupt the specified agent while speaking or thinking.
 <dd>
 
 ```typescript
-await client.agentManagement.interrupt({
+await client.agents.interrupt({
     appid: "appid",
     agentId: "agentId"
 });
@@ -581,7 +581,7 @@ await client.agentManagement.interrupt({
 <dl>
 <dd>
 
-**request:** `Agora.InterruptAgentManagementRequest` 
+**request:** `Agora.InterruptAgentsRequest` 
     
 </dd>
 </dl>
@@ -589,7 +589,7 @@ await client.agentManagement.interrupt({
 <dl>
 <dd>
 
-**requestOptions:** `AgentManagementClient.RequestOptions` 
+**requestOptions:** `AgentsClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -893,8 +893,8 @@ await client.telephony.hangup({
 </dl>
 </details>
 
-## Phone Number Management
-<details><summary><code>client.phoneNumberManagement.<a href="/src/api/resources/phoneNumberManagement/client/Client.ts">list</a>() -> Agora.ListPhoneNumberManagementResponseItem[]</code></summary>
+## PhoneNumbers
+<details><summary><code>client.phoneNumbers.<a href="/src/api/resources/phoneNumbers/client/Client.ts">list</a>() -> Agora.ListPhoneNumbersResponseItem[]</code></summary>
 <dl>
 <dd>
 
@@ -921,7 +921,7 @@ Retrieve a list of all imported phone numbers under the current account.
 <dd>
 
 ```typescript
-await client.phoneNumberManagement.list();
+await client.phoneNumbers.list();
 
 ```
 </dd>
@@ -937,7 +937,7 @@ await client.phoneNumberManagement.list();
 <dl>
 <dd>
 
-**requestOptions:** `PhoneNumberManagementClient.RequestOptions` 
+**requestOptions:** `PhoneNumbersClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -949,7 +949,7 @@ await client.phoneNumberManagement.list();
 </dl>
 </details>
 
-<details><summary><code>client.phoneNumberManagement.<a href="/src/api/resources/phoneNumberManagement/client/Client.ts">add</a>({ ...params }) -> Agora.AddPhoneNumberManagementResponse</code></summary>
+<details><summary><code>client.phoneNumbers.<a href="/src/api/resources/phoneNumbers/client/Client.ts">add</a>({ ...params }) -> Agora.AddPhoneNumbersResponse</code></summary>
 <dl>
 <dd>
 
@@ -976,7 +976,7 @@ Import a pre-configured phone number that can be used for inbound or outbound ca
 <dd>
 
 ```typescript
-await client.phoneNumberManagement.add({
+await client.phoneNumbers.add({
     provider: "byo",
     phone_number: "+19876543210",
     label: "Sales Hotline",
@@ -1005,7 +1005,7 @@ await client.phoneNumberManagement.add({
 <dl>
 <dd>
 
-**request:** `Agora.AddPhoneNumberManagementRequest` 
+**request:** `Agora.AddPhoneNumbersRequest` 
     
 </dd>
 </dl>
@@ -1013,7 +1013,7 @@ await client.phoneNumberManagement.add({
 <dl>
 <dd>
 
-**requestOptions:** `PhoneNumberManagementClient.RequestOptions` 
+**requestOptions:** `PhoneNumbersClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -1025,7 +1025,7 @@ await client.phoneNumberManagement.add({
 </dl>
 </details>
 
-<details><summary><code>client.phoneNumberManagement.<a href="/src/api/resources/phoneNumberManagement/client/Client.ts">get</a>({ ...params }) -> Agora.GetPhoneNumberManagementResponse</code></summary>
+<details><summary><code>client.phoneNumbers.<a href="/src/api/resources/phoneNumbers/client/Client.ts">get</a>({ ...params }) -> Agora.GetPhoneNumbersResponse</code></summary>
 <dl>
 <dd>
 
@@ -1052,7 +1052,7 @@ Retrieve detailed information for a specific phone number.
 <dd>
 
 ```typescript
-await client.phoneNumberManagement.get({
+await client.phoneNumbers.get({
     phone_number: "phone_number"
 });
 
@@ -1070,7 +1070,7 @@ await client.phoneNumberManagement.get({
 <dl>
 <dd>
 
-**request:** `Agora.GetPhoneNumberManagementRequest` 
+**request:** `Agora.GetPhoneNumbersRequest` 
     
 </dd>
 </dl>
@@ -1078,7 +1078,7 @@ await client.phoneNumberManagement.get({
 <dl>
 <dd>
 
-**requestOptions:** `PhoneNumberManagementClient.RequestOptions` 
+**requestOptions:** `PhoneNumbersClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -1090,7 +1090,7 @@ await client.phoneNumberManagement.get({
 </dl>
 </details>
 
-<details><summary><code>client.phoneNumberManagement.<a href="/src/api/resources/phoneNumberManagement/client/Client.ts">delete</a>({ ...params }) -> void</code></summary>
+<details><summary><code>client.phoneNumbers.<a href="/src/api/resources/phoneNumbers/client/Client.ts">delete</a>({ ...params }) -> void</code></summary>
 <dl>
 <dd>
 
@@ -1119,7 +1119,7 @@ Note: This operation only removes the number configuration from the Agora system
 <dd>
 
 ```typescript
-await client.phoneNumberManagement.delete({
+await client.phoneNumbers.delete({
     phone_number: "phone_number"
 });
 
@@ -1137,7 +1137,7 @@ await client.phoneNumberManagement.delete({
 <dl>
 <dd>
 
-**request:** `Agora.DeletePhoneNumberManagementRequest` 
+**request:** `Agora.DeletePhoneNumbersRequest` 
     
 </dd>
 </dl>
@@ -1145,7 +1145,7 @@ await client.phoneNumberManagement.delete({
 <dl>
 <dd>
 
-**requestOptions:** `PhoneNumberManagementClient.RequestOptions` 
+**requestOptions:** `PhoneNumbersClient.RequestOptions` 
     
 </dd>
 </dl>
@@ -1157,7 +1157,7 @@ await client.phoneNumberManagement.delete({
 </dl>
 </details>
 
-<details><summary><code>client.phoneNumberManagement.<a href="/src/api/resources/phoneNumberManagement/client/Client.ts">update</a>({ ...params }) -> Agora.UpdatePhoneNumberManagementResponse</code></summary>
+<details><summary><code>client.phoneNumbers.<a href="/src/api/resources/phoneNumbers/client/Client.ts">update</a>({ ...params }) -> Agora.UpdatePhoneNumbersResponse</code></summary>
 <dl>
 <dd>
 
@@ -1184,7 +1184,7 @@ Update the configuration for a phone number.
 <dd>
 
 ```typescript
-await client.phoneNumberManagement.update({
+await client.phoneNumbers.update({
     phone_number: "phone_number",
     inbound_config: {
         pipeline_id: "xxxxx"
@@ -1208,7 +1208,7 @@ await client.phoneNumberManagement.update({
 <dl>
 <dd>
 
-**request:** `Agora.UpdatePhoneNumberManagementRequest` 
+**request:** `Agora.UpdatePhoneNumbersRequest` 
     
 </dd>
 </dl>
@@ -1216,7 +1216,7 @@ await client.phoneNumberManagement.update({
 <dl>
 <dd>
 
-**requestOptions:** `PhoneNumberManagementClient.RequestOptions` 
+**requestOptions:** `PhoneNumbersClient.RequestOptions` 
     
 </dd>
 </dl>
