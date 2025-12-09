@@ -110,7 +110,7 @@ export class RegionalEndpointPool {
     public getCurrentUrl(): string {
         const currentRegion = this._currentRegionPrefixes[0];
         const currentDomain = this._currentDomain;
-        return `https://${currentRegion}.${currentDomain}`;
+        return `https://${currentRegion}.${currentDomain}/api/conversational-ai-agent`;
     }
 
     /**
