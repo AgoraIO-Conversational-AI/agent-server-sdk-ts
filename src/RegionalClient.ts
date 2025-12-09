@@ -60,10 +60,13 @@ export class RegionalAgoraClient {
         if (options.baseUrl == null) {
             if (options.endpointPool != null) {
                 endpointPool = options.endpointPool;
-                resolvedOptions.baseUrl = () => endpointPool?.getCurrentUrl();
             } else if (options.gatewayArea != null) {
                 endpointPool = new RegionalEndpointPool(options.gatewayArea);
-                resolvedOptions.baseUrl = () => endpointPool?.getCurrentUrl();
+            }
+
+            if (endpointPool != null) {
+                const pool = endpointPool;
+                resolvedOptions.baseUrl = () => pool.getCurrentUrl();
             }
         }
 
