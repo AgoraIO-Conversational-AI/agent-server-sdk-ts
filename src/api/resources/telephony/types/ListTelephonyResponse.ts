@@ -2,7 +2,7 @@
 
 export interface ListTelephonyResponse {
     /** Call data object. */
-    data?: ListTelephonyResponse.Data;
+    data: ListTelephonyResponse.Data;
     /** Metadata about the list. */
     meta?: ListTelephonyResponse.Meta;
     /** Request status. */
@@ -17,7 +17,7 @@ export namespace ListTelephonyResponse {
         /** The number of calls returned in this response. */
         count?: number;
         /** A list of calls that meet the criteria. */
-        list?: Data.List.Item[];
+        list: Data.List.Item[];
     }
 
     export namespace Data {

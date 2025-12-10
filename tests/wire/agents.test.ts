@@ -6,7 +6,12 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 describe("AgentsClient", () => {
     test("start", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {
             name: "unique_name",
             properties: {
@@ -96,7 +101,12 @@ describe("AgentsClient", () => {
 
     test("list", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
 
         const rawResponseBody = {
             data: {
@@ -107,7 +117,7 @@ describe("AgentsClient", () => {
             status: "ok",
         };
         server
-            .mockEndpoint()
+            .mockEndpoint({ once: false })
             .get("/v2/projects/appid/agents")
             .respondWith()
             .statusCode(200)
@@ -135,15 +145,20 @@ describe("AgentsClient", () => {
             appid: "appid",
         });
 
-        expect(expected.data?.list).toEqual(page.data);
+        expect(expected.data.list).toEqual(page.data);
         expect(page.hasNextPage()).toBe(true);
         const nextPage = await page.getNextPage();
-        expect(expected.data?.list).toEqual(nextPage.data);
+        expect(expected.data.list).toEqual(nextPage.data);
     });
 
     test("get", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
 
         const rawResponseBody = {
             message: "agent exits with reason: xxxx",
@@ -175,7 +190,12 @@ describe("AgentsClient", () => {
 
     test("getHistory", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
 
         const rawResponseBody = {
             agent_id: "xxxx",
@@ -217,7 +237,12 @@ describe("AgentsClient", () => {
 
     test("stop", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
 
         server.mockEndpoint().post("/v2/projects/appid/agents/agentId/leave").respondWith().statusCode(200).build();
 
@@ -230,7 +255,12 @@ describe("AgentsClient", () => {
 
     test("update", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {
             properties: {
                 token: "007eJxTYxxxxxxxxxxIaHMLAAAA0ex66",
@@ -290,7 +320,12 @@ describe("AgentsClient", () => {
 
     test("speak", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {
             text: "Sorry, the conversation content is not compliant.",
             priority: "INTERRUPT",
@@ -322,7 +357,12 @@ describe("AgentsClient", () => {
 
     test("interrupt", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            maxRetries: 0,
+            username: "test",
+            password: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {};
         const rawResponseBody = { agent_id: "1NT29XxxxxxxxxELWEHC8OS", channel: "test_channel", start_ts: 1744877089 };
         server

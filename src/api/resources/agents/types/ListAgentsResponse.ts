@@ -2,7 +2,7 @@
 
 export interface ListAgentsResponse {
     /** Agent data. */
-    data?: ListAgentsResponse.Data;
+    data: ListAgentsResponse.Data;
     /** Returns meta information about the list. */
     meta?: ListAgentsResponse.Meta;
     /** Request status. */
@@ -17,7 +17,7 @@ export namespace ListAgentsResponse {
         /** The number of agents returned. */
         count?: number;
         /** A list of agents that meets the criteria. */
-        list?: Data.List.Item[];
+        list: Data.List.Item[];
     }
 
     export namespace Data {

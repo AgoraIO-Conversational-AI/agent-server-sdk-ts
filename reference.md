@@ -101,7 +101,7 @@ await client.agents.start({
 </dl>
 </details>
 
-<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">list</a>({ ...params }) -> core.Page<Agora.ListAgentsResponse.Data | undefined.List.Item, Agora.ListAgentsResponse></code></summary>
+<details><summary><code>client.agents.<a href="/src/api/resources/agents/client/Client.ts">list</a>({ ...params }) -> core.Page<Agora.ListAgentsResponse.Data.List.Item, Agora.ListAgentsResponse></code></summary>
 <dl>
 <dd>
 
@@ -602,7 +602,7 @@ await client.agents.interrupt({
 </details>
 
 ## Telephony
-<details><summary><code>client.telephony.<a href="/src/api/resources/telephony/client/Client.ts">list</a>({ ...params }) -> core.Page<Agora.ListTelephonyResponse.Data | undefined.List.Item, Agora.ListTelephonyResponse></code></summary>
+<details><summary><code>client.telephony.<a href="/src/api/resources/telephony/client/Client.ts">list</a>({ ...params }) -> core.Page<Agora.ListTelephonyResponse.Data.List.Item, Agora.ListTelephonyResponse></code></summary>
 <dl>
 <dd>
 
