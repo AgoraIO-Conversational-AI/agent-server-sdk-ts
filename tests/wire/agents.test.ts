@@ -113,7 +113,7 @@ describe("AgentsClient", () => {
                 count: 1,
                 list: [{ start_ts: 1735035893, status: "RUNNING", agent_id: "1234567890ABCDE1CVGZNU80BEIN56XF" }],
             },
-            meta: { cursor: "", total: 1 },
+            meta: { cursor: "next_page_cursor", total: 1 },
             status: "ok",
         };
         server
@@ -136,7 +136,7 @@ describe("AgentsClient", () => {
                 ],
             },
             meta: {
-                cursor: "",
+                cursor: "next_page_cursor",
                 total: 1,
             },
             status: "ok",
