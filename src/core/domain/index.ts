@@ -37,6 +37,8 @@ export const EUCentralRegionDomainPrefix = "api-eu-central-1";
 export const CNEastRegionDomainPrefix = "api-cn-east-1";
 export const CNNorthRegionDomainPrefix = "api-cn-north-1";
 
+export const APIPath = "/api/conversational-ai-agent";
+
 /**
  * Domain contains the regional prefixes and domain suffixes for an area
  */
@@ -171,7 +173,7 @@ export class Pool {
     getCurrentURL(): string {
         const currentRegion = this.currentRegionPrefixes[0];
         const currentDomain = this.currentDomain;
-        return `https://${currentRegion}.${currentDomain}`;
+        return `https://${currentRegion}.${currentDomain}${APIPath}`;
     }
 
     /**
