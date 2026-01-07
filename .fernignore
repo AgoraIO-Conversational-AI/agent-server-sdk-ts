@@ -2,3 +2,4 @@
 src/AgoraPoolClient.ts
 src/index.ts
 src/core/domain/index.ts
+tests/wire/agents.test.ts
