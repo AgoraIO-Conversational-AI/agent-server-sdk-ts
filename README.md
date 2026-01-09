@@ -91,6 +91,56 @@ await client.agents.start({
 ```
 
 
+## MLLM Flow (Multimodal)
+
+For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
+
+```typescript
+import { AgoraClient, Agora } from "agora-sdk";
+
+const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
+
+// Configure MLLM with typed parameters
+const mllm: Agora.StartAgentsRequest.Properties.Mllm = {
+    url: "wss://api.openai.com/v1/realtime",
+    api_key: "<your_openai_api_key>",
+    vendor: Agora.StartAgentsRequest.Properties.Mllm.Vendor.Openai,
+    params: {
+        model: "gpt-4o-realtime-preview",
+        voice: "alloy"
+    },
+    input_modalities: ["audio"],
+    output_modalities: ["text", "audio"],
+    greeting_message: "Hello! I'm ready to chat in real-time."
+};
+
+// Configure turn detection for MLLM
+const turnDetection: Agora.StartAgentsRequest.Properties.TurnDetection = {
+    type: Agora.StartAgentsRequest.Properties.TurnDetection.Type.ServerVad,
+    threshold: 0.5,
+    silence_duration_ms: 500
+};
+
+await client.agents.start({
+    appid: "your_app_id",
+    name: "mllm_agent",
+    properties: {
+        channel: "channel_name",
+        token: "your_token",
+        agent_rtc_uid: "1001",
+        remote_rtc_uids: ["1002"],
+        idle_timeout: 120,
+        advanced_features: { enable_mllm: true },
+        mllm,
+        turn_detection: turnDetection,
+        // TTS and LLM are still required but not used when MLLM is enabled
+        tts: { vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft, params: {} },
+        llm: { url: "https://api.openai.com/v1/chat/completions" }
+    }
+});
+```
+
+
 ## Using Named Types
 
 The SDK exports all request types under the `Agora` namespace. You can use these types for better IDE autocompletion and type safety:
