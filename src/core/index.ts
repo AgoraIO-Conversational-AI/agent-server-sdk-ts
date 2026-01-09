@@ -1,6 +1,5 @@
 export * from "./auth/index.js";
 export * from "./base64.js";
-export * as domain from "./domain/index.js";
 export * from "./fetcher/index.js";
 export * as logging from "./logging/index.js";
 export * from "./pagination/index.js";

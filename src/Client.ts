@@ -4,22 +4,22 @@ import { AgentsClient } from "./api/resources/agents/client/Client.js";
 import { PhoneNumbersClient } from "./api/resources/phoneNumbers/client/Client.js";
 import { TelephonyClient } from "./api/resources/telephony/client/Client.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
-import { type NormalizedClientOptionsWithAuth, normalizeClientOptionsWithAuth } from "./BaseClient.js";
+import { normalizeClientOptions } from "./BaseClient.js";
 
 export declare namespace AgoraClient {
-    export type Options = BaseClientOptions;
+    export interface Options extends BaseClientOptions {}
 
     export interface RequestOptions extends BaseRequestOptions {}
 }
 
 export class AgoraClient {
-    protected readonly _options: NormalizedClientOptionsWithAuth<AgoraClient.Options>;
+    protected readonly _options: AgoraClient.Options;
     protected _agents: AgentsClient | undefined;
     protected _telephony: TelephonyClient | undefined;
     protected _phoneNumbers: PhoneNumbersClient | undefined;
 
     constructor(options: AgoraClient.Options) {
-        this._options = normalizeClientOptionsWithAuth(options);
+        this._options = normalizeClientOptions(options);
     }
 
     public get agents(): AgentsClient {

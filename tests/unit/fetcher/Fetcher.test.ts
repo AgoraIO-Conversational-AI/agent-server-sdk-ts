@@ -113,8 +113,7 @@ describe("Test fetcherImpl", () => {
             expect(typeof body.stream).toBe("function");
             const stream = body.stream();
             expect(stream).toBeInstanceOf(ReadableStream);
-            const readableStream = stream as ReadableStream;
-            const reader = readableStream.getReader();
+            const reader = stream.getReader();
             const { value } = await reader.read();
             const decoder = new TextDecoder();
             const streamContent = decoder.decode(value);
