@@ -6,12 +6,7 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 describe("TelephonyClient", () => {
     test("list", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         const rawResponseBody = {
             data: {
@@ -33,7 +28,7 @@ describe("TelephonyClient", () => {
             status: "ok",
         };
         server
-            .mockEndpoint({ once: false })
+            .mockEndpoint()
             .get("/v2/projects/appid/call")
             .respondWith()
             .statusCode(200)
@@ -74,12 +69,7 @@ describe("TelephonyClient", () => {
 
     test("call (1)", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
             name: "customer_service",
             sip: {
@@ -124,12 +114,7 @@ describe("TelephonyClient", () => {
 
     test("call (2)", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
             name: "customer_service",
             sip: {
@@ -225,12 +210,7 @@ describe("TelephonyClient", () => {
 
     test("get", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         const rawResponseBody = {
             to_number: "1300000000",
@@ -272,12 +252,7 @@ describe("TelephonyClient", () => {
 
     test("hangup", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {};
         const rawResponseBody = {};
         server

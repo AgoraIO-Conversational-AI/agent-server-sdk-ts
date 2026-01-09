@@ -3,7 +3,10 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Ffern-demo%2Fagoraio-ts-sdk)
 [![npm shield](https://img.shields.io/npm/v/agora-sdk)](https://www.npmjs.com/package/agora-sdk)
 
-The Agoraio TypeScript library provides convenient access to the Agoraio APIs from TypeScript.
+The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs, 
+enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS) 
+and multimodal flows (MLLM) for real-time audio processing.
+
 
 ## Table of Contents
 
@@ -24,6 +27,10 @@ The Agoraio TypeScript library provides convenient access to the Agoraio APIs fr
   - [Runtime Compatibility](#runtime-compatibility)
 - [Contributing](#contributing)
 
+## Documentation
+
+API reference documentation is available [here](https://docs.agora.io/en/conversational-ai/overview).
+
 ## Installation
 
 ```sh
@@ -33,6 +40,108 @@ npm i -s agora-sdk
 ## Reference
 
 A full reference for this library is available [here](https://github.com/fern-demo/agoraio-ts-sdk/blob/HEAD/./reference.md).
+
+## MLLM Flow (Multimodal)
+
+For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
+
+```typescript
+import { AgoraClient, Agora } from "agora-sdk";
+
+const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
+
+// Configure MLLM with typed parameters
+const mllm: Agora.StartAgentsRequest.Properties.Mllm = {
+    url: "wss://api.openai.com/v1/realtime",
+    api_key: "<your_openai_api_key>",
+    vendor: Agora.StartAgentsRequest.Properties.Mllm.Vendor.Openai,
+    params: {
+        model: "gpt-4o-realtime-preview",
+        voice: "alloy"
+    },
+    input_modalities: ["audio"],
+    output_modalities: ["text", "audio"],
+    greeting_message: "Hello! I'm ready to chat in real-time."
+};
+
+// Configure turn detection for MLLM
+const turnDetection: Agora.StartAgentsRequest.Properties.TurnDetection = {
+    type: Agora.StartAgentsRequest.Properties.TurnDetection.Type.ServerVad,
+    threshold: 0.5,
+    silence_duration_ms: 500
+};
+
+await client.agents.start({
+    appid: "your_app_id",
+    name: "mllm_agent",
+    properties: {
+        channel: "channel_name",
+        token: "your_token",
+        agent_rtc_uid: "1001",
+        remote_rtc_uids: ["1002"],
+        idle_timeout: 120,
+        advanced_features: { enable_mllm: true },
+        mllm,
+        turn_detection: turnDetection,
+        // TTS and LLM are still required but not used when MLLM is enabled
+        tts: { vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft, params: {} },
+        llm: { url: "https://api.openai.com/v1/chat/completions" }
+    }
+});
+```
+
+
+## Using Named Types
+
+The SDK exports all request types under the `Agora` namespace. You can use these types for better IDE autocompletion and type safety:
+
+```typescript
+import { AgoraClient, Agora } from "agora-sdk";
+
+const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
+
+// Use named types for better type safety and autocompletion
+const tts: Agora.StartAgentsRequest.Properties.Tts = {
+    vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft,
+    params: {
+        key: "<your_tts_api_key>",
+        region: "eastus",
+        voice_name: "en-US-AndrewMultilingualNeural"
+    }
+};
+
+const llm: Agora.StartAgentsRequest.Properties.Llm = {
+    url: "https://api.openai.com/v1/chat/completions",
+    api_key: "<your_llm_key>",
+    system_messages: [{ role: "system", content: "You are a helpful assistant." }],
+    params: { model: "gpt-4o-mini" },
+    max_history: 32,
+    greeting_message: "Hello, how can I assist you today?",
+    failure_message: "Please hold on a second."
+};
+
+const asr: Agora.StartAgentsRequest.Properties.Asr = {
+    language: "en-US",
+    vendor: Agora.StartAgentsRequest.Properties.Asr.Vendor.Deepgram
+};
+
+await client.agents.start({
+    appid: "your_app_id",
+    name: "unique_agent_name",
+    properties: {
+        channel: "channel_name",
+        token: "your_token",
+        agent_rtc_uid: "1001",
+        remote_rtc_uids: ["1002"],
+        idle_timeout: 120,
+        advanced_features: { enable_aivad: true },
+        asr,
+        tts,
+        llm
+    }
+});
+```
+
 
 ## Usage
 
@@ -83,7 +192,7 @@ await client.agents.start({
 });
 ```
 
-## Request and Response Types
+## Request And Response Types
 
 The SDK exports all request and response types as TypeScript interfaces. Simply import them with the
 following namespace:
@@ -150,15 +259,6 @@ const response = page.response;
 If you would like to send additional headers as part of the request, use the `headers` request option.
 
 ```typescript
-import { AgoraClient } from "agora-sdk";
-
-const client = new AgoraClient({
-    ...
-    headers: {
-        'X-Custom-Header': 'custom value'
-    }
-});
-
 const response = await client.agents.start(..., {
     headers: {
         'X-Custom-Header': 'custom value'
