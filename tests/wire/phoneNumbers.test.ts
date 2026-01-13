@@ -25,7 +25,6 @@ describe("PhoneNumbersClient", () => {
                 label: "Sales",
                 inbound: false,
                 outbound: true,
-                associated_pipeline: { pipeline_id: "pipeline_id", pipeline_name: "pipeline_name" },
                 inbound_config: { key: "value" },
                 outbound_config: { key: "value" },
             },
@@ -57,10 +56,6 @@ describe("PhoneNumbersClient", () => {
                 label: "Sales",
                 inbound: false,
                 outbound: true,
-                associated_pipeline: {
-                    pipeline_id: "pipeline_id",
-                    pipeline_name: "pipeline_name",
-                },
                 inbound_config: {
                     key: "value",
                 },
@@ -89,7 +84,6 @@ describe("PhoneNumbersClient", () => {
             provider: "byo",
             inbound: true,
             outbound: true,
-            associated_pipeline: { pipeline_id: "pipeline_id", pipeline_name: "pipeline_name" },
         };
         server
             .mockEndpoint()
@@ -120,10 +114,6 @@ describe("PhoneNumbersClient", () => {
             provider: "byo",
             inbound: true,
             outbound: true,
-            associated_pipeline: {
-                pipeline_id: "pipeline_id",
-                pipeline_name: "pipeline_name",
-            },
         });
     });
 

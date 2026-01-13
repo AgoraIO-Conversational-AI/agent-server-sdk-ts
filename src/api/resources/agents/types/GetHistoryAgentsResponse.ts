@@ -6,12 +6,17 @@ export interface GetHistoryAgentsResponse {
     /** Agent creation timestamp. */
     start_ts?: number;
     /** Agent status. Only supports querying the running agent. */
-    status?: "RUNNING";
+    status?: GetHistoryAgentsResponse.Status;
     /** Agent history. */
     contents?: GetHistoryAgentsResponse.Contents.Item[];
 }
 
 export namespace GetHistoryAgentsResponse {
+    /** Agent status. Only supports querying the running agent. */
+    export const Status = {
+        Running: "RUNNING",
+    } as const;
+    export type Status = (typeof Status)[keyof typeof Status];
     export type Contents = Contents.Item[];
 
     export namespace Contents {

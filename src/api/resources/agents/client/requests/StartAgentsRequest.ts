@@ -257,7 +257,7 @@ export namespace StartAgentsRequest {
              * The request style for MLLM completion:
              * - `openai`: For OpenAI Realtime API format
              */
-            style?: "openai";
+            style?: Mllm.Style;
         }
 
         export namespace Mllm {
@@ -271,6 +271,14 @@ export namespace StartAgentsRequest {
                 Vertexai: "vertexai",
             } as const;
             export type Vendor = (typeof Vendor)[keyof typeof Vendor];
+            /**
+             * The request style for MLLM completion:
+             * - `openai`: For OpenAI Realtime API format
+             */
+            export const Style = {
+                Openai: "openai",
+            } as const;
+            export type Style = (typeof Style)[keyof typeof Style];
         }
 
         /**
