@@ -1,8 +1,11 @@
 {
     "name": "agora-sdk",
-    "version": "0.0.12",
+    "version": "0.0.16",
     "private": false,
-    "repository": "github:fern-demo/agoraio-ts-sdk",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/fern-demo/agoraio-ts-sdk.git"
+    },
     "type": "commonjs",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.mjs",

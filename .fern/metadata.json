@@ -1,8 +1,9 @@
 {
     "cliVersion": "3.35.2",
     "generatorName": "fernapi/fern-typescript-node-sdk",
-    "generatorVersion": "3.31.1",
+    "generatorVersion": "3.42.8",
     "generatorConfig": {
         "namespaceExport": "Agora"
-    }
+    },
+    "sdkVersion": "0.0.16"
 }
