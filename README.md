@@ -8,25 +8,6 @@ enabling you to build voice-powered AI agents with support for both cascading fl
 and multimodal flows (MLLM) for real-time audio processing.
 
 
-## Table of Contents
-
-- [Installation](#installation)
-- [Reference](#reference)
-- [Usage](#usage)
-- [Request and Response Types](#request-and-response-types)
-- [Exception Handling](#exception-handling)
-- [Pagination](#pagination)
-- [Advanced](#advanced)
-  - [Additional Headers](#additional-headers)
-  - [Additional Query String Parameters](#additional-query-string-parameters)
-  - [Retries](#retries)
-  - [Timeouts](#timeouts)
-  - [Aborting Requests](#aborting-requests)
-  - [Access Raw Response Data](#access-raw-response-data)
-  - [Logging](#logging)
-  - [Runtime Compatibility](#runtime-compatibility)
-- [Contributing](#contributing)
-
 ## Documentation
 
 API reference documentation is available [here](https://docs.agora.io/en/conversational-ai/overview).
@@ -40,56 +21,6 @@ npm i -s agora-sdk
 ## Reference
 
 A full reference for this library is available [here](https://github.com/fern-demo/agoraio-ts-sdk/blob/HEAD/./reference.md).
-
-## MLLM Flow (Multimodal)
-
-For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
-
-```typescript
-import { AgoraClient, Agora } from "agora-sdk";
-
-const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
-
-// Configure MLLM with typed parameters
-const mllm: Agora.StartAgentsRequest.Properties.Mllm = {
-    url: "wss://api.openai.com/v1/realtime",
-    api_key: "<your_openai_api_key>",
-    vendor: Agora.StartAgentsRequest.Properties.Mllm.Vendor.Openai,
-    params: {
-        model: "gpt-4o-realtime-preview",
-        voice: "alloy"
-    },
-    input_modalities: ["audio"],
-    output_modalities: ["text", "audio"],
-    greeting_message: "Hello! I'm ready to chat in real-time."
-};
-
-// Configure turn detection for MLLM
-const turnDetection: Agora.StartAgentsRequest.Properties.TurnDetection = {
-    type: Agora.StartAgentsRequest.Properties.TurnDetection.Type.ServerVad,
-    threshold: 0.5,
-    silence_duration_ms: 500
-};
-
-await client.agents.start({
-    appid: "your_app_id",
-    name: "mllm_agent",
-    properties: {
-        channel: "channel_name",
-        token: "your_token",
-        agent_rtc_uid: "1001",
-        remote_rtc_uids: ["1002"],
-        idle_timeout: 120,
-        advanced_features: { enable_mllm: true },
-        mllm,
-        turn_detection: turnDetection,
-        // TTS and LLM are still required but not used when MLLM is enabled
-        tts: { vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft, params: {} },
-        llm: { url: "https://api.openai.com/v1/chat/completions" }
-    }
-});
-```
-
 
 ## MLLM Flow (Multimodal)
 
@@ -219,9 +150,9 @@ await client.agents.start({
         tts: {
             vendor: "microsoft",
             params: {
-                "key": "<your_tts_api_key>",
-                "region": "eastus",
-                "voice_name": "en-US-AndrewMultilingualNeural"
+                key: "key",
+                region: "region",
+                voice_name: "voice_name"
             }
         },
         llm: {

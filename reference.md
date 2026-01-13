@@ -45,9 +45,9 @@ await client.agents.start({
         tts: {
             vendor: "microsoft",
             params: {
-                "key": "<your_tts_api_key>",
-                "region": "eastus",
-                "voice_name": "en-US-AndrewMultilingualNeural"
+                key: "key",
+                region: "region",
+                voice_name: "voice_name"
             }
         },
         llm: {
