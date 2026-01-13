@@ -78,6 +78,7 @@ export namespace StartAgentsRequest {
         advanced_features?: Properties.AdvancedFeatures;
         /** Automatic Speech Recognition (ASR) configuration. */
         asr?: Properties.Asr;
+        /** Text-to-speech (TTS) module configuration. */
         tts: Agora.Tts;
         /** Large language model (LLM) configuration. */
         llm: Properties.Llm;
