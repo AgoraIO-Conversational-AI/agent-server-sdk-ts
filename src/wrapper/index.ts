@@ -3,6 +3,20 @@
  *
  * This module provides a cleaner, more ergonomic API on top of the
  * Fern-generated SDK types and methods.
+ *
+ * ## Maintenance Notes
+ *
+ * This wrapper is designed to minimize maintenance burden:
+ *
+ * 1. **Type aliases** (in types.ts) re-export Fern types directly.
+ *    When Fern adds new fields, they're automatically available.
+ *
+ * 2. **The `raw` property** on AgentSession exposes the underlying
+ *    Fern-generated AgentsClient. When Fern adds new endpoints,
+ *    they're immediately available via `session.raw.newEndpoint()`.
+ *
+ * 3. **Convenience methods** (say, stop, interrupt, etc.) are the only
+ *    parts that need manual updates when adding new sugar.
  */
 
 // Core classes
@@ -15,6 +29,9 @@ export type {
     AgentSessionEvent,
     AgentSessionEventHandler,
 } from "./AgentSession.js";
+
+// Re-export the underlying client type for advanced usage
+export type { AgentsClient } from "../api/resources/agents/client/Client.js";
 
 // Clean type aliases
 export type {

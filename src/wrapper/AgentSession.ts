@@ -6,6 +6,7 @@
  */
 
 import type { AgoraClient } from "../Client.js";
+import type { AgentsClient } from "../api/resources/agents/client/Client.js";
 import type * as Agora from "../api/index.js";
 import { Agent } from "./Agent.js";
 import type {
@@ -108,6 +109,36 @@ export class AgentSession {
      */
     get agent(): Agent {
         return this._agent;
+    }
+
+    /**
+     * The App ID for this session.
+     */
+    get appId(): string {
+        return this._appId;
+    }
+
+    /**
+     * Direct access to the underlying Fern-generated AgentsClient.
+     * 
+     * Use this to access any new endpoints that Fern generates without
+     * waiting for wrapper method updates. New endpoints are immediately
+     * available via this property.
+     * 
+     * Note: You'll need to pass appid and agentId manually when using raw methods.
+     * 
+     * @example
+     * ```typescript
+     * // Access new endpoints directly
+     * await session.raw.someNewEndpoint({
+     *   appid: session.appId,
+     *   agentId: session.id!,
+     *   // ... other params
+     * });
+     * ```
+     */
+    get raw(): AgentsClient {
+        return this._client.agents;
     }
 
     /**
