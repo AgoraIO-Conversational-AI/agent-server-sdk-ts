@@ -3,6 +3,7 @@ export { AgoraClient } from "./AgoraPoolClient.js";
 export type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 export { AgoraEnvironment } from "./environments.js";
 export { AgoraError, AgoraTimeoutError } from "./errors/index.js";
+export { Area } from "./core/domain/index.js";
 export * from "./exports.js";
 
 // Wrapper layer exports - clean, ergonomic API
