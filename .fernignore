@@ -4,3 +4,6 @@ src/index.ts
 src/core/domain/index.ts
 tests/wire/agents.test.ts
 changelog.md
+
+# Wrapper layer - custom code that should not be overwritten
+src/wrapper/
