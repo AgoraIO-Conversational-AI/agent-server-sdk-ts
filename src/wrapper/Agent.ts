@@ -26,8 +26,8 @@ export interface AgentOptions {
     instructions?: string;
     /** LLM configuration or shorthand string (e.g., 'openai/gpt-4') */
     llm?: LlmConfig | string;
-    /** TTS configuration */
-    tts?: TtsConfig;
+    /** TTS configuration or shorthand string (e.g., 'microsoft/en-US-JennyNeural', 'elevenlabs/rachel') */
+    tts?: TtsConfig | string;
     /** STT/ASR configuration or shorthand string (e.g., 'deepgram/nova-2') */
     stt?: SttConfig | string;
     /** MLLM configuration for multimodal */
@@ -95,6 +95,81 @@ function parseSttShorthand(shorthand: string): SttConfig {
 }
 
 /**
+ * Parses a shorthand TTS string like 'microsoft/en-US-JennyNeural' into a TtsConfig.
+ * Note: This creates a minimal config - API keys must be provided separately.
+ */
+function parseTtsShorthand(shorthand: string): TtsConfig {
+    const [vendor, voiceOrModel] = shorthand.split("/");
+    const vendorLower = vendor?.toLowerCase() ?? "";
+
+    // Map vendor to TTS config with voice/model parameter
+    switch (vendorLower) {
+        case "microsoft":
+            return {
+                vendor: "microsoft",
+                params: {
+                    key: "", // Must be provided by user
+                    region: "eastus",
+                    voice_name: voiceOrModel ?? "en-US-JennyNeural",
+                },
+            };
+        case "elevenlabs":
+            return {
+                vendor: "elevenlabs",
+                params: {
+                    key: "", // Must be provided by user
+                    model_id: "eleven_flash_v2_5",
+                    voice_id: voiceOrModel ?? "",
+                },
+            };
+        case "openai":
+            return {
+                vendor: "openai",
+                params: {
+                    key: "", // Must be provided by user
+                    voice: voiceOrModel ?? "alloy",
+                },
+            };
+        case "cartesia":
+            return {
+                vendor: "cartesia",
+                params: {
+                    key: "", // Must be provided by user
+                    voice_id: voiceOrModel ?? "",
+                },
+            };
+        case "google":
+            return {
+                vendor: "google",
+                params: {
+                    key: "", // Must be provided by user
+                    voice_name: voiceOrModel ?? "",
+                },
+            };
+        case "amazon":
+            return {
+                vendor: "amazon",
+                params: {
+                    access_key: "", // Must be provided by user
+                    secret_key: "", // Must be provided by user
+                    region: "us-east-1",
+                    voice_id: voiceOrModel ?? "",
+                },
+            };
+        default:
+            // Default to Microsoft TTS
+            return {
+                vendor: "microsoft",
+                params: {
+                    key: "",
+                    region: "eastus",
+                    voice_name: voiceOrModel ?? "en-US-JennyNeural",
+                },
+            };
+    }
+}
+
+/**
  * Agent class representing a reusable agent configuration.
  *
  * @example
@@ -137,7 +212,7 @@ export class Agent {
             this._llm = typeof options.llm === "string" ? parseLlmShorthand(options.llm) : options.llm;
         }
         if (options.tts) {
-            this._tts = options.tts;
+            this._tts = typeof options.tts === "string" ? parseTtsShorthand(options.tts) : options.tts;
         }
         if (options.stt) {
             this._stt = typeof options.stt === "string" ? parseSttShorthand(options.stt) : options.stt;
@@ -173,10 +248,11 @@ export class Agent {
 
     /**
      * Returns a new Agent with the specified TTS configuration.
+     * @param config - TTS configuration object or shorthand string (e.g., 'microsoft/en-US-JennyNeural')
      */
-    withTts(config: TtsConfig): Agent {
+    withTts(config: TtsConfig | string): Agent {
         const newAgent = this._clone();
-        newAgent._tts = config;
+        newAgent._tts = typeof config === "string" ? parseTtsShorthand(config) : config;
         return newAgent;
     }
 
@@ -272,6 +348,28 @@ export class Agent {
      */
     get greeting(): string | undefined {
         return this._greeting;
+    }
+
+    /**
+     * Get the full agent configuration as an AgentConfig object.
+     * This provides read-only access to the complete configuration.
+     */
+    get config(): AgentOptions {
+        return {
+            instructions: this._instructions,
+            llm: this._llm,
+            tts: this._tts,
+            stt: this._stt,
+            mllm: this._mllm,
+            turnDetection: this._turnDetection,
+            sal: this._sal,
+            avatar: this._avatar,
+            advancedFeatures: this._advancedFeatures,
+            parameters: this._parameters,
+            greeting: this._greeting,
+            failureMessage: this._failureMessage,
+            maxHistory: this._maxHistory,
+        };
     }
 
     /**
