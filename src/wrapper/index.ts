@@ -96,3 +96,19 @@ export type {
     AmazonTts,
     AmazonTtsParams,
 } from "./types.js";
+
+// Vendor-specific avatar types with strict constraints
+export type {
+    StrictAvatarConfig,
+    HeyGenAvatarConfig,
+    AkoolAvatarConfig,
+    GenericAvatarConfig,
+} from "./avatar-types.js";
+
+export {
+    isHeyGenAvatar,
+    isAkoolAvatar,
+    validateAvatarConfig,
+    validateTtsSampleRate,
+    toBaseAvatarConfig,
+} from "./avatar-types.js";

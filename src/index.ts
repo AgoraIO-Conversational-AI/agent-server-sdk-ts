@@ -7,7 +7,7 @@ export { Area } from "./core/domain/index.js";
 export * from "./exports.js";
 
 // Wrapper layer exports - clean, ergonomic API
-export { Agent, AgentSession } from "./wrapper/index.js";
+export { Agent, AgentSession, isHeyGenAvatar, isAkoolAvatar, validateAvatarConfig, validateTtsSampleRate, toBaseAvatarConfig } from "./wrapper/index.js";
 export type {
     AgentOptions,
     AgentSessionOptions,

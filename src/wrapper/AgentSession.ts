@@ -8,6 +8,7 @@
 import type { AgoraClient } from "../Client.js";
 import type { AgentsClient } from "../api/resources/agents/client/Client.js";
 import type * as Agora from "../api/index.js";
+import { AgoraError } from "../errors/index.js";
 import { Agent } from "./Agent.js";
 import type {
     SessionStartOptions,
@@ -17,6 +18,7 @@ import type {
     AgentConfigUpdate,
     SessionInfo,
 } from "./types.js";
+import { validateTtsSampleRate, validateAvatarConfig, isHeyGenAvatar, isAkoolAvatar } from "./avatar-types.js";
 
 /**
  * Event types that can be emitted by AgentSession.
@@ -142,10 +144,54 @@ export class AgentSession {
     }
 
     /**
+     * Validates avatar and TTS configuration before starting.
+     * 
+     * This catches common misconfigurations like using the wrong TTS sample rate
+     * for a specific avatar vendor (e.g., HeyGen requires 24kHz, Akool requires 16kHz).
+     * 
+     * @throws {Error} If configuration is invalid
+     */
+    private _validateAvatarConfig(): void {
+        const agentConfig = this._agent.config;
+        const avatar = agentConfig.avatar;
+        const tts = agentConfig.tts;
+
+        // Skip validation if no avatar is configured
+        if (!avatar || avatar.enable === false) {
+            return;
+        }
+
+        // Validate avatar config structure
+        if (isHeyGenAvatar(avatar) || isAkoolAvatar(avatar)) {
+            validateAvatarConfig(avatar);
+        }
+
+        // Validate TTS sample rate against avatar requirements
+        if (tts && tts.params && typeof tts.params.sample_rate === 'number') {
+            if (isHeyGenAvatar(avatar) || isAkoolAvatar(avatar)) {
+                validateTtsSampleRate(avatar, tts.params.sample_rate);
+            }
+        } else if (isHeyGenAvatar(avatar)) {
+            // HeyGen requires explicit 24kHz - warn if not set
+            console.warn(
+                '⚠️  Warning: HeyGen avatar detected but TTS sample_rate is not explicitly set. ' +
+                'HeyGen requires 24,000 Hz. Please ensure your TTS provider is configured for 24kHz.'
+            );
+        } else if (isAkoolAvatar(avatar)) {
+            // Akool requires explicit 16kHz - warn if not set
+            console.warn(
+                '⚠️  Warning: Akool avatar detected but TTS sample_rate is not explicitly set. ' +
+                'Akool requires 16,000 Hz. Please ensure your TTS provider is configured for 16kHz.'
+            );
+        }
+    }
+
+    /**
      * Start the agent session.
      *
      * @param options - Session start options
      * @returns A promise that resolves to the session handle
+     * @throws {Error} If avatar/TTS configuration is invalid
      */
     async start(
         options: Omit<SessionStartOptions, "appId">,
@@ -153,6 +199,9 @@ export class AgentSession {
         if (this._status !== "idle" && this._status !== "stopped" && this._status !== "error") {
             throw new Error(`Cannot start session in ${this._status} state`);
         }
+
+        // Validate avatar configuration before starting
+        this._validateAvatarConfig();
 
         this._status = "starting";
 
@@ -196,6 +245,9 @@ export class AgentSession {
 
     /**
      * Stop the agent session.
+     * 
+     * If the agent has already stopped (e.g., crashed or timed out),
+     * this method will succeed silently rather than throwing an error.
      */
     async stop(): Promise<void> {
         if (this._status !== "running") {
@@ -217,6 +269,13 @@ export class AgentSession {
             this._status = "stopped";
             this._emit("stopped", { agentId: this._agentId });
         } catch (error) {
+            // Handle 404 "task not found" gracefully - agent is already stopped
+            if (error instanceof AgoraError && error.statusCode === 404) {
+                this._status = "stopped";
+                this._emit("stopped", { agentId: this._agentId });
+                return; // Don't throw - agent is already stopped
+            }
+            
             this._status = "error";
             this._emit("error", error);
             throw error;
