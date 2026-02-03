@@ -167,9 +167,16 @@ export class AgentSession {
         }
 
         // Validate TTS sample rate against avatar requirements
-        if (tts && tts.params && typeof tts.params.sample_rate === 'number') {
+        // Note: tts can be a string (shorthand) or an object with params
+        // sample_rate may not exist on all TTS vendor params, so we check dynamically
+        const ttsParams = tts && typeof tts !== 'string' ? tts.params : undefined;
+        const sampleRate = ttsParams && 'sample_rate' in ttsParams 
+            ? (ttsParams as { sample_rate?: number }).sample_rate 
+            : undefined;
+        
+        if (typeof sampleRate === 'number') {
             if (isHeyGenAvatar(avatar) || isAkoolAvatar(avatar)) {
-                validateTtsSampleRate(avatar, tts.params.sample_rate);
+                validateTtsSampleRate(avatar, sampleRate);
             }
         } else if (isHeyGenAvatar(avatar)) {
             // HeyGen requires explicit 24kHz - warn if not set
