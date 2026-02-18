@@ -6,6 +6,7 @@
  */
 
 import type * as Agora from "../api/index.js";
+import type { AgoraClient } from "../Client.js";
 import type {
     LlmConfig,
     SttConfig,
@@ -16,12 +17,17 @@ import type {
     AvatarConfig,
     AdvancedFeatures,
     SessionParams,
+    SessionOptions,
 } from "./types.js";
+import { generateRtcToken } from "./token.js";
+import { AgentSession } from "./AgentSession.js";
 
 /**
  * Configuration options for creating an Agent.
  */
 export interface AgentOptions {
+    /** Optional name for the agent (used as default session name) */
+    name?: string;
     /** System instructions for the agent */
     instructions?: string;
     /** LLM configuration or shorthand string (e.g., 'openai/gpt-4') */
@@ -188,6 +194,7 @@ function parseTtsShorthand(shorthand: string): TtsConfig {
  * ```
  */
 export class Agent {
+    private _name?: string;
     private _llm?: LlmConfig;
     private _tts?: TtsConfig;
     private _stt?: SttConfig;
@@ -203,6 +210,7 @@ export class Agent {
     private _maxHistory?: number;
 
     constructor(options: AgentOptions = {}) {
+        this._name = options.name;
         this._instructions = options.instructions;
         this._greeting = options.greeting;
         this._failureMessage = options.failureMessage;
@@ -302,6 +310,22 @@ export class Agent {
     }
 
     /**
+     * Returns a new Agent with the specified name.
+     */
+    withName(name: string): Agent {
+        const newAgent = this._clone();
+        newAgent._name = name;
+        return newAgent;
+    }
+
+    /**
+     * Get the agent name.
+     */
+    get name(): string | undefined {
+        return this._name;
+    }
+
+    /**
      * Get the LLM configuration.
      */
     get llm(): LlmConfig | undefined {
@@ -356,6 +380,7 @@ export class Agent {
      */
     get config(): AgentOptions {
         return {
+            name: this._name,
             instructions: this._instructions,
             llm: this._llm,
             tts: this._tts,
@@ -373,51 +398,79 @@ export class Agent {
     }
 
     /**
-     * Converts the Agent configuration to the internal Fern request properties format.
-     * @internal
+     * Creates a new session from this agent configuration.
+     *
+     * @param client - The Agora client instance (must have appId and appCertificate properties)
+     * @param options - Session connection options
+     * @returns A new AgentSession instance ready to start
+     *
+     * @example
+     * ```typescript
+     * const agent = new Agent({ name: 'my-assistant', instructions: '...' })
+     *   .withLlm({ ... })
+     *   .withTts({ ... });
+     *
+     * const session = agent.createSession(client, {
+     *   channel: 'room-123',
+     *   agentUid: '1',
+     *   remoteUids: ['100'],
+     *   idleTimeout: 120,
+     * });
+     *
+     * const agentId = await session.start();
+     * ```
      */
-    toProperties(
-        channel: string,
-        token: string,
-        agentUid: string,
-        remoteUids: string[],
-        options?: {
-            idleTimeout?: number;
-            enableStringUid?: boolean;
-        },
-    ): Agora.StartAgentsRequest.Properties {
-        const llmConfig: Agora.StartAgentsRequest.Properties.Llm | undefined = this._llm
-            ? {
-                  ...this._llm,
-                  system_messages: this._instructions
-                      ? [{ role: "system", content: this._instructions }]
-                      : this._llm.system_messages,
-                  greeting_message: this._greeting ?? this._llm.greeting_message,
-                  failure_message: this._failureMessage ?? this._llm.failure_message,
-                  max_history: this._maxHistory ?? this._llm.max_history,
-              }
-            : {
-                  url: "https://api.openai.com/v1/chat/completions",
-                  system_messages: this._instructions ? [{ role: "system", content: this._instructions }] : undefined,
-                  greeting_message: this._greeting,
-                  failure_message: this._failureMessage,
-                  max_history: this._maxHistory,
-              };
+    createSession(
+        client: AgoraClient & { readonly appId: string; readonly appCertificate?: string },
+        options: SessionOptions,
+    ): AgentSession {
+        const name = options.name ?? this._name ?? `agent-${Date.now()}`;
+        return new AgentSession({
+            client,
+            agent: this,
+            appId: client.appId,
+            appCertificate: client.appCertificate,
+            ...options,
+            name,
+        });
+    }
 
-        if (!this._tts) {
-            throw new Error("TTS configuration is required. Use withTts() to set it.");
-        }
+    /**
+     * Converts the Agent configuration to the Fern request properties format.
+     *
+     * Pass either a pre-built `token` OR `appId` + `appCertificate` to have
+     * the SDK generate one automatically.
+     */
+    toProperties(opts: {
+        channel: string;
+        agentUid: string;
+        remoteUids: string[];
+        idleTimeout?: number;
+        enableStringUid?: boolean;
+    } & (
+        | { token: string; appId?: undefined; appCertificate?: undefined }
+        | { token?: undefined; appId: string; appCertificate: string; tokenExpirySeconds?: number }
+    )): Agora.StartAgentsRequest.Properties {
+        const token =
+            opts.token ??
+            generateRtcToken({
+                appId: opts.appId!,
+                appCertificate: opts.appCertificate!,
+                channel: opts.channel,
+                uid: parseInt(opts.agentUid, 10),
+                expirySeconds: opts.tokenExpirySeconds,
+            });
+        // In MLLM mode the backend handles audio end-to-end; LLM, TTS, and ASR
+        // are disabled automatically — they must not be required by the SDK.
+        const isMllmMode = this._advancedFeatures?.enable_mllm === true;
 
-        return {
-            channel,
+        const base = {
+            channel: opts.channel,
             token,
-            agent_rtc_uid: agentUid,
-            remote_rtc_uids: remoteUids,
-            idle_timeout: options?.idleTimeout,
-            enable_string_uid: options?.enableStringUid,
-            llm: llmConfig,
-            tts: this._tts,
-            asr: this._stt,
+            agent_rtc_uid: opts.agentUid,
+            remote_rtc_uids: opts.remoteUids,
+            idle_timeout: opts.idleTimeout,
+            enable_string_uid: opts.enableStringUid,
             mllm: this._mllm,
             turn_detection: this._turnDetection,
             sal: this._sal,
@@ -425,10 +478,58 @@ export class Agent {
             advanced_features: this._advancedFeatures,
             parameters: this._parameters,
         };
+
+        if (isMllmMode) {
+            // Cast needed because the generated Properties type marks `tts` as
+            // required, but the REST API omits it when enable_mllm = true.
+            return base as Agora.StartAgentsRequest.Properties;
+        }
+
+        if (!this._tts) {
+            throw new Error("TTS configuration is required. Use withTts() to set it.");
+        }
+
+        // TODO: Once Agora provides a platform-level default LLM, replace the
+        // throw below with a fallback config so callers can omit withLlm().
+        //
+        // const llmConfig: Agora.StartAgentsRequest.Properties.Llm = this._llm
+        //     ? {
+        //           ...this._llm,
+        //           system_messages: this._instructions
+        //               ? [{ role: "system", content: this._instructions }]
+        //               : this._llm.system_messages,
+        //           greeting_message: this._greeting ?? this._llm.greeting_message,
+        //           failure_message: this._failureMessage ?? this._llm.failure_message,
+        //           max_history: this._maxHistory ?? this._llm.max_history,
+        //       }
+        //     : {
+        //           url: "<agora-default-llm-url>",
+        //           system_messages: this._instructions ? [{ role: "system", content: this._instructions }] : undefined,
+        //           greeting_message: this._greeting,
+        //           failure_message: this._failureMessage,
+        //           max_history: this._maxHistory,
+        //       };
+
+        if (!this._llm) {
+            throw new Error("LLM configuration is required. Use withLlm() to set it.");
+        }
+
+        const llmConfig: Agora.StartAgentsRequest.Properties.Llm = {
+            ...this._llm,
+            system_messages: this._instructions
+                ? [{ role: "system", content: this._instructions }]
+                : this._llm.system_messages,
+            greeting_message: this._greeting ?? this._llm.greeting_message,
+            failure_message: this._failureMessage ?? this._llm.failure_message,
+            max_history: this._maxHistory ?? this._llm.max_history,
+        };
+
+        return { ...base, llm: llmConfig, tts: this._tts, asr: this._stt };
     }
 
     private _clone(): Agent {
         const newAgent = new Agent();
+        newAgent._name = this._name;
         newAgent._llm = this._llm;
         newAgent._tts = this._tts;
         newAgent._stt = this._stt;
