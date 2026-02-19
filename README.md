@@ -1,7 +1,7 @@
 # Agoraio TypeScript Library
 
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2Ffern-demo%2Fagoraio-ts-sdk)
-[![npm shield](https://img.shields.io/npm/v/agora-sdk)](https://www.npmjs.com/package/agora-sdk)
+[![npm shield](https://img.shields.io/npm/v/agora-agent-sdk)](https://www.npmjs.com/package/agora-agent-sdk)
 
 The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs, 
 enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS) 
@@ -13,6 +13,7 @@ and multimodal flows (MLLM) for real-time audio processing.
 - [Documentation](#documentation)
 - [Installation](#installation)
 - [Reference](#reference)
+- [Quick Start (Recommended)](#quick-start-recommended)
 - [Mllm Flow Multimodal](#mllm-flow-multimodal)
 - [Using Named Types](#using-named-types)
 - [Usage](#usage)
@@ -37,19 +38,110 @@ API reference documentation is available [here](https://docs.agora.io/en/convers
 ## Installation
 
 ```sh
-npm i -s agora-sdk
+npm i -s agora-agent-sdk
 ```
 
 ## Reference
 
 A full reference for this library is available [here](https://github.com/fern-demo/agoraio-ts-sdk/blob/HEAD/./reference.md).
 
+## Quick Start (Recommended)
+
+The SDK provides an ergonomic wrapper layer with the `Agent` and `AgentSession` classes for a cleaner developer experience:
+
+```typescript
+import { AgoraClient, Area, Agent } from 'agora-agent-sdk';
+
+// Initialize client with your credentials
+const client = new AgoraClient({
+  area: Area.US,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+  customerId: 'your-customer-id',
+  customerSecret: 'your-customer-secret',
+});
+
+// Define your agent using the builder pattern
+const agent = new Agent({ 
+  name: 'support-assistant',
+  instructions: 'You are a helpful voice assistant.',
+  greeting: 'Hello! How can I help you today?',
+  maxHistory: 10,
+})
+  .withLlm({
+    url: 'https://api.openai.com/v1/chat/completions',
+    api_key: 'your-openai-key',
+    params: { model: 'gpt-4o-mini' },
+  })
+  .withTts({
+    vendor: 'elevenlabs',
+    params: {
+      key: 'your-elevenlabs-key',
+      model_id: 'eleven_flash_v2_5',
+      voice_id: 'your-voice-id',
+    },
+  })
+  .withStt({
+    vendor: 'deepgram',
+    language: 'en-US',
+    params: { api_key: 'your-deepgram-key' },
+  });
+
+// Create and start a session
+const session = agent.createSession(client, {
+  channel: 'support-room-123',
+  agentUid: '1',
+  remoteUids: ['100'],
+  idleTimeout: 120,
+});
+
+const agentId = await session.start();
+
+// Interact with the agent
+await session.say('Hello! How can I help you today?');
+
+// Stop the session when done
+await session.stop();
+```
+
+### MLLM (Multimodal) with Builder Pattern
+
+For real-time audio processing with OpenAI Realtime or Google Gemini Live:
+
+```typescript
+const geminiAgent = new Agent({ 
+  name: 'gemini-assistant',
+  advancedFeatures: { enable_mllm: true } 
+})
+  .withMllm({
+    vendor: 'vertexai',
+    style: 'openai',
+    params: {
+      model: 'gemini-live-2.5-flash-preview-native-audio-09-2025',
+      adc_credentials_string: 'your-gcp-credentials-json',
+      project_id: 'your-gcp-project-id',
+      location: 'us-central1',
+      instructions: 'You are a helpful voice assistant.',
+      voice: 'Aoede',
+    },
+    greeting_message: 'Hello! Gemini is listening.',
+  });
+
+const session = geminiAgent.createSession(client, {
+  channel: 'gemini-room',
+  agentUid: '1',
+  remoteUids: ['100'],
+});
+
+const agentId = await session.start();
+```
+
 ## MLLM Flow (Multimodal)
 
 For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
 
 ```typescript
-import { AgoraClient, Agora } from "agora-sdk";
+import { AgoraClient, Agora } from "agora-agent-sdk";
 
 const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
 
@@ -99,7 +191,7 @@ await client.agents.start({
 The SDK exports all request types under the `Agora` namespace. You can use these types for better IDE autocompletion and type safety:
 
 ```typescript
-import { AgoraClient, Agora } from "agora-sdk";
+import { AgoraClient, Agora } from "agora-agent-sdk";
 
 const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
 
@@ -151,7 +243,7 @@ await client.agents.start({
 Instantiate and use the client with the following:
 
 ```typescript
-import { AgoraClient } from "agora-sdk";
+import { AgoraClient } from "agora-agent-sdk";
 
 const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
 await client.agents.start({
@@ -201,7 +293,7 @@ The SDK exports all request and response types as TypeScript interfaces. Simply 
 following namespace:
 
 ```typescript
-import { Agora } from "agora-sdk";
+import { Agora } from "agora-agent-sdk";
 
 const request: Agora.StartAgentsRequest = {
     ...
@@ -214,7 +306,7 @@ When the API returns a non-success status code (4xx or 5xx response), a subclass
 will be thrown.
 
 ```typescript
-import { AgoraError } from "agora-sdk";
+import { AgoraError } from "agora-agent-sdk";
 
 try {
     await client.agents.start(...);
@@ -233,7 +325,7 @@ try {
 List endpoints are paginated. The SDK provides an iterator so that you can simply loop over the items:
 
 ```typescript
-import { AgoraClient } from "agora-sdk";
+import { AgoraClient } from "agora-agent-sdk";
 
 const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
 const pageableResponse = await client.agents.list({
@@ -262,7 +354,7 @@ const response = page.response;
 If you would like to send additional headers as part of the request, use the `headers` request option.
 
 ```typescript
-import { AgoraClient } from "agora-sdk";
+import { AgoraClient } from "agora-agent-sdk";
 
 const client = new AgoraClient({
     ...
@@ -349,7 +441,7 @@ console.log(rawResponse.headers['X-My-Header']);
 The SDK supports logging. You can configure the logger by passing in a `logging` object to the client options.
 
 ```typescript
-import { AgoraClient, logging } from "agora-sdk";
+import { AgoraClient, logging } from "agora-agent-sdk";
 
 const client = new AgoraClient({
     ...
@@ -427,7 +519,7 @@ The SDK provides a way for you to customize the underlying HTTP client / Fetch f
 unsupported environment, this provides a way for you to break glass and ensure the SDK works.
 
 ```typescript
-import { AgoraClient } from "agora-sdk";
+import { AgoraClient } from "agora-agent-sdk";
 
 const client = new AgoraClient({
     ...

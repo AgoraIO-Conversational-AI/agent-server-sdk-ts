@@ -114,16 +114,14 @@ export type AgentConfigUpdate = UpdateAgentsRequest.Properties;
 // Session Types
 // =============================================================================
 
-/** Options for starting a session */
-export interface SessionStartOptions {
-    /** The App ID of the project */
-    appId: string;
-    /** Unique name for this agent instance */
-    name: string;
+/** Options for creating a session */
+export interface SessionOptions {
+    /** Unique name for this agent instance (optional - resolved from agent or auto-generated) */
+    name?: string;
     /** The channel to join */
     channel: string;
-    /** Authentication token for the channel */
-    token: string;
+    /** Authentication token for the channel. Omit to auto-generate (requires appCertificate on the session). */
+    token?: string;
     /** The agent's RTC UID */
     agentUid: string;
     /** Remote user UIDs to subscribe to */
@@ -132,16 +130,6 @@ export interface SessionStartOptions {
     idleTimeout?: number;
     /** Whether to use string UIDs */
     enableStringUid?: boolean;
-}
-
-/** Session handle returned after starting */
-export interface SessionHandle {
-    /** The agent ID */
-    agentId: string;
-    /** Creation timestamp */
-    createTs: number;
-    /** Status of the agent */
-    status: string;
 }
 
 /** Session status */

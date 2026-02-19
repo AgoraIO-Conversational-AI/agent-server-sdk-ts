@@ -7,10 +7,11 @@ export { Area } from "./core/domain/index.js";
 export * from "./exports.js";
 
 // Wrapper layer exports - clean, ergonomic API
-export { Agent, AgentSession, isHeyGenAvatar, isAkoolAvatar, validateAvatarConfig, validateTtsSampleRate, toBaseAvatarConfig } from "./wrapper/index.js";
+export { Agent, AgentSession, generateRtcToken, isHeyGenAvatar, isAkoolAvatar, validateAvatarConfig, validateTtsSampleRate, toBaseAvatarConfig } from "./wrapper/index.js";
 export type {
     AgentOptions,
     AgentSessionOptions,
+    GenerateTokenOptions,
     AgentSessionEvent,
     AgentSessionEventHandler,
     // Clean type aliases
@@ -37,8 +38,7 @@ export type {
     FarewellConfig,
     AgentConfig,
     AgentConfigUpdate,
-    SessionStartOptions,
-    SessionHandle,
+    SessionOptions,
     SessionStatus,
     SessionInfo,
     SessionListResponse,

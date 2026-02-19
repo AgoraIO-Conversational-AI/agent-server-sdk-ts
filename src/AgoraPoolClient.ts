@@ -5,9 +5,17 @@ import { AgoraClient as BaseAgoraClient } from "./Client.js";
 import { Area, Pool } from "./core/domain/index.js";
 
 export declare namespace AgoraClient {
-    export interface Options extends Omit<BaseClientOptions, "baseUrl" | "environment"> {
+    export interface Options extends Omit<BaseClientOptions, "baseUrl" | "environment" | "username" | "password"> {
         /** The area to use for regional URL selection */
         area: Area;
+        /** Agora App ID — used as the `appid` path parameter and for RTC token generation */
+        appId: string;
+        /** Agora App Certificate — used to sign RTC tokens. Keep this secret. */
+        appCertificate: string;
+        /** Customer ID from Agora Console (REST API authentication) */
+        customerId: string;
+        /** Customer Secret from Agora Console (REST API authentication) */
+        customerSecret: string;
     }
 
     export interface RequestOptions extends BaseRequestOptions {}
@@ -21,6 +29,7 @@ export declare namespace AgoraClient {
  * - Selects the best domain based on DNS resolution
  * - Cycles through region prefixes on request failures
  * - Supports US, EU, AP, and CN areas
+ * - Generates RTC tokens when starting agents (no manual token management)
  *
  * @example
  * ```typescript
@@ -28,21 +37,32 @@ export declare namespace AgoraClient {
  *
  * const client = new AgoraClient({
  *     area: Area.US,
- *     username: "your-username",
- *     password: "your-password",
+ *     appId: "your-app-id",
+ *     appCertificate: "your-app-certificate",
+ *     customerId: "your-customer-id",
+ *     customerSecret: "your-customer-secret",
  * });
  * ```
  */
 export class AgoraClient extends BaseAgoraClient {
     protected readonly _pool: Pool;
+    /** Agora App ID */
+    public readonly appId: string;
+    /** Agora App Certificate (used for RTC token signing) */
+    public readonly appCertificate: string;
 
     constructor(options: AgoraClient.Options) {
         const pool = new Pool(options.area);
+        const { customerId, customerSecret, ...rest } = options;
         super({
-            ...options,
+            ...rest,
+            username: customerId,
+            password: customerSecret,
             baseUrl: () => pool.getCurrentURL(),
         });
         this._pool = pool;
+        this.appId = options.appId;
+        this.appCertificate = options.appCertificate;
     }
 
     /**

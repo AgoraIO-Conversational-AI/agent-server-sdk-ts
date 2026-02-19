@@ -11,8 +11,6 @@ import type * as Agora from "../api/index.js";
 import { AgoraError } from "../errors/index.js";
 import { Agent } from "./Agent.js";
 import type {
-    SessionStartOptions,
-    SessionHandle,
     ConversationHistory,
     SayOptions,
     AgentConfigUpdate,
@@ -40,41 +38,55 @@ export interface AgentSessionOptions {
     agent: Agent;
     /** The App ID */
     appId: string;
+    /** The App Certificate — enables automatic RTC token generation when starting sessions */
+    appCertificate?: string;
+    /** Unique name for this agent instance */
+    name: string;
+    /** The channel to join */
+    channel: string;
+    /** Authentication token for the channel. Omit to auto-generate (requires appCertificate). */
+    token?: string;
+    /** The agent's RTC UID */
+    agentUid: string;
+    /** Remote user UIDs to subscribe to */
+    remoteUids: string[];
+    /** Idle timeout in seconds (0 = no auto-exit) */
+    idleTimeout?: number;
+    /** Whether to use string UIDs */
+    enableStringUid?: boolean;
 }
 
 /**
  * AgentSession class for managing agent lifecycle and interactions.
  *
+ * Use {@link Agent.createSession} to create a session — this is the recommended entry point.
+ *
  * @example
  * ```typescript
- * import { AgoraClient, Agent, AgentSession } from 'agora-sdk';
+ * import { AgoraClient, Area, Agent } from 'agora-sdk';
  *
- * const client = new AgoraClient({ appId: '...', appCertificate: '...' });
- *
- * const agent = new Agent({
- *   instructions: 'You are a helpful voice assistant.',
- *   llm: 'openai/gpt-4-turbo',
- *   tts: { vendor: 'microsoft', params: { key: '...', region: 'eastus', voice_name: 'en-US-JennyNeural' } },
+ * const client = new AgoraClient({
+ *   area: Area.US,
+ *   appId: '...',
+ *   appCertificate: '...',
+ *   customerId: '...',
+ *   customerSecret: '...',
  * });
  *
- * const session = new AgentSession({ client, agent, appId: 'your-app-id' });
+ * const agent = new Agent({ name: 'support-assistant', instructions: 'You are a helpful voice assistant.' })
+ *   .withLlm({ url: 'https://api.openai.com/v1/chat/completions', api_key: '...' })
+ *   .withTts({ vendor: 'elevenlabs', params: { key: '...', model_id: '...', voice_id: '...' } })
+ *   .withStt({ vendor: 'deepgram', params: { api_key: '...' } });
  *
- * // Start the session
- * const handle = await session.start({
- *   name: 'my-agent',
+ * const session = agent.createSession(client, {
  *   channel: 'support-room-123',
- *   token: rtcToken,
- *   agentUid: '1001',
- *   remoteUids: ['1002'],
+ *   agentUid: '1',
+ *   remoteUids: ['100'],
  * });
  *
- * // Interact with the agent
+ * const agentId = await session.start();
+ *
  * await session.say('Hello! How can I help you today?');
- *
- * // Get conversation history
- * const history = await session.getHistory();
- *
- * // Stop the session
  * await session.stop();
  * ```
  */
@@ -82,6 +94,14 @@ export class AgentSession {
     private readonly _client: AgoraClient;
     private readonly _agent: Agent;
     private readonly _appId: string;
+    private readonly _appCertificate?: string;
+    private readonly _name: string;
+    private readonly _channel: string;
+    private readonly _token?: string;
+    private readonly _agentUid: string;
+    private readonly _remoteUids: string[];
+    private readonly _idleTimeout?: number;
+    private readonly _enableStringUid?: boolean;
     private _agentId: string | null = null;
     private _status: "idle" | "starting" | "running" | "stopping" | "stopped" | "error" = "idle";
     private _eventHandlers: Map<AgentSessionEvent, Set<AgentSessionEventHandler>> = new Map();
@@ -90,6 +110,14 @@ export class AgentSession {
         this._client = options.client;
         this._agent = options.agent;
         this._appId = options.appId;
+        this._appCertificate = options.appCertificate;
+        this._name = options.name;
+        this._channel = options.channel;
+        this._token = options.token;
+        this._agentUid = options.agentUid;
+        this._remoteUids = options.remoteUids;
+        this._idleTimeout = options.idleTimeout;
+        this._enableStringUid = options.enableStringUid;
     }
 
     /**
@@ -196,13 +224,12 @@ export class AgentSession {
     /**
      * Start the agent session.
      *
-     * @param options - Session start options
-     * @returns A promise that resolves to the session handle
+     * All connection details were provided when creating the session.
+     *
+     * @returns A promise that resolves to the agent ID
      * @throws {Error} If avatar/TTS configuration is invalid
      */
-    async start(
-        options: Omit<SessionStartOptions, "appId">,
-    ): Promise<SessionHandle> {
+    async start(): Promise<string> {
         if (this._status !== "idle" && this._status !== "stopped" && this._status !== "error") {
             throw new Error(`Cannot start session in ${this._status} state`);
         }
@@ -213,20 +240,25 @@ export class AgentSession {
         this._status = "starting";
 
         try {
-            const properties = this._agent.toProperties(
-                options.channel,
-                options.token,
-                options.agentUid,
-                options.remoteUids,
-                {
-                    idleTimeout: options.idleTimeout,
-                    enableStringUid: options.enableStringUid,
-                },
-            );
+            const tokenOpts = this._token
+                ? { token: this._token }
+                : {
+                      appId: this._appId,
+                      appCertificate: this._appCertificate!,
+                  };
+
+            const properties = this._agent.toProperties({
+                channel: this._channel,
+                agentUid: this._agentUid,
+                remoteUids: this._remoteUids,
+                idleTimeout: this._idleTimeout,
+                enableStringUid: this._enableStringUid,
+                ...tokenOpts,
+            });
 
             const request: Agora.StartAgentsRequest = {
                 appid: this._appId,
-                name: options.name,
+                name: this._name,
                 properties,
             };
 
@@ -235,14 +267,8 @@ export class AgentSession {
             this._agentId = response.agent_id ?? null;
             this._status = "running";
 
-            const handle: SessionHandle = {
-                agentId: response.agent_id ?? "",
-                createTs: response.create_ts ?? Date.now(),
-                status: response.status ?? "running",
-            };
-
-            this._emit("started", handle);
-            return handle;
+            this._emit("started", { agentId: this._agentId });
+            return this._agentId ?? "";
         } catch (error) {
             this._status = "error";
             this._emit("error", error);

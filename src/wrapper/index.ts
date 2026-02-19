@@ -24,6 +24,10 @@ export { Agent } from "./Agent.js";
 export type { AgentOptions } from "./Agent.js";
 
 export { AgentSession } from "./AgentSession.js";
+
+// Token generation
+export { generateRtcToken } from "./token.js";
+export type { GenerateTokenOptions } from "./token.js";
 export type {
     AgentSessionOptions,
     AgentSessionEvent,
@@ -61,8 +65,7 @@ export type {
     AgentConfig,
     AgentConfigUpdate,
     // Session types
-    SessionStartOptions,
-    SessionHandle,
+    SessionOptions,
     SessionStatus,
     SessionInfo,
     SessionListResponse,
