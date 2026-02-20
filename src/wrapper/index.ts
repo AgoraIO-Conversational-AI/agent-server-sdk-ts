@@ -115,3 +115,81 @@ export {
     validateTtsSampleRate,
     toBaseAvatarConfig,
 } from "./avatar-types.js";
+
+// Base vendor classes
+export { BaseLLM, BaseTTS, BaseSTT, BaseMLLM, BaseAvatar } from "./vendors/base.js";
+
+// Sample rate types
+export type {
+    SampleRate,
+    ElevenLabsSampleRate,
+    MicrosoftSampleRate,
+    CartesiaSampleRate,
+    HeyGenSampleRate,
+    AkoolSampleRate,
+} from "./vendors/base.js";
+
+// LLM vendor classes
+export { OpenAI, AzureOpenAI, Anthropic, Gemini } from "./vendors/llm.js";
+export type {
+    OpenAIOptions,
+    AzureOpenAIOptions,
+    AnthropicOptions,
+    GeminiOptions,
+} from "./vendors/llm.js";
+
+// TTS vendor classes
+export {
+    ElevenLabsTTS,
+    MicrosoftTTS,
+    OpenAITTS,
+    CartesiaTTS,
+    GoogleTTS,
+    AmazonTTS,
+    HumeAITTS,
+    RimeTTS,
+    FishAudioTTS,
+    GroqTTS,
+} from "./vendors/tts.js";
+export type {
+    ElevenLabsTTSOptions,
+    MicrosoftTTSOptions,
+    OpenAITTSOptions,
+    CartesiaTTSOptions,
+    GoogleTTSOptions,
+    AmazonTTSOptions,
+    HumeAITTSOptions,
+    RimeTTSOptions,
+    FishAudioTTSOptions,
+    GroqTTSOptions,
+} from "./vendors/tts.js";
+
+// STT vendor classes
+export {
+    SpeechmaticsSTT,
+    DeepgramSTT,
+    MicrosoftSTT,
+    OpenAISTT,
+    GoogleSTT,
+    AmazonSTT,
+    AssemblyAISTT,
+    AresSTT,
+} from "./vendors/stt.js";
+export type {
+    SpeechmaticsSTTOptions,
+    DeepgramSTTOptions,
+    MicrosoftSTTOptions,
+    OpenAISTTOptions,
+    GoogleSTTOptions,
+    AmazonSTTOptions,
+    AssemblyAISTTOptions,
+    AresSTTOptions,
+} from "./vendors/stt.js";
+
+// MLLM vendor classes
+export { OpenAIRealtime, VertexAI } from "./vendors/mllm.js";
+export type { OpenAIRealtimeOptions, VertexAIOptions } from "./vendors/mllm.js";
+
+// Avatar vendor classes
+export { HeyGenAvatar, AkoolAvatar } from "./vendors/avatar.js";
+export type { HeyGenAvatarOptions, AkoolAvatarOptions } from "./vendors/avatar.js";

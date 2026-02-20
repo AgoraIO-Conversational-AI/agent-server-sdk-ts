@@ -182,7 +182,7 @@ export class AgentSession {
     private _validateAvatarConfig(): void {
         const agentConfig = this._agent.config;
         const avatar = agentConfig.avatar;
-        const tts = agentConfig.tts;
+        const tts = this._agent.tts;
 
         // Skip validation if no avatar is configured
         if (!avatar || avatar.enable === false) {

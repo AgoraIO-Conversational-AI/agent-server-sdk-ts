@@ -37,14 +37,24 @@ import type {
 // Core Configuration Types
 // =============================================================================
 
-/** LLM (Large Language Model) configuration */
-export type LlmConfig = StartAgentsRequest.Properties.Llm;
-
 /** LLM request style (openai, gemini, anthropic, dify) */
 export type LlmStyle = StartAgentsRequest.Properties.Llm.Style;
 
-/** STT/ASR (Speech-to-Text) configuration */
-export type SttConfig = StartAgentsRequest.Properties.Asr;
+/** 
+ * STT/ASR (Speech-to-Text) configuration with vendor-specific typed parameters.
+ * This discriminated union provides type safety and auto-complete for vendor params.
+ * When using shorthand strings or minimal configs, the untyped variant is available.
+ */
+export type SttConfig =
+    | { vendor: 'speechmatics'; language?: string; params: SpeechmaticsParams }
+    | { vendor: 'deepgram'; language?: string; params?: DeepgramParams }
+    | { vendor: 'microsoft'; language?: string; params: MicrosoftAsrParams }
+    | { vendor: 'openai'; language?: string; params: OpenAiAsrParams }
+    | { vendor: 'google'; language?: string; params: GoogleAsrParams }
+    | { vendor: 'amazon'; language?: string; params: AmazonAsrParams }
+    | { vendor: 'assemblyai'; language?: string; params?: AssemblyAiParams }
+    | { vendor: 'ares'; language?: string; params?: AresParams }
+    | StartAgentsRequest.Properties.Asr; // Fallback for shorthand/untyped configs
 
 /** STT vendor (ares, microsoft, deepgram, openai, etc.) */
 export type SttVendor = StartAgentsRequest.Properties.Asr.Vendor;
@@ -171,6 +181,246 @@ export interface SayOptions {
 
 /** Speak priority */
 export type SpeakPriority = SpeakAgentsRequest.Priority;
+
+// =============================================================================
+// LLM Vendor-Specific Parameter Types
+// =============================================================================
+
+/**
+ * OpenAI-style LLM parameters
+ * Used for: OpenAI, Azure OpenAI, and OpenAI-compatible APIs
+ * @see https://docs.agora.io/en/conversational-ai/models/llm/overview
+ */
+export interface OpenAiLlmParams {
+    /** Model name (e.g., 'gpt-4o-mini', 'gpt-4', 'gpt-3.5-turbo') */
+    model: string;
+    /** Maximum number of tokens to generate */
+    max_tokens?: number;
+    /** Temperature for response randomness (0-2) */
+    temperature?: number;
+    /** Top-p nucleus sampling parameter */
+    top_p?: number;
+    /** Number of completions to generate */
+    n?: number;
+    /** Presence penalty (-2.0 to 2.0) */
+    presence_penalty?: number;
+    /** Frequency penalty (-2.0 to 2.0) */
+    frequency_penalty?: number;
+    /** Additional OpenAI-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Gemini-style LLM parameters
+ * Used for: Google Gemini and Vertex AI
+ * @see https://docs.agora.io/en/conversational-ai/models/llm/overview
+ */
+export interface GeminiLlmParams {
+    /** Model name (e.g., 'gemini-pro', 'gemini-1.5-flash') */
+    model: string;
+    /** Maximum number of output tokens */
+    maxOutputTokens?: number;
+    /** Temperature for response randomness (0-2) */
+    temperature?: number;
+    /** Top-p nucleus sampling parameter */
+    topP?: number;
+    /** Top-k sampling parameter */
+    topK?: number;
+    /** Google Cloud project ID (for Vertex AI) */
+    project_id?: string;
+    /** Google Cloud location (for Vertex AI) */
+    location?: string;
+    /** Additional Gemini-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Anthropic-style LLM parameters
+ * Used for: Anthropic Claude models
+ * @see https://docs.agora.io/en/conversational-ai/models/llm/overview
+ */
+export interface AnthropicLlmParams {
+    /** Model name (e.g., 'claude-3-5-sonnet-20241022', 'claude-3-opus-20240229') */
+    model: string;
+    /** Maximum number of tokens to generate */
+    max_tokens?: number;
+    /** Temperature for response randomness (0-1) */
+    temperature?: number;
+    /** Top-p nucleus sampling parameter */
+    top_p?: number;
+    /** Top-k sampling parameter */
+    top_k?: number;
+    /** Additional Anthropic-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Dify-style LLM parameters
+ * Used for: Dify workflow API
+ * @see https://docs.agora.io/en/conversational-ai/models/llm/overview
+ */
+export interface DifyLlmParams {
+    /** Dify user identifier */
+    user?: string;
+    /** Conversation ID for continuing a conversation */
+    conversation_id?: string;
+    /** Additional Dify-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Common LLM configuration fields shared across all vendors
+ */
+interface BaseLlmConfig {
+    /** The LLM callback address */
+    url: string;
+    /** The LLM API key */
+    api_key?: string;
+    /** System messages for context */
+    system_messages?: Record<string, unknown>[];
+    /** Maximum conversation history to cache */
+    max_history?: number;
+    /** Input modalities (e.g., ["text"], ["text", "image"]) */
+    input_modalities?: string[];
+    /** Output modalities (e.g., ["text"], ["audio"], ["text", "audio"]) */
+    output_modalities?: string[];
+    /** Agent greeting message */
+    greeting_message?: string;
+    /** Failure message when LLM call fails */
+    failure_message?: string;
+    /** LLM provider (e.g., 'azure', 'custom') */
+    vendor?: string;
+}
+
+/**
+ * LLM (Large Language Model) configuration with vendor-specific typed parameters.
+ * This discriminated union provides type safety and auto-complete based on the style.
+ */
+export type LlmConfig =
+    | (BaseLlmConfig & { style: 'openai'; params: OpenAiLlmParams })
+    | (BaseLlmConfig & { style: 'gemini'; params: GeminiLlmParams })
+    | (BaseLlmConfig & { style: 'anthropic'; params: AnthropicLlmParams })
+    | (BaseLlmConfig & { style: 'dify'; params: DifyLlmParams })
+    | (BaseLlmConfig & { style?: undefined; params?: Record<string, unknown> })
+    | StartAgentsRequest.Properties.Llm; // Fallback for shorthand configs
+
+// =============================================================================
+// STT/ASR Vendor-Specific Parameter Types
+// =============================================================================
+
+/**
+ * Speechmatics STT parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/speechmatics
+ */
+export interface SpeechmaticsParams {
+    /** Speechmatics API key for authentication (required) */
+    api_key: string;
+    /** Language code for transcription (e.g., 'en', 'es', 'fr') (required) */
+    language: string;
+    /** Additional Speechmatics-specific parameters passed directly to Speechmatics API */
+    [key: string]: unknown;
+}
+
+/**
+ * Deepgram STT parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/deepgram
+ */
+export interface DeepgramParams {
+    /** Deepgram API key */
+    api_key?: string;
+    /** Model to use (e.g., 'nova-2', 'enhanced', 'base') */
+    model?: string;
+    /** Language code (e.g., 'en-US', 'es', 'fr') */
+    language?: string;
+    /** Enable smart formatting */
+    smart_format?: boolean;
+    /** Enable punctuation */
+    punctuation?: boolean;
+    /** Additional Deepgram-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Microsoft Azure Speech STT parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/microsoft
+ */
+export interface MicrosoftAsrParams {
+    /** Microsoft Azure subscription key (required) */
+    key: string;
+    /** Azure region (e.g., 'eastus', 'westus') (required) */
+    region: string;
+    /** Language code (e.g., 'en-US', 'es-ES') */
+    language?: string;
+    /** Additional Microsoft Azure Speech-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * OpenAI Whisper STT parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/openai
+ */
+export interface OpenAiAsrParams {
+    /** OpenAI API key (required) */
+    api_key: string;
+    /** Model to use (default: 'whisper-1') */
+    model?: string;
+    /** Additional OpenAI-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Google Cloud Speech-to-Text parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/google
+ */
+export interface GoogleAsrParams {
+    /** Google Cloud API key (required) */
+    api_key: string;
+    /** Language code (e.g., 'en-US', 'es-ES') */
+    language?: string;
+    /** Additional Google Speech-to-Text parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Amazon Transcribe STT parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/amazon
+ */
+export interface AmazonAsrParams {
+    /** AWS Access Key ID (required) */
+    access_key: string;
+    /** AWS Secret Access Key (required) */
+    secret_key: string;
+    /** AWS region (e.g., 'us-east-1') (required) */
+    region: string;
+    /** Language code */
+    language?: string;
+    /** Additional Amazon Transcribe parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * AssemblyAI STT parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/assemblyai
+ */
+export interface AssemblyAiParams {
+    /** AssemblyAI API key (required) */
+    api_key: string;
+    /** Language code */
+    language?: string;
+    /** Additional AssemblyAI-specific parameters */
+    [key: string]: unknown;
+}
+
+/**
+ * Agora ARES (Adaptive Recognition Engine for Speech) parameters
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/ares
+ */
+export interface AresParams {
+    /** Language code for ARES ASR */
+    language?: string;
+    /** Additional ARES-specific parameters */
+    [key: string]: unknown;
+}
 
 // =============================================================================
 // TTS Vendor-Specific Types (re-exports for convenience)

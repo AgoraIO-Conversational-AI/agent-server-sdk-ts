@@ -19,25 +19,21 @@ import type {
     SessionParams,
     SessionOptions,
 } from "./types.js";
+import { BaseLLM, BaseTTS, BaseSTT, BaseMLLM, BaseAvatar } from "./vendors/base.js";
 import { generateRtcToken } from "./token.js";
 import { AgentSession } from "./AgentSession.js";
 
 /**
  * Configuration options for creating an Agent.
+ * 
+ * Use the fluent builder methods (.withLlm(), .withTts(), .withStt(), .withMllm())
+ * to configure vendor settings after construction.
  */
 export interface AgentOptions {
     /** Optional name for the agent (used as default session name) */
     name?: string;
     /** System instructions for the agent */
     instructions?: string;
-    /** LLM configuration or shorthand string (e.g., 'openai/gpt-4') */
-    llm?: LlmConfig | string;
-    /** TTS configuration or shorthand string (e.g., 'microsoft/en-US-JennyNeural', 'elevenlabs/rachel') */
-    tts?: TtsConfig | string;
-    /** STT/ASR configuration or shorthand string (e.g., 'deepgram/nova-2') */
-    stt?: SttConfig | string;
-    /** MLLM configuration for multimodal */
-    mllm?: MllmConfig;
     /** Turn detection configuration */
     turnDetection?: TurnDetectionConfig;
     /** SAL configuration */
@@ -57,143 +53,22 @@ export interface AgentOptions {
 }
 
 /**
- * Parses a shorthand LLM string like 'openai/gpt-4' into an LlmConfig.
- */
-function parseLlmShorthand(shorthand: string): LlmConfig {
-    const [vendor, model] = shorthand.split("/");
-    const vendorUrls: Record<string, string> = {
-        openai: "https://api.openai.com/v1/chat/completions",
-        anthropic: "https://api.anthropic.com/v1/messages",
-        azure: "https://YOUR_RESOURCE.openai.azure.com/openai/deployments/YOUR_DEPLOYMENT/chat/completions",
-        gemini: "https://generativelanguage.googleapis.com/v1beta/models",
-    };
-
-    const url = vendorUrls[vendor?.toLowerCase() ?? ""] ?? vendorUrls.openai;
-    const style = vendor?.toLowerCase() as LlmConfig["style"];
-
-    return {
-        url,
-        vendor: vendor?.toLowerCase() === "azure" ? "azure" : undefined,
-        style: style === "gemini" || style === "anthropic" ? style : "openai",
-        params: model ? { model } : undefined,
-    };
-}
-
-/**
- * Parses a shorthand STT string like 'deepgram/nova-2' into an SttConfig.
- */
-function parseSttShorthand(shorthand: string): SttConfig {
-    const [vendor] = shorthand.split("/");
-    const vendorMap: Record<string, SttConfig["vendor"]> = {
-        ares: "ares",
-        microsoft: "microsoft",
-        deepgram: "deepgram",
-        openai: "openai",
-        google: "google",
-        amazon: "amazon",
-        assemblyai: "assemblyai",
-        speechmatics: "speechmatics",
-    };
-
-    return {
-        vendor: vendorMap[vendor?.toLowerCase() ?? ""] ?? "deepgram",
-    };
-}
-
-/**
- * Parses a shorthand TTS string like 'microsoft/en-US-JennyNeural' into a TtsConfig.
- * Note: This creates a minimal config - API keys must be provided separately.
- */
-function parseTtsShorthand(shorthand: string): TtsConfig {
-    const [vendor, voiceOrModel] = shorthand.split("/");
-    const vendorLower = vendor?.toLowerCase() ?? "";
-
-    // Map vendor to TTS config with voice/model parameter
-    switch (vendorLower) {
-        case "microsoft":
-            return {
-                vendor: "microsoft",
-                params: {
-                    key: "", // Must be provided by user
-                    region: "eastus",
-                    voice_name: voiceOrModel ?? "en-US-JennyNeural",
-                },
-            };
-        case "elevenlabs":
-            return {
-                vendor: "elevenlabs",
-                params: {
-                    key: "", // Must be provided by user
-                    model_id: "eleven_flash_v2_5",
-                    voice_id: voiceOrModel ?? "",
-                },
-            };
-        case "openai":
-            return {
-                vendor: "openai",
-                params: {
-                    key: "", // Must be provided by user
-                    voice: voiceOrModel ?? "alloy",
-                },
-            };
-        case "cartesia":
-            return {
-                vendor: "cartesia",
-                params: {
-                    key: "", // Must be provided by user
-                    voice_id: voiceOrModel ?? "",
-                },
-            };
-        case "google":
-            return {
-                vendor: "google",
-                params: {
-                    key: "", // Must be provided by user
-                    voice_name: voiceOrModel ?? "",
-                },
-            };
-        case "amazon":
-            return {
-                vendor: "amazon",
-                params: {
-                    access_key: "", // Must be provided by user
-                    secret_key: "", // Must be provided by user
-                    region: "us-east-1",
-                    voice_id: voiceOrModel ?? "",
-                },
-            };
-        default:
-            // Default to Microsoft TTS
-            return {
-                vendor: "microsoft",
-                params: {
-                    key: "",
-                    region: "eastus",
-                    voice_name: voiceOrModel ?? "en-US-JennyNeural",
-                },
-            };
-    }
-}
-
-/**
  * Agent class representing a reusable agent configuration.
+ * 
+ * @template TTSSampleRate - The TTS sample rate literal type (tracked for avatar compatibility)
  *
  * @example
  * ```typescript
- * const agent = new Agent({
- *   instructions: 'You are a helpful voice assistant.',
- *   llm: 'openai/gpt-4-turbo',
- *   tts: { vendor: 'microsoft', params: { key: '...', region: 'eastus', voice_name: 'en-US-JennyNeural' } },
- *   stt: 'deepgram/nova-2',
- * });
+ * import { Agent, OpenAI, MicrosoftTTS, DeepgramSTT } from 'agora-agent-sdk';
  *
- * // Or use the fluent builder pattern
+ * // Use the fluent builder pattern to configure vendors
  * const agent = new Agent({ instructions: 'You are helpful.' })
- *   .withLlm('openai/gpt-4')
- *   .withTts({ vendor: 'elevenlabs', params: { key: '...', model_id: '...', voice_id: '...' } });
+ *   .withLlm(new OpenAI({ apiKey: '...', model: 'gpt-4' }))
+ *   .withTts(new ElevenLabsTTS({ key: '...', modelId: '...', voiceId: '...', sampleRate: 24000 }))
+ *   .withStt(new DeepgramSTT({ apiKey: '...', model: 'nova-2' }));
  * ```
  */
-export class Agent {
+export class Agent<TTSSampleRate extends number = number> {
     private _name?: string;
     private _llm?: LlmConfig;
     private _tts?: TtsConfig;
@@ -216,18 +91,6 @@ export class Agent {
         this._failureMessage = options.failureMessage;
         this._maxHistory = options.maxHistory;
 
-        if (options.llm) {
-            this._llm = typeof options.llm === "string" ? parseLlmShorthand(options.llm) : options.llm;
-        }
-        if (options.tts) {
-            this._tts = typeof options.tts === "string" ? parseTtsShorthand(options.tts) : options.tts;
-        }
-        if (options.stt) {
-            this._stt = typeof options.stt === "string" ? parseSttShorthand(options.stt) : options.stt;
-        }
-        if (options.mllm) {
-            this._mllm = options.mllm;
-        }
         if (options.turnDetection) {
             this._turnDetection = options.turnDetection;
         }
@@ -246,47 +109,109 @@ export class Agent {
     }
 
     /**
-     * Returns a new Agent with the specified LLM configuration.
+     * Returns a new Agent with the specified LLM vendor.
+     * 
+     * @param vendor - LLM vendor instance (e.g., new OpenAI({ apiKey: '...', model: 'gpt-4' }))
      */
-    withLlm(config: LlmConfig | string): Agent {
-        const newAgent = this._clone();
-        newAgent._llm = typeof config === "string" ? parseLlmShorthand(config) : config;
+    withLlm(vendor: BaseLLM): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        newAgent._llm = vendor.toConfig();
         return newAgent;
     }
 
     /**
-     * Returns a new Agent with the specified TTS configuration.
-     * @param config - TTS configuration object or shorthand string (e.g., 'microsoft/en-US-JennyNeural')
+     * Returns a new Agent with the specified TTS vendor.
+     * 
+     * The sample rate type is tracked for compile-time avatar compatibility checking.
+     * 
+     * @template SR - Sample rate literal type
+     * @param vendor - TTS vendor instance (e.g., new ElevenLabsTTS({ key: '...', modelId: '...', voiceId: '...', sampleRate: 24000 }))
+     * @returns Agent with tracked sample rate type
      */
-    withTts(config: TtsConfig | string): Agent {
-        const newAgent = this._clone();
-        newAgent._tts = typeof config === "string" ? parseTtsShorthand(config) : config;
+    withTts<SR extends number>(vendor: BaseTTS<SR>): Agent<SR> {
+        const newAgent = this._clone() as Agent<SR>;
+        newAgent._tts = vendor.toConfig();
         return newAgent;
     }
 
     /**
-     * Returns a new Agent with the specified STT configuration.
+     * Returns a new Agent with the specified STT vendor.
+     * 
+     * @param vendor - STT vendor instance (e.g., new SpeechmaticsSTT({ apiKey: '...', language: 'en' }))
+     * 
+     * @example
+     * ```typescript
+     * import { SpeechmaticsSTT } from 'agora-agent-sdk';
+     * 
+     * agent.withStt(new SpeechmaticsSTT({
+     *   apiKey: 'your-key',
+     *   language: 'en',
+     * }));
+     * ```
      */
-    withStt(config: SttConfig | string): Agent {
-        const newAgent = this._clone();
-        newAgent._stt = typeof config === "string" ? parseSttShorthand(config) : config;
+    withStt(vendor: BaseSTT): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        newAgent._stt = vendor.toConfig();
         return newAgent;
     }
 
     /**
-     * Returns a new Agent with the specified MLLM configuration.
+     * Returns a new Agent with the specified MLLM vendor.
+     * 
+     * @param vendor - MLLM vendor instance (e.g., new VertexAI({ model: '...', projectId: '...', ... }))
      */
-    withMllm(config: MllmConfig): Agent {
-        const newAgent = this._clone();
-        newAgent._mllm = config;
+    withMllm(vendor: BaseMLLM): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        newAgent._mllm = vendor.toConfig();
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified Avatar vendor.
+     * 
+     * ⚠️ IMPORTANT: Different avatar vendors require specific TTS sample rates:
+     * - HeyGen: Requires 24,000 Hz (24kHz)
+     * - Akool: Requires 16,000 Hz (16kHz)
+     * 
+     * This method enforces sample rate compatibility at compile time. If you configure
+     * a TTS with 16kHz and try to add a HeyGen avatar (which needs 24kHz), TypeScript
+     * will show a compile error.
+     * 
+     * @template RequiredSR - Required sample rate for the avatar
+     * @param vendor - Avatar vendor instance (e.g., new HeyGenAvatar({ apiKey: '...', quality: 'high', ... }))
+     * 
+     * @example
+     * ```typescript
+     * import { HeyGenAvatar, ElevenLabsTTS } from 'agora-agent-sdk';
+     * 
+     * const agent = new Agent({ name: 'avatar-assistant' })
+     *   .withTts(new ElevenLabsTTS({
+     *     key: '...',
+     *     modelId: '...',
+     *     voiceId: '...',
+     *     sampleRate: 24000, // Required for HeyGen
+     *   }))
+     *   .withAvatar(new HeyGenAvatar({
+     *     apiKey: '...',
+     *     quality: 'high',
+     *     agoraUid: '12345',
+     *   }));
+     * ```
+     */
+    withAvatar<RequiredSR extends number>(
+        this: Agent<RequiredSR>,
+        vendor: BaseAvatar<RequiredSR>
+    ): Agent<RequiredSR> {
+        const newAgent = this._clone() as Agent<RequiredSR>;
+        newAgent._avatar = vendor.toConfig();
         return newAgent;
     }
 
     /**
      * Returns a new Agent with the specified turn detection configuration.
      */
-    withTurnDetection(config: TurnDetectionConfig): Agent {
-        const newAgent = this._clone();
+    withTurnDetection(config: TurnDetectionConfig): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
         newAgent._turnDetection = config;
         return newAgent;
     }
@@ -294,8 +219,8 @@ export class Agent {
     /**
      * Returns a new Agent with the specified instructions.
      */
-    withInstructions(instructions: string): Agent {
-        const newAgent = this._clone();
+    withInstructions(instructions: string): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
         newAgent._instructions = instructions;
         return newAgent;
     }
@@ -303,8 +228,8 @@ export class Agent {
     /**
      * Returns a new Agent with the specified greeting message.
      */
-    withGreeting(greeting: string): Agent {
-        const newAgent = this._clone();
+    withGreeting(greeting: string): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
         newAgent._greeting = greeting;
         return newAgent;
     }
@@ -312,8 +237,8 @@ export class Agent {
     /**
      * Returns a new Agent with the specified name.
      */
-    withName(name: string): Agent {
-        const newAgent = this._clone();
+    withName(name: string): Agent<TTSSampleRate> {
+        const newAgent = this._clone() as Agent<TTSSampleRate>;
         newAgent._name = name;
         return newAgent;
     }
@@ -382,10 +307,6 @@ export class Agent {
         return {
             name: this._name,
             instructions: this._instructions,
-            llm: this._llm,
-            tts: this._tts,
-            stt: this._stt,
-            mllm: this._mllm,
             turnDetection: this._turnDetection,
             sal: this._sal,
             avatar: this._avatar,
