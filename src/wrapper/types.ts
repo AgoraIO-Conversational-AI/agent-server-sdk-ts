@@ -140,6 +140,8 @@ export interface SessionOptions {
     idleTimeout?: number;
     /** Whether to use string UIDs */
     enableStringUid?: boolean;
+    /** Enable debug logging of API requests */
+    debug?: boolean;
 }
 
 /** Session status */

@@ -54,6 +54,8 @@ export interface AgentSessionOptions {
     idleTimeout?: number;
     /** Whether to use string UIDs */
     enableStringUid?: boolean;
+    /** Enable debug logging of API requests */
+    debug?: boolean;
 }
 
 /**
@@ -102,6 +104,7 @@ export class AgentSession {
     private readonly _remoteUids: string[];
     private readonly _idleTimeout?: number;
     private readonly _enableStringUid?: boolean;
+    private readonly _debug?: boolean;
     private _agentId: string | null = null;
     private _status: "idle" | "starting" | "running" | "stopping" | "stopped" | "error" = "idle";
     private _eventHandlers: Map<AgentSessionEvent, Set<AgentSessionEventHandler>> = new Map();
@@ -118,6 +121,7 @@ export class AgentSession {
         this._remoteUids = options.remoteUids;
         this._idleTimeout = options.idleTimeout;
         this._enableStringUid = options.enableStringUid;
+        this._debug = options.debug;
     }
 
     /**
@@ -261,6 +265,14 @@ export class AgentSession {
                 name: this._name,
                 properties,
             };
+
+            if (this._debug) {
+                console.log('[Agora Debug] Starting agent session...');
+                if ('getCurrentURL' in this._client && typeof this._client.getCurrentURL === 'function') {
+                    console.log('[Agora Debug] API Endpoint:', this._client.getCurrentURL());
+                }
+                console.log('[Agora Debug] Request:', JSON.stringify(request, null, 2));
+            }
 
             const response = await this._client.agents.start(request);
 
