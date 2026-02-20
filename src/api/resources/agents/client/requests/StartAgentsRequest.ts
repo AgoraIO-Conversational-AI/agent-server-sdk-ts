@@ -79,9 +79,9 @@ export namespace StartAgentsRequest {
         /** Automatic Speech Recognition (ASR) configuration. */
         asr?: Properties.Asr;
         /** Text-to-speech (TTS) module configuration. */
-        tts: Agora.Tts;
+        tts?: Agora.Tts;
         /** Large language model (LLM) configuration. */
-        llm: Properties.Llm;
+        llm?: Properties.Llm;
         /** Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing. */
         mllm?: Properties.Mllm;
         /** Avatar configuration. */

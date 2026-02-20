@@ -1,11 +1,8 @@
 {
     "name": "agora-agent-sdk",
-    "version": "0.0.16",
+    "version": "0.0.17",
     "private": false,
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/fern-demo/agoraio-ts-sdk.git"
-    },
+    "repository": "github:fern-demo/agoraio-ts-sdk",
     "type": "commonjs",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.mjs",
@@ -45,17 +42,15 @@
         "test:unit": "vitest --project unit",
         "test:wire": "vitest --project wire"
     },
-    "dependencies": {
-        "agora-token": "^2.0.5"
-    },
+    "dependencies": {},
     "devDependencies": {
-        "@biomejs/biome": "2.3.1",
-        "@types/node": "^18.19.70",
-        "msw": "2.11.2",
+        "webpack": "^5.97.1",
         "ts-loader": "^9.5.1",
-        "typescript": "~5.7.2",
         "vitest": "^3.2.4",
-        "webpack": "^5.97.1"
+        "msw": "2.11.2",
+        "@types/node": "^18.19.70",
+        "typescript": "~5.7.2",
+        "@biomejs/biome": "2.3.1"
     },
     "browser": {
         "fs": false,

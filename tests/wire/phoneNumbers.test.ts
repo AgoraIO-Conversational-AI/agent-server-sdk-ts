@@ -6,12 +6,7 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 describe("PhoneNumbersClient", () => {
     test("list", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         const rawResponseBody = [
             {
@@ -73,12 +68,7 @@ describe("PhoneNumbersClient", () => {
 
     test("add (1)", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
             provider: "byo",
             phone_number: "+19876543210",
@@ -129,12 +119,7 @@ describe("PhoneNumbersClient", () => {
 
     test("add (2)", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = {
             provider: "byo",
             phone_number: "+19876543210",
@@ -190,12 +175,7 @@ describe("PhoneNumbersClient", () => {
 
     test("get", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         const rawResponseBody = {
             provider: "byo",
@@ -239,12 +219,7 @@ describe("PhoneNumbersClient", () => {
 
     test("delete", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
 
         server.mockEndpoint().delete("/v2/phone-numbers/phone_number").respondWith().statusCode(200).build();
 
@@ -256,12 +231,7 @@ describe("PhoneNumbersClient", () => {
 
     test("update", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({
-            maxRetries: 0,
-            username: "test",
-            password: "test",
-            environment: server.baseUrl,
-        });
+        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
         const rawRequestBody = { inbound_config: { pipeline_id: "xxxxx" }, outbound_config: { pipeline_id: "xxxxx" } };
         const rawResponseBody = {
             provider: "byo",
