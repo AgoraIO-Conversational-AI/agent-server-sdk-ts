@@ -23,6 +23,8 @@ export interface OpenAIOptions {
     greetingMessage?: string;
     /** Failure message when LLM call fails */
     failureMessage?: string;
+    /** Input modalities (defaults to ["text"]) */
+    inputModalities?: string[];
     /** Additional LLM parameters */
     params?: Record<string, unknown>;
 }
@@ -47,7 +49,7 @@ export class OpenAI extends BaseLLM {
     }
 
     toConfig(): LlmConfig {
-        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, params } = this.options;
+        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
         
         return {
             url: url ?? "https://api.openai.com/v1/chat/completions",
@@ -57,6 +59,7 @@ export class OpenAI extends BaseLLM {
             system_messages: systemMessages,
             greeting_message: greetingMessage,
             failure_message: failureMessage,
+            input_modalities: inputModalities ?? ["text"],
             style: "openai",
         };
     }
@@ -84,6 +87,8 @@ export interface AzureOpenAIOptions {
     greetingMessage?: string;
     /** Failure message when LLM call fails */
     failureMessage?: string;
+    /** Input modalities (defaults to ["text"]) */
+    inputModalities?: string[];
     /** Additional LLM parameters */
     params?: Record<string, unknown>;
 }
@@ -120,6 +125,7 @@ export class AzureOpenAI extends BaseLLM {
             systemMessages,
             greetingMessage,
             failureMessage,
+            inputModalities,
             params,
         } = this.options;
 
@@ -132,6 +138,7 @@ export class AzureOpenAI extends BaseLLM {
             system_messages: systemMessages,
             greeting_message: greetingMessage,
             failure_message: failureMessage,
+            input_modalities: inputModalities ?? ["text"],
             style: "openai",
         };
     }
@@ -155,6 +162,8 @@ export interface AnthropicOptions {
     greetingMessage?: string;
     /** Failure message when LLM call fails */
     failureMessage?: string;
+    /** Input modalities (defaults to ["text"]) */
+    inputModalities?: string[];
     /** Additional LLM parameters */
     params?: Record<string, unknown>;
 }
@@ -179,7 +188,7 @@ export class Anthropic extends BaseLLM {
     }
 
     toConfig(): LlmConfig {
-        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, params } = this.options;
+        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
 
         return {
             url: url ?? "https://api.anthropic.com/v1/messages",
@@ -189,6 +198,7 @@ export class Anthropic extends BaseLLM {
             system_messages: systemMessages,
             greeting_message: greetingMessage,
             failure_message: failureMessage,
+            input_modalities: inputModalities ?? ["text"],
             style: "anthropic",
         };
     }
@@ -212,6 +222,8 @@ export interface GeminiOptions {
     greetingMessage?: string;
     /** Failure message when LLM call fails */
     failureMessage?: string;
+    /** Input modalities (defaults to ["text"]) */
+    inputModalities?: string[];
     /** Additional LLM parameters */
     params?: Record<string, unknown>;
 }
@@ -236,7 +248,7 @@ export class Gemini extends BaseLLM {
     }
 
     toConfig(): LlmConfig {
-        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, params } = this.options;
+        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
 
         return {
             url: url ?? "https://generativelanguage.googleapis.com/v1beta/models",
@@ -246,6 +258,7 @@ export class Gemini extends BaseLLM {
             system_messages: systemMessages,
             greeting_message: greetingMessage,
             failure_message: failureMessage,
+            input_modalities: inputModalities ?? ["text"],
             style: "gemini",
         };
     }

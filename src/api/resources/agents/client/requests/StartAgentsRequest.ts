@@ -142,6 +142,8 @@ export namespace StartAgentsRequest {
              * - `assemblyai`: AssemblyAI (Beta)
              * - `amazon`: Amazon Transcribe (Beta)
              * - `google`: Google (Beta)
+             * - `soniox`: Soniox
+             * - `sarvam`: Sarvam (Beta)
              */
             export const Vendor = {
                 Ares: "ares",
@@ -152,6 +154,8 @@ export namespace StartAgentsRequest {
                 Amazon: "amazon",
                 Assemblyai: "assemblyai",
                 Speechmatics: "speechmatics",
+                Soniox: "soniox",
+                Sarvam: "sarvam",
             } as const;
             export type Vendor = (typeof Vendor)[keyof typeof Vendor];
         }

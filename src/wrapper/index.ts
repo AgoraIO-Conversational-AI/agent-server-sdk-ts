@@ -150,6 +150,8 @@ export {
     RimeTTS,
     FishAudioTTS,
     GroqTTS,
+    MiniMaxTTS,
+    SarvamTTS,
 } from "./vendors/tts.js";
 export type {
     ElevenLabsTTSOptions,
@@ -162,6 +164,8 @@ export type {
     RimeTTSOptions,
     FishAudioTTSOptions,
     GroqTTSOptions,
+    MiniMaxTTSOptions,
+    SarvamTTSOptions,
 } from "./vendors/tts.js";
 
 // STT vendor classes
@@ -174,6 +178,8 @@ export {
     AmazonSTT,
     AssemblyAISTT,
     AresSTT,
+    SonioxSTT,
+    SarvamSTT,
 } from "./vendors/stt.js";
 export type {
     SpeechmaticsSTTOptions,
@@ -184,6 +190,8 @@ export type {
     AmazonSTTOptions,
     AssemblyAISTTOptions,
     AresSTTOptions,
+    SonioxSTTOptions,
+    SarvamSTTOptions,
 } from "./vendors/stt.js";
 
 // MLLM vendor classes

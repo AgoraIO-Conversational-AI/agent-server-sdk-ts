@@ -509,3 +509,99 @@ export class GroqTTS extends BaseTTS {
         };
     }
 }
+
+/**
+ * Constructor options for MiniMax TTS.
+ */
+export interface MiniMaxTTSOptions {
+    /** MiniMax API key */
+    key: string;
+    /** Voice ID */
+    voiceId?: string;
+    /** Model name */
+    model?: string;
+    /** Skip patterns for bracketed content */
+    skipPatterns?: number[];
+}
+
+/**
+ * MiniMax TTS vendor.
+ *
+ * @example
+ * ```typescript
+ * const tts = new MiniMaxTTS({
+ *   key: process.env.MINIMAX_API_KEY,
+ *   voiceId: 'female_voice_1',
+ * });
+ * ```
+ */
+export class MiniMaxTTS extends BaseTTS {
+    private options: MiniMaxTTSOptions;
+
+    constructor(options: MiniMaxTTSOptions) {
+        super();
+        this.options = options;
+    }
+
+    toConfig(): TtsConfig {
+        const { key, voiceId, model, skipPatterns } = this.options;
+
+        return {
+            vendor: "minimax",
+            params: {
+                key,
+                ...(voiceId && { voice_id: voiceId }),
+                ...(model && { model }),
+            },
+            ...(skipPatterns && { skip_patterns: skipPatterns }),
+        };
+    }
+}
+
+/**
+ * Constructor options for Sarvam TTS.
+ */
+export interface SarvamTTSOptions {
+    /** Sarvam API key */
+    apiKey: string;
+    /** Voice ID */
+    voiceId?: string;
+    /** Model name */
+    model?: string;
+    /** Skip patterns for bracketed content */
+    skipPatterns?: number[];
+}
+
+/**
+ * Sarvam TTS vendor (Beta).
+ *
+ * @example
+ * ```typescript
+ * const tts = new SarvamTTS({
+ *   apiKey: process.env.SARVAM_API_KEY,
+ *   voiceId: 'en-female-1',
+ * });
+ * ```
+ */
+export class SarvamTTS extends BaseTTS {
+    private options: SarvamTTSOptions;
+
+    constructor(options: SarvamTTSOptions) {
+        super();
+        this.options = options;
+    }
+
+    toConfig(): TtsConfig {
+        const { apiKey, voiceId, model, skipPatterns } = this.options;
+
+        return {
+            vendor: "sarvam",
+            params: {
+                api_key: apiKey,
+                ...(voiceId && { voice_id: voiceId }),
+                ...(model && { model }),
+            },
+            ...(skipPatterns && { skip_patterns: skipPatterns }),
+        };
+    }
+}

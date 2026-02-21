@@ -5,6 +5,7 @@ import type * as Agora from "../index.js";
 export type Tts =
     | Agora.Tts.Microsoft
     | Agora.Tts.Elevenlabs
+    | Agora.Tts.Minimax
     | Agora.Tts.Cartesia
     | Agora.Tts.Openai
     | Agora.Tts.Humeai
@@ -12,7 +13,8 @@ export type Tts =
     | Agora.Tts.Fishaudio
     | Agora.Tts.Groq
     | Agora.Tts.Google
-    | Agora.Tts.Amazon;
+    | Agora.Tts.Amazon
+    | Agora.Tts.Sarvam;
 
 export namespace Tts {
     export interface Microsoft extends Agora.MicrosoftTts {
@@ -21,6 +23,10 @@ export namespace Tts {
 
     export interface Elevenlabs extends Agora.ElevenLabsTts {
         vendor: "elevenlabs";
+    }
+
+    export interface Minimax extends Agora.MiniMaxTts {
+        vendor: "minimax";
     }
 
     export interface Cartesia extends Agora.CartesiaTts {
@@ -53,5 +59,9 @@ export namespace Tts {
 
     export interface Amazon extends Agora.AmazonTts {
         vendor: "amazon";
+    }
+
+    export interface Sarvam extends Agora.SarvamTts {
+        vendor: "sarvam";
     }
 }

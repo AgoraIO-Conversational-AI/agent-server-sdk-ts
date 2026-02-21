@@ -388,3 +388,95 @@ export class AresSTT extends BaseSTT {
         };
     }
 }
+
+/**
+ * Constructor options for Soniox STT.
+ */
+export interface SonioxSTTOptions {
+    /** Soniox API key */
+    apiKey: string;
+    /** Language code (e.g., 'en', 'es', 'fr') */
+    language: string;
+    /** Additional vendor-specific parameters */
+    additionalParams?: Record<string, unknown>;
+}
+
+/**
+ * Soniox STT vendor.
+ *
+ * @example
+ * ```typescript
+ * const stt = new SonioxSTT({
+ *   apiKey: process.env.SONIOX_API_KEY,
+ *   language: 'en',
+ * });
+ * ```
+ */
+export class SonioxSTT extends BaseSTT {
+    private options: SonioxSTTOptions;
+
+    constructor(options: SonioxSTTOptions) {
+        super();
+        this.options = options;
+    }
+
+    toConfig(): SttConfig {
+        const { apiKey, language, additionalParams } = this.options;
+
+        return {
+            vendor: "soniox",
+            language,
+            params: {
+                api_key: apiKey,
+                language,
+                ...additionalParams,
+            },
+        };
+    }
+}
+
+/**
+ * Constructor options for Sarvam STT.
+ */
+export interface SarvamSTTOptions {
+    /** Sarvam API key */
+    apiKey: string;
+    /** Language code (e.g., 'en', 'hi', 'ta') */
+    language: string;
+    /** Additional vendor-specific parameters */
+    additionalParams?: Record<string, unknown>;
+}
+
+/**
+ * Sarvam STT vendor (Beta).
+ *
+ * @example
+ * ```typescript
+ * const stt = new SarvamSTT({
+ *   apiKey: process.env.SARVAM_API_KEY,
+ *   language: 'en',
+ * });
+ * ```
+ */
+export class SarvamSTT extends BaseSTT {
+    private options: SarvamSTTOptions;
+
+    constructor(options: SarvamSTTOptions) {
+        super();
+        this.options = options;
+    }
+
+    toConfig(): SttConfig {
+        const { apiKey, language, additionalParams } = this.options;
+
+        return {
+            vendor: "sarvam",
+            language,
+            params: {
+                api_key: apiKey,
+                language,
+                ...additionalParams,
+            },
+        };
+    }
+}
