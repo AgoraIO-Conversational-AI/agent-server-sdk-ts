@@ -46,9 +46,9 @@ export class AgentsClient {
      *             tts: {
      *                 vendor: "microsoft",
      *                 params: {
-     *                     key: "key",
-     *                     region: "region",
-     *                     voice_name: "voice_name"
+     *                     "key": "<your_tts_api_key>",
+     *                     "region": "eastus",
+     *                     "voice_name": "en-US-AndrewMultilingualNeural"
      *                 }
      *             },
      *             llm: {

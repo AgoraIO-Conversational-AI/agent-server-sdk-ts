@@ -1,6 +1,6 @@
 {
     "name": "agora-agent-sdk",
-    "version": "0.0.17",
+    "version": "0.0.24",
     "private": false,
     "repository": "github:fern-demo/agoraio-ts-sdk",
     "type": "commonjs",

@@ -22,9 +22,9 @@ import type * as Agora from "../../../../index.js";
  *             tts: {
  *                 vendor: "microsoft",
  *                 params: {
- *                     key: "key",
- *                     region: "region",
- *                     voice_name: "voice_name"
+ *                     "key": "<your_tts_api_key>",
+ *                     "region": "eastus",
+ *                     "voice_name": "en-US-AndrewMultilingualNeural"
  *                 }
  *             },
  *             llm: {
@@ -79,7 +79,7 @@ export namespace StartAgentsRequest {
         /** Automatic Speech Recognition (ASR) configuration. */
         asr?: Properties.Asr;
         /** Text-to-speech (TTS) module configuration. */
-        tts?: Agora.Tts;
+        tts?: Properties.Tts;
         /** Large language model (LLM) configuration. */
         llm?: Properties.Llm;
         /** Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing. */
@@ -92,6 +92,7 @@ export namespace StartAgentsRequest {
         sal?: Properties.Sal;
         /** Agent configuration parameters. */
         parameters?: Properties.Parameters;
+        onboard_tts?: Agora.Tts;
     }
 
     export namespace Properties {
@@ -152,6 +153,70 @@ export namespace StartAgentsRequest {
                 Amazon: "amazon",
                 Assemblyai: "assemblyai",
                 Speechmatics: "speechmatics",
+            } as const;
+            export type Vendor = (typeof Vendor)[keyof typeof Vendor];
+        }
+
+        /**
+         * Text-to-speech (TTS) module configuration.
+         */
+        export interface Tts {
+            /**
+             * TTS provider:
+             * - `microsoft`: Microsoft Azure
+             * - `elevenlabs`: ElevenLabs
+             * - `cartesia`: Cartesia (Beta)
+             * - `openai`: OpenAI (Beta)
+             * - `humeai`: Hume AI (Beta)
+             * - `rime`: Rime (Beta)
+             * - `fishaudio`: Fish Audio (Beta)
+             * - `groq`: Groq (Beta)
+             * - `google`: Google (Beta)
+             * - `amazon`: Amazon Polly (Beta)
+             */
+            vendor: Tts.Vendor;
+            /** The configuration parameters for the TTS vendor. See [TTS Overview](https://docs.agora.io/en/conversational-ai/models/tts/overview) for details. */
+            params: Record<string, unknown>;
+            /**
+             * Controls whether the TTS module skips bracketed content when reading LLM response text. Enable this feature by specifying one or more values:
+             * - `1`: Skip content in Chinese parentheses （）
+             * - `2`: Skip content in Chinese square brackets 【】
+             * - `3`: Skip content in parentheses ( )
+             * - `4`: Skip content in square brackets [ ]
+             * - `5`: Skip content in curly braces { }
+             *
+             * > - **Nested brackets**: When input text contains nested brackets and multiple bracket types are configured to be skipped, the system processes only the outermost brackets. The system matches from the beginning of the text and skips the first outermost bracket pair that meets the skip rule, including all nested content.
+             * > - **Agent memory**: The agent's short-term memory always contains the complete, unfiltered LLM text, regardless of live captioning settings.
+             * > - **Real-time transcript**: When enabled, transcript excludes filtered content during TTS playback but restores the complete text after each sentence finishes.
+             */
+            skip_patterns?: number[];
+        }
+
+        export namespace Tts {
+            /**
+             * TTS provider:
+             * - `microsoft`: Microsoft Azure
+             * - `elevenlabs`: ElevenLabs
+             * - `cartesia`: Cartesia (Beta)
+             * - `openai`: OpenAI (Beta)
+             * - `humeai`: Hume AI (Beta)
+             * - `rime`: Rime (Beta)
+             * - `fishaudio`: Fish Audio (Beta)
+             * - `groq`: Groq (Beta)
+             * - `google`: Google (Beta)
+             * - `amazon`: Amazon Polly (Beta)
+             */
+            export const Vendor = {
+                Microsoft: "microsoft",
+                Elevenlabs: "elevenlabs",
+                Cartesia: "cartesia",
+                Openai: "openai",
+                Humeai: "humeai",
+                Rime: "rime",
+                Fishaudio: "fishaudio",
+                Groq: "groq",
+                Google: "google",
+                Amazon: "amazon",
             } as const;
             export type Vendor = (typeof Vendor)[keyof typeof Vendor];
         }
