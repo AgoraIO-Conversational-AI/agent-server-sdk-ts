@@ -1,5 +1,6 @@
 export * as Agora from "./api/index.js";
 export { AgoraClient } from "./AgoraPoolClient.js";
+export type { AgoraAuthMode } from "./AgoraPoolClient.js";
 export type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 export { AgoraEnvironment } from "./environments.js";
 export { AgoraError, AgoraTimeoutError } from "./errors/index.js";
@@ -11,6 +12,7 @@ export {
     Agent,
     AgentSession,
     generateRtcToken,
+    generateConvoAIToken,
     isHeyGenAvatar,
     isAkoolAvatar,
     validateAvatarConfig,
@@ -62,6 +64,7 @@ export type {
     AgentOptions,
     AgentSessionOptions,
     GenerateTokenOptions,
+    GenerateConvoAITokenOptions,
     AgentSessionEvent,
     AgentSessionEventHandler,
     // Sample rate types
