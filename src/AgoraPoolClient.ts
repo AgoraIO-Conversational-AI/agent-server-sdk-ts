@@ -127,11 +127,11 @@ export class AgoraClient extends BaseAgoraClient {
             // to replace it with the agora token header on every request.
             const authorizationHeader = opts.authToken;
             const baseFetch = opts.fetch;
-            fetchFn = async (url: string, init: RequestInit): Promise<Response> => {
-                const headers = new Headers(init.headers);
+            fetchFn = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+                const headers = new Headers(init?.headers);
                 headers.set("Authorization", authorizationHeader);
                 const fetchImpl = baseFetch ?? globalThis.fetch;
-                return fetchImpl(url, { ...init, headers });
+                return fetchImpl(input, { ...init, headers });
             };
         } else {
             authMode = "app-credentials";
