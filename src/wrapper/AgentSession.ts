@@ -17,6 +17,8 @@ import type {
     SessionInfo,
 } from "./types.js";
 import { validateTtsSampleRate, validateAvatarConfig, isHeyGenAvatar, isAkoolAvatar } from "./avatar-types.js";
+import type { AgoraAuthMode } from "../AgoraPoolClient.js";
+import { generateConvoAIToken } from "./token.js";
 
 /**
  * Event types that can be emitted by AgentSession.
@@ -105,6 +107,7 @@ export class AgentSession {
     private readonly _idleTimeout?: number;
     private readonly _enableStringUid?: boolean;
     private readonly _debug?: boolean;
+    private readonly _authMode: AgoraAuthMode;
     private _agentId: string | null = null;
     private _status: "idle" | "starting" | "running" | "stopping" | "stopped" | "error" = "idle";
     private _eventHandlers: Map<AgentSessionEvent, Set<AgentSessionEventHandler>> = new Map();
@@ -122,6 +125,29 @@ export class AgentSession {
         this._idleTimeout = options.idleTimeout;
         this._enableStringUid = options.enableStringUid;
         this._debug = options.debug;
+        // Read authMode from pool client if available, else fall back to basic
+        this._authMode = (options.client as { authMode?: AgoraAuthMode }).authMode ?? "basic";
+    }
+
+    /**
+     * Builds per-request headers for app-credentials auth mode.
+     *
+     * Generates a fresh ConvoAI REST token on each call — no caching — to
+     * avoid expired-token issues. Token generation is cheap.
+     *
+     * Returns undefined for basic and pre-built-token modes (the client handles those).
+     */
+    private _convoAIHeaders(): Record<string, string> | undefined {
+        if (this._authMode !== "app-credentials") {
+            return undefined;
+        }
+        const token = generateConvoAIToken({
+            appId: this._appId,
+            appCertificate: this._appCertificate!,
+            channelName: this._channel,
+            account: this._agentUid,
+        });
+        return { Authorization: `agora token=${token}` };
     }
 
     /**
@@ -274,7 +300,7 @@ export class AgentSession {
                 console.log('[Agora Debug] Request:', JSON.stringify(request, null, 2));
             }
 
-            const response = await this._client.agents.start(request);
+            const response = await this._client.agents.start(request, { headers: this._convoAIHeaders() });
 
             this._agentId = response.agent_id ?? null;
             this._status = "running";
@@ -309,7 +335,7 @@ export class AgentSession {
             await this._client.agents.stop({
                 appid: this._appId,
                 agentId: this._agentId,
-            });
+            }, { headers: this._convoAIHeaders() });
 
             this._status = "stopped";
             this._emit("stopped", { agentId: this._agentId });
@@ -348,7 +374,7 @@ export class AgentSession {
             text,
             priority: options?.priority,
             interruptable: options?.interruptable,
-        });
+        }, { headers: this._convoAIHeaders() });
     }
 
     /**
@@ -366,7 +392,7 @@ export class AgentSession {
         await this._client.agents.interrupt({
             appid: this._appId,
             agentId: this._agentId,
-        });
+        }, { headers: this._convoAIHeaders() });
     }
 
     /**
@@ -387,7 +413,7 @@ export class AgentSession {
             appid: this._appId,
             agentId: this._agentId,
             properties: config,
-        });
+        }, { headers: this._convoAIHeaders() });
     }
 
     /**
@@ -403,7 +429,7 @@ export class AgentSession {
         return this._client.agents.getHistory({
             appid: this._appId,
             agentId: this._agentId,
-        });
+        }, { headers: this._convoAIHeaders() });
     }
 
     /**
@@ -419,7 +445,7 @@ export class AgentSession {
         return this._client.agents.get({
             appid: this._appId,
             agentId: this._agentId,
-        });
+        }, { headers: this._convoAIHeaders() });
     }
 
     /**

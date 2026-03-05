@@ -4,19 +4,52 @@ import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { AgoraClient as BaseAgoraClient } from "./Client.js";
 import { Area, Pool } from "./core/domain/index.js";
 
+/**
+ * Auth mode for the client:
+ * - `basic`: Customer ID + Secret for REST API (HTTP Basic Auth)
+ * - `token`: Pre-built `agora token=<value>` auth header
+ * - `app-credentials`: appId + appCertificate only; AgentSession generates
+ *   a fresh ConvoAI token per API call
+ */
+export type AgoraAuthMode = "basic" | "token" | "app-credentials";
+
 export declare namespace AgoraClient {
-    export interface Options extends Omit<BaseClientOptions, "baseUrl" | "environment" | "username" | "password"> {
+    export type Options = BaseOptions & AuthOptions;
+
+    interface BaseOptions extends Omit<BaseClientOptions, "baseUrl" | "environment" | "username" | "password"> {
         /** The area to use for regional URL selection */
         area: Area;
         /** Agora App ID — used as the `appid` path parameter and for RTC token generation */
         appId: string;
         /** Agora App Certificate — used to sign RTC tokens. Keep this secret. */
         appCertificate: string;
-        /** Customer ID from Agora Console (REST API authentication) */
-        customerId: string;
-        /** Customer Secret from Agora Console (REST API authentication) */
-        customerSecret: string;
     }
+
+    /** Use Customer ID + Secret for REST API authentication (HTTP Basic Auth) */
+    interface BasicAuthOptions {
+        customerId: string;
+        customerSecret: string;
+        authToken?: never;
+    }
+
+    /** Use a pre-built Agora token for REST API authentication */
+    interface TokenAuthOptions {
+        authToken: string;
+        customerId?: never;
+        customerSecret?: never;
+    }
+
+    /**
+     * Use only appId + appCertificate. AgentSession generates a fresh
+     * ConvoAI token per API call — no Customer Secret required.
+     */
+    interface AppCredentialsOptions {
+        customerId?: never;
+        customerSecret?: never;
+        authToken?: never;
+    }
+
+    type AuthOptions = BasicAuthOptions | TokenAuthOptions | AppCredentialsOptions;
 
     export interface RequestOptions extends BaseRequestOptions {}
 }
@@ -25,16 +58,30 @@ export declare namespace AgoraClient {
  * AgoraClient extends the base client with domain pool support for
  * regional URL cycling and automatic domain selection.
  *
- * This client automatically:
- * - Selects the best domain based on DNS resolution
- * - Cycles through region prefixes on request failures
- * - Supports US, EU, AP, and CN areas
- * - Generates RTC tokens when starting agents (no manual token management)
+ * Three authentication modes are supported:
  *
- * @example
+ * **App credentials (recommended)** — no Customer Secret needed; AgentSession
+ * generates a short-lived ConvoAI token per API call:
  * ```typescript
- * import { AgoraClient, Area } from "agora-sdk";
+ * const client = new AgoraClient({
+ *     area: Area.US,
+ *     appId: "your-app-id",
+ *     appCertificate: "your-app-certificate",
+ * });
+ * ```
  *
+ * **Token auth** — pass a pre-built Agora token (e.g. generated server-side):
+ * ```typescript
+ * const client = new AgoraClient({
+ *     area: Area.US,
+ *     appId: "your-app-id",
+ *     appCertificate: "your-app-certificate",
+ *     authToken: "agora token=<your-token>",
+ * });
+ * ```
+ *
+ * **Basic auth** — Customer ID + Secret from Agora Console:
+ * ```typescript
  * const client = new AgoraClient({
  *     area: Area.US,
  *     appId: "your-app-id",
@@ -50,19 +97,61 @@ export class AgoraClient extends BaseAgoraClient {
     public readonly appId: string;
     /** Agora App Certificate (used for RTC token signing) */
     public readonly appCertificate: string;
+    /** The active authentication mode */
+    public readonly authMode: AgoraAuthMode;
 
     constructor(options: AgoraClient.Options) {
         const pool = new Pool(options.area);
-        const { customerId, customerSecret, ...rest } = options;
+
+        let authMode: AgoraAuthMode;
+        let username: string;
+        let password: string;
+        let fetchFn: typeof fetch | undefined;
+
+        const opts = options as AgoraClient.Options & {
+            customerId?: string;
+            customerSecret?: string;
+            authToken?: string;
+        };
+
+        if (opts.customerId != null) {
+            authMode = "basic";
+            username = opts.customerId;
+            password = opts.customerSecret!;
+        } else if (opts.authToken != null) {
+            authMode = "token";
+            username = "";
+            password = "";
+            // The generated client always emits a Basic auth header from username/password.
+            // Until Fern regeneration adds native authToken support, use a fetch wrapper
+            // to replace it with the agora token header on every request.
+            const authorizationHeader = opts.authToken;
+            const baseFetch = opts.fetch;
+            fetchFn = async (url: string, init: RequestInit): Promise<Response> => {
+                const headers = new Headers(init.headers);
+                headers.set("Authorization", authorizationHeader);
+                const fetchImpl = baseFetch ?? globalThis.fetch;
+                return fetchImpl(url, { ...init, headers });
+            };
+        } else {
+            authMode = "app-credentials";
+            username = "";
+            password = "";
+        }
+
+        const { customerId: _cid, customerSecret: _cs, authToken: _at, ...rest } = opts;
+
         super({
             ...rest,
-            username: customerId,
-            password: customerSecret,
+            username,
+            password,
+            ...(fetchFn != null ? { fetch: fetchFn } : {}),
             baseUrl: () => pool.getCurrentURL(),
         });
         this._pool = pool;
         this.appId = options.appId;
         this.appCertificate = options.appCertificate;
+        this.authMode = authMode;
     }
 
     /**

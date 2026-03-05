@@ -45,6 +45,60 @@ npm i -s agora-agent-sdk
 
 A full reference for this library is available [here](https://github.com/fern-demo/agoraio-ts-sdk/blob/HEAD/./reference.md).
 
+## Authentication
+
+Three auth methods are supported. **App credentials (recommended)** — no Customer Secret needed for REST API calls; the SDK generates a short-lived ConvoAI token per session using your App ID and App Certificate:
+
+```typescript
+// Option 1: App credentials (recommended) — SDK auto-generates ConvoAI tokens
+const client = new AgoraClient({
+  area: Area.US,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+  // No customerId/customerSecret required
+});
+
+// Option 2: Pre-built Agora token — generate server-side and pass directly
+const client = new AgoraClient({
+  area: Area.US,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+  authToken: 'agora token=<your-rtc-rtm-token>',
+});
+
+// Option 3: Basic Auth — Customer ID + Secret from Agora Console → Developer Toolkit → RESTful API
+const client = new AgoraClient({
+  area: Area.US,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+  customerId: 'your-customer-id',
+  customerSecret: 'your-customer-secret',
+});
+```
+
+> **Note:** Token-based auth (`authToken` and app-credentials mode) uses `Authorization: agora token=<value>`, which is accepted by the ConvoAI endpoint but is not yet in official Agora docs. It is stable and preferred over Basic Auth — tokens are scoped to a single App ID + channel, while Customer Secret grants access to every project on the account.
+
+To generate a ConvoAI token manually (e.g. server-side, then pass as `authToken`):
+
+```typescript
+import { generateConvoAIToken } from 'agora-agent-sdk';
+
+const token = generateConvoAIToken({
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+  channelName: 'your-channel',
+  account: '1001', // agent UID as string
+  tokenExpire: 3600,
+});
+
+const client = new AgoraClient({
+  area: Area.US,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+  authToken: `agora token=${token}`,
+});
+```
+
 ## Quick Start (Recommended)
 
 The SDK provides an ergonomic wrapper layer with the `Agent` and `AgentSession` classes for a cleaner developer experience:
@@ -52,13 +106,11 @@ The SDK provides an ergonomic wrapper layer with the `Agent` and `AgentSession` 
 ```typescript
 import { AgoraClient, Area, Agent } from 'agora-agent-sdk';
 
-// Initialize client with your credentials
+// Initialize client — app credentials mode generates ConvoAI tokens automatically
 const client = new AgoraClient({
   area: Area.US,
   appId: 'your-app-id',
   appCertificate: 'your-app-certificate',
-  customerId: 'your-customer-id',
-  customerSecret: 'your-customer-secret',
 });
 
 // Define your agent using the builder pattern
@@ -141,59 +193,9 @@ const agentId = await session.start();
 For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
 
 ```typescript
-import { AgoraClient, Agora } from "agora-agent-sdk";
+import { AgoraClient, Area, Agora } from "agora-agent-sdk";
 
-const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
-
-// Configure MLLM with typed parameters
-const mllm: Agora.StartAgentsRequest.Properties.Mllm = {
-    url: "wss://api.openai.com/v1/realtime",
-    api_key: "<your_openai_api_key>",
-    vendor: Agora.StartAgentsRequest.Properties.Mllm.Vendor.Openai,
-    params: {
-        model: "gpt-4o-realtime-preview",
-        voice: "alloy"
-    },
-    input_modalities: ["audio"],
-    output_modalities: ["text", "audio"],
-    greeting_message: "Hello! I'm ready to chat in real-time."
-};
-
-// Configure turn detection for MLLM
-const turnDetection: Agora.StartAgentsRequest.Properties.TurnDetection = {
-    type: Agora.StartAgentsRequest.Properties.TurnDetection.Type.ServerVad,
-    threshold: 0.5,
-    silence_duration_ms: 500
-};
-
-await client.agents.start({
-    appid: "your_app_id",
-    name: "mllm_agent",
-    properties: {
-        channel: "channel_name",
-        token: "your_token",
-        agent_rtc_uid: "1001",
-        remote_rtc_uids: ["1002"],
-        idle_timeout: 120,
-        advanced_features: { enable_mllm: true },
-        mllm,
-        turn_detection: turnDetection,
-        // TTS and LLM are still required but not used when MLLM is enabled
-        tts: { vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft, params: {} },
-        llm: { url: "https://api.openai.com/v1/chat/completions" }
-    }
-});
-```
-
-
-## MLLM Flow (Multimodal)
-
-For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
-
-```typescript
-import { AgoraClient, Agora } from "agora-agent-sdk";
-
-const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
+const client = new AgoraClient({ area: Area.US, appId: "YOUR_APP_ID", appCertificate: "YOUR_APP_CERTIFICATE" });
 
 // Configure MLLM with typed parameters
 const mllm: Agora.StartAgentsRequest.Properties.Mllm = {
@@ -241,9 +243,9 @@ await client.agents.start({
 The SDK exports all request types under the `Agora` namespace. You can use these types for better IDE autocompletion and type safety:
 
 ```typescript
-import { AgoraClient, Agora } from "agora-agent-sdk";
+import { AgoraClient, Area, Agora } from "agora-agent-sdk";
 
-const client = new AgoraClient({ username: "YOUR_APP_ID", password: "YOUR_APP_CERTIFICATE" });
+const client = new AgoraClient({ area: Area.US, appId: "YOUR_APP_ID", appCertificate: "YOUR_APP_CERTIFICATE" });
 
 // Use named types for better type safety and autocompletion
 const tts: Agora.StartAgentsRequest.Properties.Tts = {
@@ -293,9 +295,9 @@ await client.agents.start({
 Instantiate and use the client with the following:
 
 ```typescript
-import { AgoraClient } from "agora-agent-sdk";
+import { AgoraClient, Area } from "agora-agent-sdk";
 
-const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
+const client = new AgoraClient({ area: Area.US, appId: "YOUR_APP_ID", appCertificate: "YOUR_APP_CERTIFICATE" });
 await client.agents.start({
     appid: "appid",
     name: "unique_name",
@@ -375,9 +377,9 @@ try {
 List endpoints are paginated. The SDK provides an iterator so that you can simply loop over the items:
 
 ```typescript
-import { AgoraClient } from "agora-agent-sdk";
+import { AgoraClient, Area } from "agora-agent-sdk";
 
-const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD" });
+const client = new AgoraClient({ area: Area.US, appId: "YOUR_APP_ID", appCertificate: "YOUR_APP_CERTIFICATE" });
 const pageableResponse = await client.agents.list({
     appid: "appid"
 });
