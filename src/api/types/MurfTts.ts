@@ -3,10 +3,10 @@
 import type * as Agora from "../index.js";
 
 /**
- * Groq Text-to-Speech configuration (Beta).
+ * Murf Text-to-Speech configuration.
  */
-export interface GroqTts {
-    params: Agora.GroqTtsParams;
+export interface MurfTts {
+    params: Agora.MurfTtsParams;
     /** Controls whether the TTS module skips bracketed content when reading LLM response text. */
     skip_patterns?: number[];
 }

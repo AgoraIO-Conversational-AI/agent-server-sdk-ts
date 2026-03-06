@@ -40,7 +40,10 @@ export class PhoneNumbersClient {
     ): Promise<core.WithRawResponse<Agora.ListPhoneNumbersResponseItem[]>> {
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -123,7 +126,10 @@ export class PhoneNumbersClient {
     ): Promise<core.WithRawResponse<Agora.AddPhoneNumbersResponse>> {
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -199,7 +205,10 @@ export class PhoneNumbersClient {
         const { phone_number: phoneNumber } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -252,7 +261,8 @@ export class PhoneNumbersClient {
     /**
      * Remove an imported phone number from the system.
      *
-     * Note: This operation only removes the number configuration from the Agora system; the number stored with the phone service provider is not deleted. After calling this endpoint, the number stops receiving calls routed through this system. To delete the number from the service provider, remove it in the service provider's console.
+     * After calling this endpoint, the number stops receiving calls routed through this system. To delete the number from the service provider, remove it in the service provider's console.
+     * > This operation only removes the number configuration from the Agora system; the number stored with the phone service provider is not deleted.
      *
      * @param {Agora.DeletePhoneNumbersRequest} request
      * @param {PhoneNumbersClient.RequestOptions} requestOptions - Request-specific configuration.
@@ -276,7 +286,10 @@ export class PhoneNumbersClient {
         const { phone_number: phoneNumber } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -357,7 +370,10 @@ export class PhoneNumbersClient {
         const { phone_number: phoneNumber, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -415,5 +431,10 @@ export class PhoneNumbersClient {
             username: await core.Supplier.get(this._options.username),
             password: await core.Supplier.get(this._options.password),
         });
+    }
+
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const authorizationValue = await core.Supplier.get(this._options.authorization);
+        return { Authorization: authorizationValue };
     }
 }

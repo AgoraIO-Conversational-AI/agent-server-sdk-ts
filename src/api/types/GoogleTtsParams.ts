@@ -10,4 +10,6 @@ export interface GoogleTtsParams {
     voice_name: string;
     /** Language code (e.g., "en-US") */
     language_code?: string;
+    /** Sample rate in Hz (default depends on selected voice) */
+    sample_rate_hertz?: number;
 }

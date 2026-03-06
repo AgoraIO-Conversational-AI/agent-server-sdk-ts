@@ -1,8 +1,8 @@
 {
     "name": "agora-agent-sdk",
-    "version": "0.0.17",
+    "version": "0.1.0",
     "private": false,
-    "repository": "github:fern-demo/agoraio-ts-sdk",
+    "repository": "github:AgoraIO-Conversational-AI/agora-agent-ts-sdk",
     "type": "commonjs",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.mjs",
@@ -42,9 +42,7 @@
         "test:unit": "vitest --project unit",
         "test:wire": "vitest --project wire"
     },
-    "dependencies": {
-        "agora-token": "^2.0.4"
-    },
+    "dependencies": {},
     "devDependencies": {
         "webpack": "^5.97.1",
         "ts-loader": "^9.5.1",

@@ -37,9 +37,6 @@ export class AgentsClient {
      *             agent_rtc_uid: "1001",
      *             remote_rtc_uids: ["1002"],
      *             idle_timeout: 120,
-     *             advanced_features: {
-     *                 enable_aivad: true
-     *             },
      *             asr: {
      *                 language: "en-US"
      *             },
@@ -82,7 +79,10 @@ export class AgentsClient {
         const { appid, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -172,7 +172,10 @@ export class AgentsClient {
                 }
                 const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
                     this._options?.headers,
-                    mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                    mergeOnlyDefinedHeaders({
+                        Authorization: await this._getAuthorizationHeader(),
+                        ...(await this._getCustomAuthorizationHeaders()),
+                    }),
                     requestOptions?.headers,
                 );
                 const _response = await core.fetcher({
@@ -260,7 +263,10 @@ export class AgentsClient {
         const { appid, agentId } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -338,7 +344,10 @@ export class AgentsClient {
         const { appid, agentId } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -414,7 +423,10 @@ export class AgentsClient {
         const { appid, agentId } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -506,7 +518,10 @@ export class AgentsClient {
         const { appid, agentId, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -592,7 +607,10 @@ export class AgentsClient {
         const { appid, agentId, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -671,7 +689,10 @@ export class AgentsClient {
         const { appid, agentId, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -729,5 +750,10 @@ export class AgentsClient {
             username: await core.Supplier.get(this._options.username),
             password: await core.Supplier.get(this._options.password),
         });
+    }
+
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const authorizationValue = await core.Supplier.get(this._options.authorization);
+        return { Authorization: authorizationValue };
     }
 }

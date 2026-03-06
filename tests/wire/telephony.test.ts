@@ -6,7 +6,12 @@ import { mockServerPool } from "../mock-server/MockServerPool";
 describe("TelephonyClient", () => {
     test("list", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            username: "test",
+            password: "test",
+            authorization: "test",
+            environment: server.baseUrl,
+        });
 
         const rawResponseBody = {
             data: {
@@ -69,17 +74,27 @@ describe("TelephonyClient", () => {
 
     test("call (1)", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            username: "test",
+            password: "test",
+            authorization: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {
             name: "customer_service",
             sip: {
                 to_number: "+19876543210",
                 from_number: "+11234567890",
-                sip_rtc_uid: "100",
-                sip_rtc_token: "<agora_sip_rtc_token>",
+                rtc_uid: "100",
+                rtc_token: "<agora_sip_rtc_token>",
             },
             pipeline_id: "fzufjlweixxxxnlp",
-            properties: { channel: "<agora_channel>", token: "<agora_channel_token>", agent_rtc_uid: "111" },
+            properties: {
+                channel: "<agora_channel>",
+                token: "<agora_channel_token>",
+                agent_rtc_uid: "111",
+                remote_rtc_uids: ["100"],
+            },
         };
         const rawResponseBody = { agent_id: "A42AK62PExxxxxxxx74LN47MF46E" };
         server
@@ -97,14 +112,15 @@ describe("TelephonyClient", () => {
             sip: {
                 to_number: "+19876543210",
                 from_number: "+11234567890",
-                sip_rtc_uid: "100",
-                sip_rtc_token: "<agora_sip_rtc_token>",
+                rtc_uid: "100",
+                rtc_token: "<agora_sip_rtc_token>",
             },
             pipeline_id: "fzufjlweixxxxnlp",
             properties: {
                 channel: "<agora_channel>",
                 token: "<agora_channel_token>",
                 agent_rtc_uid: "111",
+                remote_rtc_uids: ["100"],
             },
         });
         expect(response).toEqual({
@@ -114,17 +130,21 @@ describe("TelephonyClient", () => {
 
     test("call (2)", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            username: "test",
+            password: "test",
+            authorization: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {
             name: "customer_service",
             sip: {
                 to_number: "+19876543210",
                 from_number: "+11234567890",
-                sip_rtc_uid: "100",
-                sip_rtc_token: "<agora_sip_rtc_token>",
+                rtc_uid: "100",
+                rtc_token: "<agora_sip_rtc_token>",
             },
             properties: {
-                remote_rtc_uids: ["1002"],
                 idle_timeout: 120,
                 llm: {
                     url: "https://api.openai.com/v1/chat/completions",
@@ -147,6 +167,7 @@ describe("TelephonyClient", () => {
                 channel: "<agora_channel>",
                 token: "<agora_channel_token>",
                 agent_rtc_uid: "111",
+                remote_rtc_uids: ["100"],
             },
         };
         const rawResponseBody = { agent_id: "A42AK62PExxxxxxxx74LN47MF46E" };
@@ -165,14 +186,14 @@ describe("TelephonyClient", () => {
             sip: {
                 to_number: "+19876543210",
                 from_number: "+11234567890",
-                sip_rtc_uid: "100",
-                sip_rtc_token: "<agora_sip_rtc_token>",
+                rtc_uid: "100",
+                rtc_token: "<agora_sip_rtc_token>",
             },
             properties: {
                 channel: "<agora_channel>",
                 token: "<agora_channel_token>",
                 agent_rtc_uid: "111",
-                remote_rtc_uids: ["1002"],
+                remote_rtc_uids: ["100"],
                 idle_timeout: 120,
                 llm: {
                     url: "https://api.openai.com/v1/chat/completions",
@@ -210,7 +231,12 @@ describe("TelephonyClient", () => {
 
     test("get", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            username: "test",
+            password: "test",
+            authorization: "test",
+            environment: server.baseUrl,
+        });
 
         const rawResponseBody = {
             to_number: "1300000000",
@@ -252,7 +278,12 @@ describe("TelephonyClient", () => {
 
     test("hangup", async () => {
         const server = mockServerPool.createServer();
-        const client = new AgoraClient({ username: "test", password: "test", environment: server.baseUrl });
+        const client = new AgoraClient({
+            username: "test",
+            password: "test",
+            authorization: "test",
+            environment: server.baseUrl,
+        });
         const rawRequestBody = {};
         const rawResponseBody = {};
         server

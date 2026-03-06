@@ -71,7 +71,10 @@ export class TelephonyClient {
                 }
                 const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
                     this._options?.headers,
-                    mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+                    mergeOnlyDefinedHeaders({
+                        Authorization: await this._getAuthorizationHeader(),
+                        ...(await this._getCustomAuthorizationHeaders()),
+                    }),
                     requestOptions?.headers,
                 );
                 const _response = await core.fetcher({
@@ -148,14 +151,15 @@ export class TelephonyClient {
      *         sip: {
      *             to_number: "+19876543210",
      *             from_number: "+11234567890",
-     *             sip_rtc_uid: "100",
-     *             sip_rtc_token: "<agora_sip_rtc_token>"
+     *             rtc_uid: "100",
+     *             rtc_token: "<agora_sip_rtc_token>"
      *         },
      *         pipeline_id: "fzufjlweixxxxnlp",
      *         properties: {
      *             channel: "<agora_channel>",
      *             token: "<agora_channel_token>",
-     *             agent_rtc_uid: "111"
+     *             agent_rtc_uid: "111",
+     *             remote_rtc_uids: ["100"]
      *         }
      *     })
      *
@@ -166,16 +170,14 @@ export class TelephonyClient {
      *         sip: {
      *             to_number: "+19876543210",
      *             from_number: "+11234567890",
-     *             sip_rtc_uid: "100",
-     *             sip_rtc_token: "<agora_sip_rtc_token>"
+     *             rtc_uid: "100",
+     *             rtc_token: "<agora_sip_rtc_token>"
      *         },
      *         properties: {
      *             channel: "<agora_channel>",
      *             token: "<agora_channel_token>",
      *             agent_rtc_uid: "111",
-     *             remote_rtc_uids: [
-     *                 "1002"
-     *             ],
+     *             remote_rtc_uids: ["100"],
      *             idle_timeout: 120,
      *             llm: {
      *                 "url": "https://api.openai.com/v1/chat/completions",
@@ -221,7 +223,10 @@ export class TelephonyClient {
         const { appid, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -298,7 +303,10 @@ export class TelephonyClient {
         const { appid, agent_id: agentId } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -374,7 +382,10 @@ export class TelephonyClient {
         const { appid, agent_id: agentId, ..._body } = request;
         const _headers: core.Fetcher.Args["headers"] = mergeHeaders(
             this._options?.headers,
-            mergeOnlyDefinedHeaders({ Authorization: await this._getAuthorizationHeader() }),
+            mergeOnlyDefinedHeaders({
+                Authorization: await this._getAuthorizationHeader(),
+                ...(await this._getCustomAuthorizationHeaders()),
+            }),
             requestOptions?.headers,
         );
         const _response = await core.fetcher({
@@ -432,5 +443,10 @@ export class TelephonyClient {
             username: await core.Supplier.get(this._options.username),
             password: await core.Supplier.get(this._options.password),
         });
+    }
+
+    protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
+        const authorizationValue = await core.Supplier.get(this._options.authorization);
+        return { Authorization: authorizationValue };
     }
 }

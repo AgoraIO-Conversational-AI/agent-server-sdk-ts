@@ -6,12 +6,12 @@ export type Tts =
     | Agora.Tts.Microsoft
     | Agora.Tts.Elevenlabs
     | Agora.Tts.Minimax
+    | Agora.Tts.Murf
     | Agora.Tts.Cartesia
     | Agora.Tts.Openai
     | Agora.Tts.Humeai
     | Agora.Tts.Rime
     | Agora.Tts.Fishaudio
-    | Agora.Tts.Groq
     | Agora.Tts.Google
     | Agora.Tts.Amazon
     | Agora.Tts.Sarvam;
@@ -25,8 +25,12 @@ export namespace Tts {
         vendor: "elevenlabs";
     }
 
-    export interface Minimax extends Agora.MiniMaxTts {
+    export interface Minimax extends Agora.MinimaxTts {
         vendor: "minimax";
+    }
+
+    export interface Murf extends Agora.MurfTts {
+        vendor: "murf";
     }
 
     export interface Cartesia extends Agora.CartesiaTts {
@@ -47,10 +51,6 @@ export namespace Tts {
 
     export interface Fishaudio extends Agora.FishAudioTts {
         vendor: "fishaudio";
-    }
-
-    export interface Groq extends Agora.GroqTts {
-        vendor: "groq";
     }
 
     export interface Google extends Agora.GoogleTts {

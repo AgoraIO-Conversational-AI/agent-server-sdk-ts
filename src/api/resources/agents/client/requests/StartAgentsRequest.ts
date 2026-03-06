@@ -13,9 +13,6 @@ import type * as Agora from "../../../../index.js";
  *             agent_rtc_uid: "1001",
  *             remote_rtc_uids: ["1002"],
  *             idle_timeout: 120,
- *             advanced_features: {
- *                 enable_aivad: true
- *             },
  *             asr: {
  *                 language: "en-US"
  *             },
@@ -74,32 +71,72 @@ export namespace StartAgentsRequest {
         enable_string_uid?: boolean;
         /** Sets the timeout after all the users specified in `remote_rtc_uids` are detected to have left the channel. When the timeout value is exceeded, the agent automatically stops and exits the channel. A value of `0` means that the agent does not exit until it is stopped manually. */
         idle_timeout?: number;
+        /** Regional access restriction configuration. Use this to limit which Agora servers the Conversational AI Engine can access based on geographic regions. */
+        geofence?: Properties.Geofence;
         /** Advanced features configuration. */
         advanced_features?: Properties.AdvancedFeatures;
         /** Automatic Speech Recognition (ASR) configuration. */
         asr?: Properties.Asr;
         /** Text-to-speech (TTS) module configuration. */
-        tts?: Agora.Tts;
+        tts: Agora.Tts;
         /** Large language model (LLM) configuration. */
-        llm?: Properties.Llm;
+        llm: Properties.Llm;
         /** Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing. */
         mllm?: Properties.Mllm;
         /** Avatar configuration. */
         avatar?: Properties.Avatar;
-        /** Conversation turn detection settings. */
+        /** Conversation turn detection settings. Controls the logic for voice activity detection and conversation turn determination. */
         turn_detection?: Properties.TurnDetection;
         /** Selective Attention Locking (SAL) configuration. */
         sal?: Properties.Sal;
+        /** Custom labels in key-value pair format, where the key is the label name and the value is the label value. Enables agents to carry custom business information. These labels are bound to the agent and returned in the `payload` field of all message notification callbacks from the conversational AI engine. */
+        labels?: Record<string, string>;
+        /** RTC media encryption configuration. */
+        rtc?: Properties.Rtc;
+        /** Filler word configuration. Plays filler words while waiting for LLM responses to reduce user anxiety and improve conversation flow. */
+        filler_words?: Properties.FillerWords;
         /** Agent configuration parameters. */
         parameters?: Properties.Parameters;
     }
 
     export namespace Properties {
         /**
+         * Regional access restriction configuration. Use this to limit which Agora servers the Conversational AI Engine can access based on geographic regions.
+         */
+        export interface Geofence {
+            /** The allowed region for server access. */
+            area: Geofence.Area;
+            /** The excluded region. Only available when `area` is set to `GLOBAL`. */
+            exclude_area?: Geofence.ExcludeArea;
+        }
+
+        export namespace Geofence {
+            /** The allowed region for server access. */
+            export const Area = {
+                Global: "GLOBAL",
+                NorthAmerica: "NORTH_AMERICA",
+                Europe: "EUROPE",
+                Asia: "ASIA",
+                India: "INDIA",
+                Japan: "JAPAN",
+            } as const;
+            export type Area = (typeof Area)[keyof typeof Area];
+            /** The excluded region. Only available when `area` is set to `GLOBAL`. */
+            export const ExcludeArea = {
+                NorthAmerica: "NORTH_AMERICA",
+                Europe: "EUROPE",
+                Asia: "ASIA",
+                India: "INDIA",
+                Japan: "JAPAN",
+            } as const;
+            export type ExcludeArea = (typeof ExcludeArea)[keyof typeof ExcludeArea];
+        }
+
+        /**
          * Advanced features configuration.
          */
         export interface AdvancedFeatures {
-            /** Whether to enable the intelligent interruption handling function (AIVAD). This feature is currently available only for English. */
+            /** Whether to enable the intelligent interruption handling function (AIVAD). This feature is currently available only for English. Deprecated. Use `turn_detection.config.end_of_speech.mode.semantic` instead. */
             enable_aivad?: boolean;
             /** Enable Multimodal Large Language Model. Enabling MLLM automatically disables ASR, LLM, and TTS. When you set this parameter to true, `enable_aivad` is also disabled. */
             enable_mllm?: boolean;
@@ -107,6 +144,8 @@ export namespace StartAgentsRequest {
             enable_rtm?: boolean;
             /** Enable Selective Attention Locking (SAL). When enabled, configure the `sal` field to set up speaker recognition or locking modes. */
             enable_sal?: boolean;
+            /** Enable tool invocation. When enabled, the agent can invoke tools provided by the MCP server to implement advanced functionality. */
+            enable_tools?: boolean;
         }
 
         /**
@@ -125,6 +164,7 @@ export namespace StartAgentsRequest {
              * - `assemblyai`: AssemblyAI (Beta)
              * - `amazon`: Amazon Transcribe (Beta)
              * - `google`: Google (Beta)
+             * - `sarvam`: Sarvam (Beta)
              */
             vendor?: Asr.Vendor;
             /** The configuration parameters for the ASR vendor. See [ASR Overview](https://docs.agora.io/en/conversational-ai/models/asr/overview) for details. */
@@ -142,7 +182,6 @@ export namespace StartAgentsRequest {
              * - `assemblyai`: AssemblyAI (Beta)
              * - `amazon`: Amazon Transcribe (Beta)
              * - `google`: Google (Beta)
-             * - `soniox`: Soniox
              * - `sarvam`: Sarvam (Beta)
              */
             export const Vendor = {
@@ -154,7 +193,6 @@ export namespace StartAgentsRequest {
                 Amazon: "amazon",
                 Assemblyai: "assemblyai",
                 Speechmatics: "speechmatics",
-                Soniox: "soniox",
                 Sarvam: "sarvam",
             } as const;
             export type Vendor = (typeof Vendor)[keyof typeof Vendor];
@@ -207,6 +245,12 @@ export namespace StartAgentsRequest {
              * - `dify`: For Dify API format
              */
             style?: Llm.Style;
+            /** Agent greeting broadcast configuration. */
+            greeting_configs?: Llm.GreetingConfigs;
+            /** Template parameter configuration used to insert variables into the agent's `system_messages`, `greeting_message`, `failure_message`, and `parameters.silence_config.content` text. Uses key-value pairs, where the key is the variable name and the value is the variable's value. To insert defined variables in the prompt text, use the syntax `{{variable_name}}`. The system automatically replaces each variable with the corresponding value defined in `template_variables`. Variable values cannot reference other variables. */
+            template_variables?: Record<string, string>;
+            /** MCP (Model Context Protocol) server configuration. By configuring MCP servers, agents can call tools provided by external services to implement advanced functionality. */
+            mcp_servers?: Llm.McpServers.Item[];
         }
 
         export namespace Llm {
@@ -224,6 +268,60 @@ export namespace StartAgentsRequest {
                 Dify: "dify",
             } as const;
             export type Style = (typeof Style)[keyof typeof Style];
+
+            /**
+             * Agent greeting broadcast configuration.
+             */
+            export interface GreetingConfigs {
+                /**
+                 * Determines when the agent sends greeting messages to users joining the channel.
+                 * - `single_every`: Broadcasts a greeting every time a user joins the channel.
+                 * - `single_first`: Broadcasts a greeting only once to the first user who joins the channel.
+                 */
+                mode?: GreetingConfigs.Mode;
+            }
+
+            export namespace GreetingConfigs {
+                /**
+                 * Determines when the agent sends greeting messages to users joining the channel.
+                 * - `single_every`: Broadcasts a greeting every time a user joins the channel.
+                 * - `single_first`: Broadcasts a greeting only once to the first user who joins the channel.
+                 */
+                export const Mode = {
+                    SingleEvery: "single_every",
+                    SingleFirst: "single_first",
+                } as const;
+                export type Mode = (typeof Mode)[keyof typeof Mode];
+            }
+
+            export type McpServers = McpServers.Item[];
+
+            export namespace McpServers {
+                export interface Item {
+                    /** A unique identifier for the MCP server. Maximum 48 characters. Accepts only English letters and numbers. */
+                    name: string;
+                    /** The endpoint address of the MCP server. The agent uses this to communicate with the MCP server. */
+                    endpoint: string;
+                    /**
+                     * Transport protocol type.
+                     * - `streamable_http`: Streaming HTTP protocol
+                     */
+                    transport?: "streamable_http";
+                    /** HTTP header information to include when requesting the MCP server, such as authentication information. */
+                    headers?: Record<string, string>;
+                    /**
+                     * A list of tools that the agent is allowed to invoke. The agent can only use tools on this list.
+                     * - Empty or omitted: All tools are enabled.
+                     * - Empty array `[]`: No tools are enabled.
+                     * - `["*"]`: All tools are enabled.
+                     * - Specific tools `["aa", "bb"]`: Only listed tools are enabled.
+                     * - Mix with wildcard `["aa", "*"]`: All tools are enabled (wildcard takes precedence).
+                     */
+                    allowed_tools?: string[];
+                    /** The MCP server request timeout in milliseconds. After timeout, the agent stops waiting for the MCP server's response and continues executing subsequent logic. */
+                    timeout_ms?: number;
+                }
+            }
         }
 
         /**
@@ -261,7 +359,7 @@ export namespace StartAgentsRequest {
              * The request style for MLLM completion:
              * - `openai`: For OpenAI Realtime API format
              */
-            style?: Mllm.Style;
+            style?: "openai";
         }
 
         export namespace Mllm {
@@ -275,14 +373,6 @@ export namespace StartAgentsRequest {
                 Vertexai: "vertexai",
             } as const;
             export type Vendor = (typeof Vendor)[keyof typeof Vendor];
-            /**
-             * The request style for MLLM completion:
-             * - `openai`: For OpenAI Realtime API format
-             */
-            export const Style = {
-                Openai: "openai",
-            } as const;
-            export type Style = (typeof Style)[keyof typeof Style];
         }
 
         /**
@@ -315,10 +405,18 @@ export namespace StartAgentsRequest {
         }
 
         /**
-         * Conversation turn detection settings.
+         * Conversation turn detection settings. Controls the logic for voice activity detection and conversation turn determination.
          */
         export interface TurnDetection {
             /**
+             * Conversation turn detection mode:
+             * - `default`: Uses standard conversation turn detection configuration.
+             */
+            mode?: "default";
+            /** Detailed configuration for conversation turn detection. */
+            config?: TurnDetection.Config;
+            /**
+             * Deprecated. Use `turn_detection.mode` and `turn_detection.config` instead.
              * Turn detection mechanism:
              * - `agora_vad`: Agora VAD
              * - `server_vad`: The model detects the start and end of speech based on audio volume. Only available when `mllm` is enabled and OpenAI is selected.
@@ -326,6 +424,7 @@ export namespace StartAgentsRequest {
              */
             type?: TurnDetection.Type;
             /**
+             * Deprecated. Use `turn_detection.config.start_of_speech` instead.
              * Sets the agent's behavior when human voice interrupts the agent while it is interacting (speaking or thinking):
              * - `interrupt`: The agent immediately stops the current interaction and processes the human voice input.
              * - `append`: The agent completes the current interaction, then processes the human voice input.
@@ -334,33 +433,168 @@ export namespace StartAgentsRequest {
              * - `adaptive`: The agent dynamically increases the voice continuity threshold while speaking to reduce accidental interruptions.
              */
             interrupt_mode?: TurnDetection.InterruptMode;
-            /** The amount of time in milliseconds that the user's voice must exceed the VAD threshold before an interruption is triggered. */
+            /** Deprecated. Use `turn_detection.config.start_of_speech.vad_config.interrupt_duration_ms` instead. The amount of time in milliseconds that the user's voice must exceed the VAD threshold before an interruption is triggered. */
             interrupt_duration_ms?: number;
-            /** Specifies the list of keywords that trigger an interruption when `interrupt_mode` is set to `keyword`. You can configure up to 128 keywords. */
+            /** Deprecated. Use `turn_detection.config.start_of_speech.keywords_config.triggered_keywords` instead. Specifies the list of keywords that trigger an interruption when `interrupt_mode` is set to `keyword`. You can configure up to 128 keywords. */
             interrupt_keywords?: string[];
-            /** The extra forward padding time in milliseconds before the processing system starts to process the speech input. This padding helps capture the beginning of the speech. */
+            /** Deprecated. Use `turn_detection.config.start_of_speech.vad_config.prefix_padding_ms` instead. The extra forward padding time in milliseconds before the processing system starts to process the speech input. */
             prefix_padding_ms?: number;
-            /** The duration of audio silence in milliseconds. If no voice activity is detected during this period, the agent assumes that the user has stopped speaking. */
+            /** Deprecated. Use `turn_detection.config.end_of_speech.vad_config.silence_duration_ms` instead. The duration of audio silence in milliseconds. If no voice activity is detected during this period, the agent assumes that the user has stopped speaking. */
             silence_duration_ms?: number;
-            /** Identification sensitivity determines the level of sound in the audio signal that is considered voice activity. Lower values make it easier for the agent to detect speech, and higher values ignore weak sounds. */
+            /** Deprecated. Use `turn_detection.config.speech_threshold` instead. Identification sensitivity determines the level of sound in the audio signal that is considered voice activity. */
             threshold?: number;
             /** Whether to automatically generate a response when a VAD stop event occurs. Only available in `server_vad` and `semantic_vad` modes when using OpenAI Realtime API. */
             create_response?: boolean;
             /** Whether to automatically interrupt any ongoing response when a VAD start event occurs. Only available in `server_vad` and `semantic_vad` modes when using OpenAI Realtime API. */
             interrupt_response?: boolean;
             /**
+             * Deprecated. Only available in `semantic_vad` mode when using OpenAI Realtime API.
              * The eagerness of the model to respond:
              * - `auto`: Equivalent to medium
              * - `low`: Wait longer for the user to continue speaking
              * - `high`: Respond more quickly
-             *
-             * Only available in `semantic_vad` mode when using OpenAI Realtime API.
              */
             eagerness?: TurnDetection.Eagerness;
         }
 
         export namespace TurnDetection {
             /**
+             * Detailed configuration for conversation turn detection.
+             */
+            export interface Config {
+                /** Voice activity detection sensitivity. Determines the sound level in the audio signal that is considered voice activity. Lower values make it easier for the agent to detect speech, and higher values ignore weak sounds. */
+                speech_threshold?: number;
+                /** Start of Speech (SoS) detection configuration. Determines when a user begins speaking. */
+                start_of_speech?: Config.StartOfSpeech;
+                /** End of Speech (EoS) detection configuration. Determines when a user ends their speech. */
+                end_of_speech?: Config.EndOfSpeech;
+            }
+
+            export namespace Config {
+                /**
+                 * Start of Speech (SoS) detection configuration. Determines when a user begins speaking.
+                 */
+                export interface StartOfSpeech {
+                    /**
+                     * Start of speech detection mode:
+                     * - `vad`: Based on VAD (Voice Activity Detection). Uses audio signal detection.
+                     * - `keywords`: (Beta) Based on keyword trigger. Conversation begins when the agent detects a specified keyword.
+                     * - `disabled`: Disables start of speech detection. Does not actively trigger new conversation turns.
+                     */
+                    mode: StartOfSpeech.Mode;
+                    /** VAD configuration. Used when `mode` is `vad`. */
+                    vad_config?: StartOfSpeech.VadConfig;
+                    /** Keywords configuration. Used when `mode` is `keywords`. */
+                    keywords_config?: StartOfSpeech.KeywordsConfig;
+                    /** Disabled mode configuration. Used when `mode` is `disabled`. */
+                    disabled_config?: StartOfSpeech.DisabledConfig;
+                }
+
+                export namespace StartOfSpeech {
+                    /**
+                     * Start of speech detection mode:
+                     * - `vad`: Based on VAD (Voice Activity Detection). Uses audio signal detection.
+                     * - `keywords`: (Beta) Based on keyword trigger. Conversation begins when the agent detects a specified keyword.
+                     * - `disabled`: Disables start of speech detection. Does not actively trigger new conversation turns.
+                     */
+                    export const Mode = {
+                        Vad: "vad",
+                        Keywords: "keywords",
+                        Disabled: "disabled",
+                    } as const;
+                    export type Mode = (typeof Mode)[keyof typeof Mode];
+
+                    /**
+                     * VAD configuration. Used when `mode` is `vad`.
+                     */
+                    export interface VadConfig {
+                        interrupt_duration_ms?: number;
+                        speaking_interrupt_duration_ms?: number;
+                        prefix_padding_ms?: number;
+                    }
+
+                    /**
+                     * Keywords configuration. Used when `mode` is `keywords`.
+                     */
+                    export interface KeywordsConfig {
+                        interrupt_duration_ms?: number;
+                        prefix_padding_ms?: number;
+                        triggered_keywords?: string[];
+                    }
+
+                    /**
+                     * Disabled mode configuration. Used when `mode` is `disabled`.
+                     */
+                    export interface DisabledConfig {
+                        /**
+                         * Voice processing strategy when the agent is interacting:
+                         * - `append`: Human voice does not interrupt the agent. The agent processes the human voice input after the current interaction ends.
+                         * - `ignored`: The agent ignores human voice input and discards it without storing in context.
+                         */
+                        strategy?: DisabledConfig.Strategy;
+                    }
+
+                    export namespace DisabledConfig {
+                        /**
+                         * Voice processing strategy when the agent is interacting:
+                         * - `append`: Human voice does not interrupt the agent. The agent processes the human voice input after the current interaction ends.
+                         * - `ignored`: The agent ignores human voice input and discards it without storing in context.
+                         */
+                        export const Strategy = {
+                            Append: "append",
+                            Ignored: "ignored",
+                        } as const;
+                        export type Strategy = (typeof Strategy)[keyof typeof Strategy];
+                    }
+                }
+
+                /**
+                 * End of Speech (EoS) detection configuration. Determines when a user ends their speech.
+                 */
+                export interface EndOfSpeech {
+                    /**
+                     * End of speech detection mode:
+                     * - `vad`: Based on VAD (Voice Activity Detection). Detects silence duration.
+                     * - `semantic`: Based on semantic triggering. Uses semantic understanding to determine when conversation ends.
+                     */
+                    mode?: EndOfSpeech.Mode;
+                    /** VAD configuration. Used when `mode` is `vad`. */
+                    vad_config?: EndOfSpeech.VadConfig;
+                    /** Semantic configuration. Used when `mode` is `semantic`. */
+                    semantic_config?: EndOfSpeech.SemanticConfig;
+                }
+
+                export namespace EndOfSpeech {
+                    /**
+                     * End of speech detection mode:
+                     * - `vad`: Based on VAD (Voice Activity Detection). Detects silence duration.
+                     * - `semantic`: Based on semantic triggering. Uses semantic understanding to determine when conversation ends.
+                     */
+                    export const Mode = {
+                        Vad: "vad",
+                        Semantic: "semantic",
+                    } as const;
+                    export type Mode = (typeof Mode)[keyof typeof Mode];
+
+                    /**
+                     * VAD configuration. Used when `mode` is `vad`.
+                     */
+                    export interface VadConfig {
+                        silence_duration_ms?: number;
+                    }
+
+                    /**
+                     * Semantic configuration. Used when `mode` is `semantic`.
+                     */
+                    export interface SemanticConfig {
+                        silence_duration_ms?: number;
+                        max_wait_ms?: number;
+                    }
+                }
+            }
+
+            /**
+             * Deprecated. Use `turn_detection.mode` and `turn_detection.config` instead.
              * Turn detection mechanism:
              * - `agora_vad`: Agora VAD
              * - `server_vad`: The model detects the start and end of speech based on audio volume. Only available when `mllm` is enabled and OpenAI is selected.
@@ -373,6 +607,7 @@ export namespace StartAgentsRequest {
             } as const;
             export type Type = (typeof Type)[keyof typeof Type];
             /**
+             * Deprecated. Use `turn_detection.config.start_of_speech` instead.
              * Sets the agent's behavior when human voice interrupts the agent while it is interacting (speaking or thinking):
              * - `interrupt`: The agent immediately stops the current interaction and processes the human voice input.
              * - `append`: The agent completes the current interaction, then processes the human voice input.
@@ -389,12 +624,11 @@ export namespace StartAgentsRequest {
             } as const;
             export type InterruptMode = (typeof InterruptMode)[keyof typeof InterruptMode];
             /**
+             * Deprecated. Only available in `semantic_vad` mode when using OpenAI Realtime API.
              * The eagerness of the model to respond:
              * - `auto`: Equivalent to medium
              * - `low`: Wait longer for the user to continue speaking
              * - `high`: Respond more quickly
-             *
-             * Only available in `semantic_vad` mode when using OpenAI Realtime API.
              */
             export const Eagerness = {
                 Auto: "auto",
@@ -417,10 +651,9 @@ export namespace StartAgentsRequest {
              */
             sal_mode?: Sal.SalMode;
             /**
-             * The registered voiceprint URLs as key-value pairs, where each key is the voiceprint name and each value is the download URL for that speaker's voiceprint.
+             * The registered voiceprint URL as a key-value pair, where the key is the voiceprint name and the value is the download URL for the speaker's voiceprint. Only one voiceprint URL is supported.
              * > - Do not set the incoming voiceprint name to "unknown"; this is a reserved keyword used to identify unknown speakers.
              * > - For a registered voiceprint, ensure that:
-             * >   - Quantity: You must register at least 1 voiceprint URL, with a maximum of 3 per task request.
              * >   - Size: A single voiceprint file must not exceed 2 MB.
              * >   - Duration: 10 to 15 seconds, with at least 8 seconds of effective audio without silent segments.
              * >   - Format: 16kHz sampling rate, 16-bit depth, mono PCM audio file. The file name extension must be ".pcm".
@@ -441,6 +674,111 @@ export namespace StartAgentsRequest {
                 Recognition: "recognition",
             } as const;
             export type SalMode = (typeof SalMode)[keyof typeof SalMode];
+        }
+
+        /**
+         * RTC media encryption configuration.
+         */
+        export interface Rtc {
+            /** The encryption key for RTC media content. The key has no length limit. Agora recommends using a 32-byte key. If no encryption key is set or if the key is empty, built-in encryption is not used. */
+            encryption_key?: string;
+            /** The salt value used for encryption. This is a Base64-encoded string that is 32 bytes long after decoding. This parameter only takes effect when `encryption_mode` is set to `7` (AES_128_GCM2) or `8` (AES_256_GCM2). Ensure that the salt parameter is not empty for these encryption modes. */
+            encryption_salt?: string;
+            /**
+             * The built-in encryption mode.
+             * - `1`: AES_128_XTS - 128-bit AES encryption, XTS mode.
+             * - `2`: AES_128_ECB - 128-bit AES encryption, ECB mode.
+             * - `3`: AES_256_XTS - 256-bit AES encryption, XTS mode.
+             * - `4`: SM4_128_ECB - 128-bit SM4 encryption, ECB mode.
+             * - `5`: AES_128_GCM - 128-bit AES encryption, GCM mode.
+             * - `6`: AES_256_GCM - 256-bit AES encryption, GCM mode.
+             * - `7`: AES_128_GCM2 - 128-bit AES encryption, GCM mode. Requires setting `encryption_salt`.
+             * - `8`: AES_256_GCM2 - 256-bit AES encryption, GCM mode. Requires setting `encryption_salt`.
+             */
+            encryption_mode?: number;
+        }
+
+        /**
+         * Filler word configuration. Plays filler words while waiting for LLM responses to reduce user anxiety and improve conversation flow.
+         */
+        export interface FillerWords {
+            /**
+             * Whether to enable filler words:
+             * - `true`: Enable filler words.
+             * - `false`: Disable filler words.
+             */
+            enable?: boolean;
+            /** Filler word trigger configuration. Defines when to trigger filler word playback. */
+            trigger?: FillerWords.Trigger;
+            /** Filler word content configuration. Defines the source and selection rules for filler words. */
+            content?: FillerWords.Content;
+        }
+
+        export namespace FillerWords {
+            /**
+             * Filler word trigger configuration. Defines when to trigger filler word playback.
+             */
+            export interface Trigger {
+                /**
+                 * Filler word trigger mode:
+                 * - `fixed_time`: Fixed time trigger. Triggers filler word playback when LLM response wait time exceeds the threshold.
+                 */
+                mode?: "fixed_time";
+                /** Fixed time trigger configuration. Used when `mode` is `fixed_time`. */
+                fixed_time_config?: Trigger.FixedTimeConfig;
+            }
+
+            export namespace Trigger {
+                /**
+                 * Fixed time trigger configuration. Used when `mode` is `fixed_time`.
+                 */
+                export interface FixedTimeConfig {
+                    /** LLM response wait threshold in milliseconds. Triggers filler word playback when the LLM waits this duration without generating a response. */
+                    response_wait_ms?: number;
+                }
+            }
+
+            /**
+             * Filler word content configuration. Defines the source and selection rules for filler words.
+             */
+            export interface Content {
+                /**
+                 * Filler word content mode:
+                 * - `static`: Static filler words. Uses a predefined list of filler words.
+                 */
+                mode?: "static";
+                /** Static filler word configuration. Used when `mode` is `static`. */
+                static_config?: Content.StaticConfig;
+            }
+
+            export namespace Content {
+                /**
+                 * Static filler word configuration. Used when `mode` is `static`.
+                 */
+                export interface StaticConfig {
+                    /** List of filler word phrases. Maximum 100 filler words, each not exceeding 50 English words. */
+                    phrases?: string[];
+                    /**
+                     * Filler word selection rule:
+                     * - `shuffle`: Random shuffle. Already-used filler words are not repeated until all have been used once.
+                     * - `round_robin`: Round-robin. Selects and plays filler words sequentially from the list.
+                     */
+                    selection_rule?: StaticConfig.SelectionRule;
+                }
+
+                export namespace StaticConfig {
+                    /**
+                     * Filler word selection rule:
+                     * - `shuffle`: Random shuffle. Already-used filler words are not repeated until all have been used once.
+                     * - `round_robin`: Round-robin. Selects and plays filler words sequentially from the list.
+                     */
+                    export const SelectionRule = {
+                        Shuffle: "shuffle",
+                        RoundRobin: "round_robin",
+                    } as const;
+                    export type SelectionRule = (typeof SelectionRule)[keyof typeof SelectionRule];
+                }
+            }
         }
 
         /**
