@@ -18,6 +18,10 @@ import type {
     AdvancedFeatures,
     SessionParams,
     SessionOptions,
+    GeofenceConfig,
+    RtcConfig,
+    FillerWordsConfig,
+    Labels,
 } from "./types.js";
 import { BaseLLM, BaseTTS, BaseSTT, BaseMLLM, BaseAvatar } from "./vendors/base.js";
 import { generateRtcToken } from "./token.js";
@@ -50,6 +54,14 @@ export interface AgentOptions {
     failureMessage?: string;
     /** Max conversation history */
     maxHistory?: number;
+    /** Regional access restriction configuration */
+    geofence?: GeofenceConfig;
+    /** Custom key-value labels attached to the agent (returned in notification callbacks) */
+    labels?: Labels;
+    /** RTC media encryption configuration */
+    rtc?: RtcConfig;
+    /** Filler word configuration (plays filler words while waiting for LLM responses) */
+    fillerWords?: FillerWordsConfig;
 }
 
 /**
@@ -83,6 +95,10 @@ export class Agent<TTSSampleRate extends number = number> {
     private _greeting?: string;
     private _failureMessage?: string;
     private _maxHistory?: number;
+    private _geofence?: GeofenceConfig;
+    private _labels?: Labels;
+    private _rtc?: RtcConfig;
+    private _fillerWords?: FillerWordsConfig;
 
     constructor(options: AgentOptions = {}) {
         this._name = options.name;
@@ -105,6 +121,18 @@ export class Agent<TTSSampleRate extends number = number> {
         }
         if (options.parameters) {
             this._parameters = options.parameters;
+        }
+        if (options.geofence) {
+            this._geofence = options.geofence;
+        }
+        if (options.labels) {
+            this._labels = options.labels;
+        }
+        if (options.rtc) {
+            this._rtc = options.rtc;
+        }
+        if (options.fillerWords) {
+            this._fillerWords = options.fillerWords;
         }
     }
 
@@ -315,6 +343,10 @@ export class Agent<TTSSampleRate extends number = number> {
             greeting: this._greeting,
             failureMessage: this._failureMessage,
             maxHistory: this._maxHistory,
+            geofence: this._geofence,
+            labels: this._labels,
+            rtc: this._rtc,
+            fillerWords: this._fillerWords,
         };
     }
 
@@ -398,6 +430,10 @@ export class Agent<TTSSampleRate extends number = number> {
             avatar: this._avatar,
             advanced_features: this._advancedFeatures,
             parameters: this._parameters,
+            geofence: this._geofence,
+            labels: this._labels,
+            rtc: this._rtc,
+            filler_words: this._fillerWords,
         };
 
         if (isMllmMode) {
@@ -409,27 +445,6 @@ export class Agent<TTSSampleRate extends number = number> {
         if (!this._tts) {
             throw new Error("TTS configuration is required. Use withTts() to set it.");
         }
-
-        // TODO: Once Agora provides a platform-level default LLM, replace the
-        // throw below with a fallback config so callers can omit withLlm().
-        //
-        // const llmConfig: Agora.StartAgentsRequest.Properties.Llm = this._llm
-        //     ? {
-        //           ...this._llm,
-        //           system_messages: this._instructions
-        //               ? [{ role: "system", content: this._instructions }]
-        //               : this._llm.system_messages,
-        //           greeting_message: this._greeting ?? this._llm.greeting_message,
-        //           failure_message: this._failureMessage ?? this._llm.failure_message,
-        //           max_history: this._maxHistory ?? this._llm.max_history,
-        //       }
-        //     : {
-        //           url: "<agora-default-llm-url>",
-        //           system_messages: this._instructions ? [{ role: "system", content: this._instructions }] : undefined,
-        //           greeting_message: this._greeting,
-        //           failure_message: this._failureMessage,
-        //           max_history: this._maxHistory,
-        //       };
 
         if (!this._llm) {
             throw new Error("LLM configuration is required. Use withLlm() to set it.");
@@ -464,6 +479,10 @@ export class Agent<TTSSampleRate extends number = number> {
         newAgent._greeting = this._greeting;
         newAgent._failureMessage = this._failureMessage;
         newAgent._maxHistory = this._maxHistory;
+        newAgent._geofence = this._geofence;
+        newAgent._labels = this._labels;
+        newAgent._rtc = this._rtc;
+        newAgent._fillerWords = this._fillerWords;
         return newAgent;
     }
 }

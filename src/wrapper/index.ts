@@ -47,7 +47,6 @@ export type {
     TtsConfig,
     MllmConfig,
     MllmVendor,
-    MllmStyle,
     AvatarConfig,
     AvatarVendor,
     TurnDetectionConfig,
@@ -61,6 +60,11 @@ export type {
     SilenceConfig,
     SilenceAction,
     FarewellConfig,
+    GeofenceConfig,
+    GeofenceArea,
+    RtcConfig,
+    FillerWordsConfig,
+    Labels,
     // Agent configuration
     AgentConfig,
     AgentConfigUpdate,
@@ -92,12 +96,14 @@ export type {
     RimeTtsParams,
     FishAudioTts,
     FishAudioTtsParams,
-    GroqTts,
-    GroqTtsParams,
     GoogleTts,
     GoogleTtsParams,
     AmazonTts,
     AmazonTtsParams,
+    MinimaxTts,
+    MinimaxTtsParams,
+    MurfTts,
+    MurfTtsParams,
 } from "./types.js";
 
 // Vendor-specific avatar types with strict constraints
@@ -149,8 +155,8 @@ export {
     HumeAITTS,
     RimeTTS,
     FishAudioTTS,
-    GroqTTS,
     MiniMaxTTS,
+    MurfTTS,
     SarvamTTS,
 } from "./vendors/tts.js";
 export type {
@@ -163,8 +169,8 @@ export type {
     HumeAITTSOptions,
     RimeTTSOptions,
     FishAudioTTSOptions,
-    GroqTTSOptions,
     MiniMaxTTSOptions,
+    MurfTTSOptions,
     SarvamTTSOptions,
 } from "./vendors/tts.js";
 
@@ -178,7 +184,6 @@ export {
     AmazonSTT,
     AssemblyAISTT,
     AresSTT,
-    SonioxSTT,
     SarvamSTT,
 } from "./vendors/stt.js";
 export type {
@@ -190,7 +195,6 @@ export type {
     AmazonSTTOptions,
     AssemblyAISTTOptions,
     AresSTTOptions,
-    SonioxSTTOptions,
     SarvamSTTOptions,
 } from "./vendors/stt.js";
 

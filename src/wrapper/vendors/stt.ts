@@ -390,52 +390,6 @@ export class AresSTT extends BaseSTT {
 }
 
 /**
- * Constructor options for Soniox STT.
- */
-export interface SonioxSTTOptions {
-    /** Soniox API key */
-    apiKey: string;
-    /** Language code (e.g., 'en', 'es', 'fr') */
-    language: string;
-    /** Additional vendor-specific parameters */
-    additionalParams?: Record<string, unknown>;
-}
-
-/**
- * Soniox STT vendor.
- *
- * @example
- * ```typescript
- * const stt = new SonioxSTT({
- *   apiKey: process.env.SONIOX_API_KEY,
- *   language: 'en',
- * });
- * ```
- */
-export class SonioxSTT extends BaseSTT {
-    private options: SonioxSTTOptions;
-
-    constructor(options: SonioxSTTOptions) {
-        super();
-        this.options = options;
-    }
-
-    toConfig(): SttConfig {
-        const { apiKey, language, additionalParams } = this.options;
-
-        return {
-            vendor: "soniox",
-            language,
-            params: {
-                api_key: apiKey,
-                language,
-                ...additionalParams,
-            },
-        };
-    }
-}
-
-/**
  * Constructor options for Sarvam STT.
  */
 export interface SarvamSTTOptions {
