@@ -42,7 +42,9 @@
         "test:unit": "vitest --project unit",
         "test:wire": "vitest --project wire"
     },
-    "dependencies": {},
+    "dependencies": {
+        "agora-token": "^2.0.5"
+    },
     "devDependencies": {
         "webpack": "^5.97.1",
         "ts-loader": "^9.5.1",
