@@ -66,7 +66,7 @@ export interface HeyGenAvatarOptions {
  * @see https://docs.agora.io/en/conversational-ai/models/avatar/heygen
  */
 export class HeyGenAvatar extends BaseAvatar<HeyGenSampleRate> {
-    private options: HeyGenAvatarOptions;
+    private readonly options: HeyGenAvatarOptions;
 
     /**
      * HeyGen avatars require TTS sample rate of 24,000 Hz.
@@ -77,24 +77,16 @@ export class HeyGenAvatar extends BaseAvatar<HeyGenSampleRate> {
         super();
         this.options = options;
 
-        // Validate required fields
+        // Defense-in-depth checks for JavaScript callers that bypass TypeScript types.
+        // TypeScript's union type already prevents invalid quality values at compile time.
+        // At session start, validateAvatarConfig() in avatar-types.ts performs the same
+        // checks on the converted API-format config — two separate layers for two separate
+        // object representations (camelCase options here vs. snake_case API config there).
         if (!options.apiKey) {
             throw new Error("HeyGen avatar requires apiKey");
         }
-        if (!options.quality) {
-            throw new Error("HeyGen avatar requires quality (low, medium, or high)");
-        }
         if (!options.agoraUid) {
             throw new Error("HeyGen avatar requires agoraUid");
-        }
-
-        // Validate quality values
-        const validQualities = ["low", "medium", "high"];
-        if (!validQualities.includes(options.quality)) {
-            throw new Error(
-                `Invalid quality for HeyGen: ${options.quality}. ` +
-                `Must be one of: ${validQualities.join(", ")}`
-            );
         }
     }
 
@@ -115,6 +107,8 @@ export class HeyGenAvatar extends BaseAvatar<HeyGenSampleRate> {
             enable,
             vendor: "heygen",
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 api_key: apiKey,
                 quality,
                 agora_uid: agoraUid,
@@ -122,7 +116,6 @@ export class HeyGenAvatar extends BaseAvatar<HeyGenSampleRate> {
                 ...(avatarId && { avatar_id: avatarId }),
                 ...(disableIdleTimeout !== undefined && { disable_idle_timeout: disableIdleTimeout }),
                 ...(activityIdleTimeout !== undefined && { activity_idle_timeout: activityIdleTimeout }),
-                ...additionalParams,
             },
         };
     }
@@ -150,20 +143,19 @@ export interface AkoolAvatarOptions {
  *
  * @example
  * ```typescript
- * import { Agent, AkoolAvatar, MicrosoftTTS } from 'agora-agent-sdk';
+ * import { Agent, AkoolAvatar, ElevenLabsTTS } from 'agora-agent-sdk';
  *
  * const avatar = new AkoolAvatar({
  *   apiKey: process.env.AKOOL_API_KEY,
  *   avatarId: 'avatar-id',
  * });
  *
- * // Make sure TTS uses 16kHz sample rate for Akool
- * const tts = new MicrosoftTTS({
- *   key: process.env.AZURE_SPEECH_KEY,
- *   region: 'eastus',
- *   voiceName: 'en-US-JennyNeural',
- *   // Note: Microsoft TTS doesn't have a sample_rate param in the API,
- *   // but ensure your audio pipeline is configured for 16kHz
+ * // TTS must declare sampleRate: 16000 so withAvatar() enforces the match at compile time.
+ * const tts = new ElevenLabsTTS({
+ *   key: process.env.ELEVENLABS_API_KEY,
+ *   modelId: 'eleven_flash_v2_5',
+ *   voiceId: 'voice-id',
+ *   sampleRate: 16000, // Required for Akool
  * });
  *
  * const agent = new Agent({ name: 'avatar-assistant' })
@@ -174,7 +166,7 @@ export interface AkoolAvatarOptions {
  * @see https://docs.agora.io/en/conversational-ai/models/avatar/akool
  */
 export class AkoolAvatar extends BaseAvatar<AkoolSampleRate> {
-    private options: AkoolAvatarOptions;
+    private readonly options: AkoolAvatarOptions;
 
     /**
      * Akool avatars require TTS sample rate of 16,000 Hz.
@@ -185,7 +177,8 @@ export class AkoolAvatar extends BaseAvatar<AkoolSampleRate> {
         super();
         this.options = options;
 
-        // Validate required fields
+        // Defense-in-depth check for JavaScript callers that bypass TypeScript types.
+        // See HeyGenAvatar constructor for the two-layer validation rationale.
         if (!options.apiKey) {
             throw new Error("Akool avatar requires apiKey");
         }
@@ -198,9 +191,10 @@ export class AkoolAvatar extends BaseAvatar<AkoolSampleRate> {
             enable,
             vendor: "akool",
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 api_key: apiKey,
                 ...(avatarId && { avatar_id: avatarId }),
-                ...additionalParams,
             },
         };
     }

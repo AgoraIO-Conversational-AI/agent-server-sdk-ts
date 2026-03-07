@@ -10,4 +10,6 @@ export interface MicrosoftTtsParams {
     region: string;
     /** Voice name (e.g., "en-US-AndrewMultilingualNeural") */
     voice_name: string;
+    /** Audio sampling rate in Hz */
+    sample_rate?: number;
 }

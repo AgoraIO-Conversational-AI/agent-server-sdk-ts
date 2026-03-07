@@ -1,5 +1,5 @@
 /**
- * Token generation for internal use by the wrapper layer.
+ * Token generation for internal use by the agentkit layer.
  *
  * - RTC tokens authenticate a specific (appId, channel, uid) combination with
  *   the Agora RTC network.
@@ -23,7 +23,7 @@ export interface GenerateTokenOptions {
 }
 
 /**
- * Builds a short-lived RTC token.
+ * Builds a short-lived RTC token for a numeric UID.
  *
  * Both `tokenExpire` and `privilegeExpire` are set to the same value — the
  * standard approach for most applications.
@@ -35,6 +35,38 @@ export function generateRtcToken(opts: GenerateTokenOptions): string {
         opts.appCertificate,
         opts.channel,
         opts.uid,
+        opts.role ?? RtcRole.PUBLISHER,
+        expiry,
+        expiry,
+    );
+}
+
+export interface GenerateRtcTokenWithAccountOptions {
+    appId: string;
+    appCertificate: string;
+    channel: string;
+    /** String account identity — used when enableStringUid is true */
+    account: string;
+    role?: typeof RtcRole.PUBLISHER | typeof RtcRole.SUBSCRIBER;
+    expirySeconds?: number;
+}
+
+/**
+ * Builds a short-lived RTC token for a string UID (user account).
+ *
+ * Use this instead of `generateRtcToken` when `enableStringUid` is true and
+ * the agent UID is a non-numeric string. The Agora platform treats
+ * `buildTokenWithUserAccount` tokens as valid for string-UID channels.
+ *
+ * Both `tokenExpire` and `privilegeExpire` are set to the same value.
+ */
+export function generateRtcTokenWithAccount(opts: GenerateRtcTokenWithAccountOptions): string {
+    const expiry = opts.expirySeconds ?? DEFAULT_EXPIRY_SECONDS;
+    return RtcTokenBuilder.buildTokenWithUserAccount(
+        opts.appId,
+        opts.appCertificate,
+        opts.channel,
+        opts.account,
         opts.role ?? RtcRole.PUBLISHER,
         expiry,
         expiry,

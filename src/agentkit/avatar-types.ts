@@ -181,7 +181,7 @@ export function validateTtsSampleRate(
 
 /**
  * Converts strict avatar config to base avatar config for API calls.
- * This bridges the gap between our type-safe wrapper and Fern's generated types.
+ * This bridges the gap between our type-safe agentkit and Fern's generated types.
  */
 export function toBaseAvatarConfig(config: StrictAvatarConfig): BaseAvatarConfig {
   return config as unknown as BaseAvatarConfig;

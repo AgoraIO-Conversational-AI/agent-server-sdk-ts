@@ -43,7 +43,7 @@ export interface ElevenLabsTTSOptions<SR extends ElevenLabsSampleRate = ElevenLa
  * ```
  */
 export class ElevenLabsTTS<SR extends ElevenLabsSampleRate = ElevenLabsSampleRate> extends BaseTTS<SR> {
-    private options: ElevenLabsTTSOptions<SR>;
+    private readonly options: ElevenLabsTTSOptions<SR>;
 
     constructor(options: ElevenLabsTTSOptions<SR>) {
         super();
@@ -100,7 +100,7 @@ export interface MicrosoftTTSOptions<SR extends MicrosoftSampleRate = MicrosoftS
  * ```
  */
 export class MicrosoftTTS<SR extends MicrosoftSampleRate = MicrosoftSampleRate> extends BaseTTS<SR> {
-    private options: MicrosoftTTSOptions<SR>;
+    private readonly options: MicrosoftTTSOptions<SR>;
 
     constructor(options: MicrosoftTTSOptions<SR>) {
         super();
@@ -151,7 +151,7 @@ export interface OpenAITTSOptions {
  * ```
  */
 export class OpenAITTS extends BaseTTS<24000> {
-    private options: OpenAITTSOptions;
+    private readonly options: OpenAITTSOptions;
 
     constructor(options: OpenAITTSOptions) {
         super();
@@ -205,7 +205,7 @@ export interface CartesiaTTSOptions<SR extends CartesiaSampleRate = CartesiaSamp
  * ```
  */
 export class CartesiaTTS<SR extends CartesiaSampleRate = CartesiaSampleRate> extends BaseTTS<SR> {
-    private options: CartesiaTTSOptions<SR>;
+    private readonly options: CartesiaTTSOptions<SR>;
 
     constructor(options: CartesiaTTSOptions<SR>) {
         super();
@@ -254,7 +254,7 @@ export interface GoogleTTSOptions {
  * ```
  */
 export class GoogleTTS extends BaseTTS {
-    private options: GoogleTTSOptions;
+    private readonly options: GoogleTTSOptions;
 
     constructor(options: GoogleTTSOptions) {
         super();
@@ -306,7 +306,7 @@ export interface AmazonTTSOptions {
  * ```
  */
 export class AmazonTTS extends BaseTTS {
-    private options: AmazonTTSOptions;
+    private readonly options: AmazonTTSOptions;
 
     constructor(options: AmazonTTSOptions) {
         super();
@@ -352,7 +352,7 @@ export interface HumeAITTSOptions {
  * ```
  */
 export class HumeAITTS extends BaseTTS {
-    private options: HumeAITTSOptions;
+    private readonly options: HumeAITTSOptions;
 
     constructor(options: HumeAITTSOptions) {
         super();
@@ -399,7 +399,7 @@ export interface RimeTTSOptions {
  * ```
  */
 export class RimeTTS extends BaseTTS {
-    private options: RimeTTSOptions;
+    private readonly options: RimeTTSOptions;
 
     constructor(options: RimeTTSOptions) {
         super();
@@ -445,7 +445,7 @@ export interface FishAudioTTSOptions {
  * ```
  */
 export class FishAudioTTS extends BaseTTS {
-    private options: FishAudioTTSOptions;
+    private readonly options: FishAudioTTSOptions;
 
     constructor(options: FishAudioTTSOptions) {
         super();
@@ -467,59 +467,19 @@ export class FishAudioTTS extends BaseTTS {
 }
 
 /**
- * Constructor options for Groq TTS.
- */
-export interface GroqTTSOptions {
-    /** Groq API key */
-    key: string;
-    /** Model name */
-    model?: string;
-    /** Skip patterns for bracketed content */
-    skipPatterns?: number[];
-}
-
-/**
- * Groq TTS vendor.
- *
- * @example
- * ```typescript
- * const tts = new GroqTTS({
- *   key: process.env.GROQ_API_KEY,
- * });
- * ```
- */
-export class GroqTTS extends BaseTTS {
-    private options: GroqTTSOptions;
-
-    constructor(options: GroqTTSOptions) {
-        super();
-        this.options = options;
-    }
-
-    toConfig(): TtsConfig {
-        const { key, model, skipPatterns } = this.options;
-
-        return {
-            vendor: "groq",
-            params: {
-                key,
-                ...(model && { model }),
-            },
-            ...(skipPatterns && { skip_patterns: skipPatterns }),
-        };
-    }
-}
-
-/**
  * Constructor options for MiniMax TTS.
  */
 export interface MiniMaxTTSOptions {
     /** MiniMax API key */
     key: string;
-    /** Voice ID */
-    voiceId?: string;
-    /** Model name */
-    model?: string;
+    /** MiniMax group identifier */
+    groupId: string;
+    /** TTS model (e.g., 'speech-02-turbo') */
+    model: string;
+    /** Voice style identifier (e.g., 'English_captivating_female1') */
+    voiceId: string;
+    /** WebSocket endpoint (e.g., 'wss://api-uw.minimax.io/ws/v1/t2a_v2') */
+    url: string;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -531,12 +491,15 @@ export interface MiniMaxTTSOptions {
  * ```typescript
  * const tts = new MiniMaxTTS({
  *   key: process.env.MINIMAX_API_KEY,
- *   voiceId: 'female_voice_1',
+ *   groupId: 'your-group-id',
+ *   model: 'speech-02-turbo',
+ *   voiceId: 'English_captivating_female1',
+ *   url: 'wss://api-uw.minimax.io/ws/v1/t2a_v2',
  * });
  * ```
  */
 export class MiniMaxTTS extends BaseTTS {
-    private options: MiniMaxTTSOptions;
+    private readonly options: MiniMaxTTSOptions;
 
     constructor(options: MiniMaxTTSOptions) {
         super();
@@ -544,14 +507,16 @@ export class MiniMaxTTS extends BaseTTS {
     }
 
     toConfig(): TtsConfig {
-        const { key, voiceId, model, skipPatterns } = this.options;
+        const { key, groupId, model, voiceId, url, skipPatterns } = this.options;
 
         return {
             vendor: "minimax",
             params: {
                 key,
-                ...(voiceId && { voice_id: voiceId }),
-                ...(model && { model }),
+                group_id: groupId,
+                model,
+                voice_setting: { voice_id: voiceId },
+                url,
             },
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };
@@ -559,15 +524,15 @@ export class MiniMaxTTS extends BaseTTS {
 }
 
 /**
- * Constructor options for Sarvam TTS.
+ * Constructor options for Sarvam TTS (Beta).
  */
 export interface SarvamTTSOptions {
-    /** Sarvam API key */
-    apiKey: string;
-    /** Voice ID */
-    voiceId?: string;
-    /** Model name */
-    model?: string;
+    /** Sarvam API subscription key */
+    key: string;
+    /** Speaker/voice ID (e.g., 'anushka', 'abhilash', 'karun', 'hitesh', 'manisha', 'vidya', 'arya') */
+    speaker: string;
+    /** Target language code (e.g., 'en-IN', 'hi-IN', 'ta-IN') */
+    targetLanguageCode: string;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -578,13 +543,14 @@ export interface SarvamTTSOptions {
  * @example
  * ```typescript
  * const tts = new SarvamTTS({
- *   apiKey: process.env.SARVAM_API_KEY,
- *   voiceId: 'en-female-1',
+ *   key: process.env.SARVAM_API_KEY,
+ *   speaker: 'anushka',
+ *   targetLanguageCode: 'en-IN',
  * });
  * ```
  */
 export class SarvamTTS extends BaseTTS {
-    private options: SarvamTTSOptions;
+    private readonly options: SarvamTTSOptions;
 
     constructor(options: SarvamTTSOptions) {
         super();
@@ -592,14 +558,63 @@ export class SarvamTTS extends BaseTTS {
     }
 
     toConfig(): TtsConfig {
-        const { apiKey, voiceId, model, skipPatterns } = this.options;
+        const { key, speaker, targetLanguageCode, skipPatterns } = this.options;
 
         return {
             vendor: "sarvam",
             params: {
-                api_key: apiKey,
-                ...(voiceId && { voice_id: voiceId }),
-                ...(model && { model }),
+                key,
+                speaker,
+                target_language_code: targetLanguageCode,
+            },
+            ...(skipPatterns && { skip_patterns: skipPatterns }),
+        };
+    }
+}
+
+/**
+ * Constructor options for Murf TTS.
+ */
+export interface MurfTTSOptions {
+    /** Murf API key */
+    key: string;
+    /** Voice ID (e.g., 'Ariana', 'Natalie', 'Ken') */
+    voiceId: string;
+    /** Voice style (e.g., 'Angry', 'Sad', 'Conversational', 'Newscast') */
+    style?: string;
+    /** Skip patterns for bracketed content */
+    skipPatterns?: number[];
+}
+
+/**
+ * Murf TTS vendor.
+ *
+ * @example
+ * ```typescript
+ * const tts = new MurfTTS({
+ *   key: process.env.MURF_API_KEY,
+ *   voiceId: 'Ariana',
+ *   style: 'Conversational',
+ * });
+ * ```
+ */
+export class MurfTTS extends BaseTTS {
+    private readonly options: MurfTTSOptions;
+
+    constructor(options: MurfTTSOptions) {
+        super();
+        this.options = options;
+    }
+
+    toConfig(): TtsConfig {
+        const { key, voiceId, style, skipPatterns } = this.options;
+
+        return {
+            vendor: "murf",
+            params: {
+                key,
+                voice_id: voiceId,
+                ...(style && { style }),
             },
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };

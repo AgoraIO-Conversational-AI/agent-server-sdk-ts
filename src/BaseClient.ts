@@ -10,6 +10,8 @@ export interface BaseClientOptions {
     baseUrl?: core.Supplier<string>;
     username: core.Supplier<string>;
     password: core.Supplier<string>;
+    /** Override the Authorization header */
+    authorization: core.Supplier<string>;
     /** Additional headers to include in requests. */
     headers?: Record<string, string | core.Supplier<string | null | undefined> | null | undefined>;
     /** The default maximum time to wait for a response in seconds. */
@@ -29,6 +31,8 @@ export interface BaseRequestOptions {
     maxRetries?: number;
     /** A hook to abort the request. */
     abortSignal?: AbortSignal;
+    /** Override the Authorization header */
+    authorization?: string;
     /** Additional query string parameters to include in the request. */
     queryParams?: Record<string, unknown>;
     /** Additional headers to include in the request. */
@@ -40,8 +44,8 @@ export function normalizeClientOptions<T extends BaseClientOptions>(options: T):
         {
             "X-Fern-Language": "JavaScript",
             "X-Fern-SDK-Name": "agora-agent-sdk",
-            "X-Fern-SDK-Version": "0.0.17",
-            "User-Agent": "agora-agent-sdk/0.0.17",
+            "X-Fern-SDK-Version": "0.1.0",
+            "User-Agent": "agora-agent-sdk/0.1.0",
             "X-Fern-Runtime": core.RUNTIME.type,
             "X-Fern-Runtime-Version": core.RUNTIME.version,
         },

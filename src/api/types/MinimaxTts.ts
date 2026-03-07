@@ -5,8 +5,8 @@ import type * as Agora from "../index.js";
 /**
  * MiniMax Text-to-Speech configuration.
  */
-export interface MiniMaxTts {
-    params: Agora.MiniMaxTtsParams;
+export interface MinimaxTts {
+    params: Agora.MinimaxTtsParams;
     /** Controls whether the TTS module skips bracketed content when reading LLM response text. */
     skip_patterns?: number[];
 }

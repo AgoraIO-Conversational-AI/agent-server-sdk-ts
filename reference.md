@@ -36,9 +36,6 @@ await client.agents.start({
         agent_rtc_uid: "1001",
         remote_rtc_uids: ["1002"],
         idle_timeout: 120,
-        advanced_features: {
-            enable_aivad: true
-        },
         asr: {
             language: "en-US"
         },
@@ -716,14 +713,15 @@ await client.telephony.call({
     sip: {
         to_number: "+19876543210",
         from_number: "+11234567890",
-        sip_rtc_uid: "100",
-        sip_rtc_token: "<agora_sip_rtc_token>"
+        rtc_uid: "100",
+        rtc_token: "<agora_sip_rtc_token>"
     },
     pipeline_id: "fzufjlweixxxxnlp",
     properties: {
         channel: "<agora_channel>",
         token: "<agora_channel_token>",
-        agent_rtc_uid: "111"
+        agent_rtc_uid: "111",
+        remote_rtc_uids: ["100"]
     }
 });
 
@@ -1104,7 +1102,8 @@ await client.phoneNumbers.get({
 
 Remove an imported phone number from the system.
 
-Note: This operation only removes the number configuration from the Agora system; the number stored with the phone service provider is not deleted. After calling this endpoint, the number stops receiving calls routed through this system. To delete the number from the service provider, remove it in the service provider's console.
+After calling this endpoint, the number stops receiving calls routed through this system. To delete the number from the service provider, remove it in the service provider's console.
+> This operation only removes the number configuration from the Agora system; the number stored with the phone service provider is not deleted.
 </dd>
 </dl>
 </dd>

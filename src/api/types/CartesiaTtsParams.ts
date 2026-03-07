@@ -10,4 +10,6 @@ export interface CartesiaTtsParams {
     voice_id: string;
     /** Model ID (optional) */
     model_id?: string;
+    /** Audio sampling rate in Hz */
+    sample_rate?: number;
 }

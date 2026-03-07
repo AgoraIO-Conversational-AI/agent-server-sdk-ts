@@ -8,14 +8,15 @@
  *         sip: {
  *             to_number: "+19876543210",
  *             from_number: "+11234567890",
- *             sip_rtc_uid: "100",
- *             sip_rtc_token: "<agora_sip_rtc_token>"
+ *             rtc_uid: "100",
+ *             rtc_token: "<agora_sip_rtc_token>"
  *         },
  *         pipeline_id: "fzufjlweixxxxnlp",
  *         properties: {
  *             channel: "<agora_channel>",
  *             token: "<agora_channel_token>",
- *             agent_rtc_uid: "111"
+ *             agent_rtc_uid: "111",
+ *             remote_rtc_uids: ["100"]
  *         }
  *     }
  *
@@ -26,16 +27,14 @@
  *         sip: {
  *             to_number: "+19876543210",
  *             from_number: "+11234567890",
- *             sip_rtc_uid: "100",
- *             sip_rtc_token: "<agora_sip_rtc_token>"
+ *             rtc_uid: "100",
+ *             rtc_token: "<agora_sip_rtc_token>"
  *         },
  *         properties: {
  *             channel: "<agora_channel>",
  *             token: "<agora_channel_token>",
  *             agent_rtc_uid: "111",
- *             remote_rtc_uids: [
- *                 "1002"
- *             ],
+ *             remote_rtc_uids: ["100"],
  *             idle_timeout: 120,
  *             llm: {
  *                 "url": "https://api.openai.com/v1/chat/completions",
@@ -78,7 +77,7 @@ export interface CallTelephonyRequest {
     pipeline_id?: string;
     /**
      * Call attribute configuration. The content of this field varies depending on the invocation method:
-     * - **Using pipeline ID**: Simply pass in `channel`, `token`, and `agent_rtc_uid`.
+     * - **Using pipeline ID**: Simply pass in `channel`, `token`, `agent_rtc_uid`, and `remote_rtc_uids`.
      * - **Using complete configuration**: Pass in the complete parameters of the [Start a conversational AI agent](https://docs.agora.io/en/conversational-ai/rest-api/agent/join) `properties`, including all required fields such as `channel`, `token`, `agent_rtc_uid`, `remote_rtc_uids`, `tts`, and `llm`.
      */
     properties: CallTelephonyRequest.Properties;
@@ -94,14 +93,14 @@ export namespace CallTelephonyRequest {
         /** Caller ID (the number that initiated the call), in E.164 format. */
         from_number: string;
         /** The RTC UID used by the SIP gateway. */
-        sip_rtc_uid: string;
+        rtc_uid: string;
         /** The RTC token used by the SIP gateway. */
-        sip_rtc_token: string;
+        rtc_token: string;
     }
 
     /**
      * Call attribute configuration. The content of this field varies depending on the invocation method:
-     * - **Using pipeline ID**: Simply pass in `channel`, `token`, and `agent_rtc_uid`.
+     * - **Using pipeline ID**: Simply pass in `channel`, `token`, `agent_rtc_uid`, and `remote_rtc_uids`.
      * - **Using complete configuration**: Pass in the complete parameters of the [Start a conversational AI agent](https://docs.agora.io/en/conversational-ai/rest-api/agent/join) `properties`, including all required fields such as `channel`, `token`, `agent_rtc_uid`, `remote_rtc_uids`, `tts`, and `llm`.
      */
     export interface Properties {
@@ -111,6 +110,8 @@ export namespace CallTelephonyRequest {
         token: string;
         /** The agent's user ID in the RTC channel. */
         agent_rtc_uid: string;
+        /** A list of RTC user IDs. When using pipeline ID, this should contain the SIP gateway UID. */
+        remote_rtc_uids?: string[];
         /** Accepts any additional properties */
         [key: string]: any;
     }

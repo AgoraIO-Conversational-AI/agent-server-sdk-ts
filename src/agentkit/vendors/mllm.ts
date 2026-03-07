@@ -48,7 +48,7 @@ export interface OpenAIRealtimeOptions {
  * ```
  */
 export class OpenAIRealtime extends BaseMLLM {
-    private options: OpenAIRealtimeOptions;
+    private readonly options: OpenAIRealtimeOptions;
 
     constructor(options: OpenAIRealtimeOptions) {
         super();
@@ -67,12 +67,19 @@ export class OpenAIRealtime extends BaseMLLM {
             params,
         } = this.options;
 
+        // Build params only when there is something to include.
+        // Previously `...(model && { params: ... })` silently dropped the
+        // entire params object when model was undefined — fixed by checking
+        // either field independently.
+        const mergedParams = { ...(model !== undefined && { model }), ...params };
+        const hasParams = model !== undefined || params !== undefined;
+
         return {
             vendor: "openai",
             style: "openai",
             api_key: apiKey,
             ...(url && { url }),
-            ...(model && { params: { model, ...params } }),
+            ...(hasParams && { params: mergedParams }),
             ...(greetingMessage && { greeting_message: greetingMessage }),
             ...(inputModalities && { input_modalities: inputModalities }),
             ...(outputModalities && { output_modalities: outputModalities }),
@@ -131,7 +138,7 @@ export interface VertexAIOptions {
  * ```
  */
 export class VertexAI extends BaseMLLM {
-    private options: VertexAIOptions;
+    private readonly options: VertexAIOptions;
 
     constructor(options: VertexAIOptions) {
         super();
@@ -155,15 +162,19 @@ export class VertexAI extends BaseMLLM {
 
         return {
             vendor: "vertexai",
+            // "openai" is the only valid MLLM style value in the Agora API — it
+            // describes the request/response protocol format used by the backend,
+            // not the underlying vendor. All MLLM vendors including VertexAI use it.
             style: "openai",
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 model,
                 project_id: projectId,
                 location,
                 adc_credentials_string: adcCredentialsString,
                 ...(instructions && { instructions }),
                 ...(voice && { voice }),
-                ...additionalParams,
             },
             ...(greetingMessage && { greeting_message: greetingMessage }),
             ...(inputModalities && { input_modalities: inputModalities }),

@@ -18,9 +18,13 @@ import type {
     AdvancedFeatures,
     SessionParams,
     SessionOptions,
+    GeofenceConfig,
+    RtcConfig,
+    FillerWordsConfig,
+    Labels,
 } from "./types.js";
 import { BaseLLM, BaseTTS, BaseSTT, BaseMLLM, BaseAvatar } from "./vendors/base.js";
-import { generateRtcToken } from "./token.js";
+import { generateRtcToken, generateRtcTokenWithAccount } from "./token.js";
 import { AgentSession } from "./AgentSession.js";
 
 /**
@@ -50,6 +54,14 @@ export interface AgentOptions {
     failureMessage?: string;
     /** Max conversation history */
     maxHistory?: number;
+    /** Regional access restriction configuration */
+    geofence?: GeofenceConfig;
+    /** Custom key-value labels attached to the agent (returned in notification callbacks) */
+    labels?: Labels;
+    /** RTC media encryption configuration */
+    rtc?: RtcConfig;
+    /** Filler word configuration (plays filler words while waiting for LLM responses) */
+    fillerWords?: FillerWordsConfig;
 }
 
 /**
@@ -83,6 +95,10 @@ export class Agent<TTSSampleRate extends number = number> {
     private _greeting?: string;
     private _failureMessage?: string;
     private _maxHistory?: number;
+    private _geofence?: GeofenceConfig;
+    private _labels?: Labels;
+    private _rtc?: RtcConfig;
+    private _fillerWords?: FillerWordsConfig;
 
     constructor(options: AgentOptions = {}) {
         this._name = options.name;
@@ -106,6 +122,18 @@ export class Agent<TTSSampleRate extends number = number> {
         if (options.parameters) {
             this._parameters = options.parameters;
         }
+        if (options.geofence) {
+            this._geofence = options.geofence;
+        }
+        if (options.labels) {
+            this._labels = options.labels;
+        }
+        if (options.rtc) {
+            this._rtc = options.rtc;
+        }
+        if (options.fillerWords) {
+            this._fillerWords = options.fillerWords;
+        }
     }
 
     /**
@@ -114,7 +142,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * @param vendor - LLM vendor instance (e.g., new OpenAI({ apiKey: '...', model: 'gpt-4' }))
      */
     withLlm(vendor: BaseLLM): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._llm = vendor.toConfig();
         return newAgent;
     }
@@ -129,6 +157,9 @@ export class Agent<TTSSampleRate extends number = number> {
      * @returns Agent with tracked sample rate type
      */
     withTts<SR extends number>(vendor: BaseTTS<SR>): Agent<SR> {
+        // Cast is intentional: _clone() preserves TTSSampleRate but withTts
+        // changes the type parameter to SR (the new vendor's sample rate).
+        // The cast is safe because _clone copies all fields before the reassignment.
         const newAgent = this._clone() as Agent<SR>;
         newAgent._tts = vendor.toConfig();
         return newAgent;
@@ -150,7 +181,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * ```
      */
     withStt(vendor: BaseSTT): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._stt = vendor.toConfig();
         return newAgent;
     }
@@ -161,7 +192,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * @param vendor - MLLM vendor instance (e.g., new VertexAI({ model: '...', projectId: '...', ... }))
      */
     withMllm(vendor: BaseMLLM): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._mllm = vendor.toConfig();
         return newAgent;
     }
@@ -202,7 +233,9 @@ export class Agent<TTSSampleRate extends number = number> {
         this: Agent<RequiredSR>,
         vendor: BaseAvatar<RequiredSR>
     ): Agent<RequiredSR> {
-        const newAgent = this._clone() as Agent<RequiredSR>;
+        // No cast needed: _clone() returns Agent<TTSSampleRate>, and since
+        // `this: Agent<RequiredSR>`, TTSSampleRate = RequiredSR here.
+        const newAgent = this._clone();
         newAgent._avatar = vendor.toConfig();
         return newAgent;
     }
@@ -211,7 +244,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * Returns a new Agent with the specified turn detection configuration.
      */
     withTurnDetection(config: TurnDetectionConfig): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._turnDetection = config;
         return newAgent;
     }
@@ -220,7 +253,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * Returns a new Agent with the specified instructions.
      */
     withInstructions(instructions: string): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._instructions = instructions;
         return newAgent;
     }
@@ -229,7 +262,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * Returns a new Agent with the specified greeting message.
      */
     withGreeting(greeting: string): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._greeting = greeting;
         return newAgent;
     }
@@ -238,7 +271,7 @@ export class Agent<TTSSampleRate extends number = number> {
      * Returns a new Agent with the specified name.
      */
     withName(name: string): Agent<TTSSampleRate> {
-        const newAgent = this._clone() as Agent<TTSSampleRate>;
+        const newAgent = this._clone();
         newAgent._name = name;
         return newAgent;
     }
@@ -300,10 +333,16 @@ export class Agent<TTSSampleRate extends number = number> {
     }
 
     /**
-     * Get the full agent configuration as an AgentConfig object.
-     * This provides read-only access to the complete configuration.
+     * Get the full agent configuration as an object.
+     * This provides read-only access to the complete configuration,
+     * including all vendor configs set via builder methods.
      */
-    get config(): AgentOptions {
+    get config(): AgentOptions & {
+        llm?: LlmConfig;
+        tts?: TtsConfig;
+        stt?: SttConfig;
+        mllm?: MllmConfig;
+    } {
         return {
             name: this._name,
             instructions: this._instructions,
@@ -315,6 +354,14 @@ export class Agent<TTSSampleRate extends number = number> {
             greeting: this._greeting,
             failureMessage: this._failureMessage,
             maxHistory: this._maxHistory,
+            geofence: this._geofence,
+            labels: this._labels,
+            rtc: this._rtc,
+            fillerWords: this._fillerWords,
+            llm: this._llm,
+            tts: this._tts,
+            stt: this._stt,
+            mllm: this._mllm,
         };
     }
 
@@ -372,15 +419,44 @@ export class Agent<TTSSampleRate extends number = number> {
         | { token: string; appId?: undefined; appCertificate?: undefined }
         | { token?: undefined; appId: string; appCertificate: string; tokenExpirySeconds?: number }
     )): Agora.StartAgentsRequest.Properties {
-        const token =
-            opts.token ??
-            generateRtcToken({
-                appId: opts.appId!,
-                appCertificate: opts.appCertificate!,
-                channel: opts.channel,
-                uid: parseInt(opts.agentUid, 10),
-                expirySeconds: opts.tokenExpirySeconds,
-            });
+        let token: string;
+        if (opts.token) {
+            token = opts.token;
+        } else {
+            // opts is narrowed to the appId/appCertificate branch here
+            const { appId, appCertificate, tokenExpirySeconds } = opts as {
+                appId: string;
+                appCertificate: string;
+                tokenExpirySeconds?: number;
+            };
+            const uid = parseInt(opts.agentUid, 10);
+            if (isNaN(uid)) {
+                // Non-numeric UID: only valid when enableStringUid is true.
+                // Use buildTokenWithUserAccount so the token matches the channel's
+                // string-UID mode. Numeric UIDs always use buildTokenWithUid.
+                if (!opts.enableStringUid) {
+                    throw new Error(
+                        `Cannot generate RTC token: agentUid "${opts.agentUid}" is not a numeric string. ` +
+                        "Set enableStringUid: true to use string UIDs, or pass a pre-built token directly."
+                    );
+                }
+                token = generateRtcTokenWithAccount({
+                    appId,
+                    appCertificate,
+                    channel: opts.channel,
+                    account: opts.agentUid,
+                    expirySeconds: tokenExpirySeconds,
+                });
+            } else {
+                token = generateRtcToken({
+                    appId,
+                    appCertificate,
+                    channel: opts.channel,
+                    uid,
+                    expirySeconds: tokenExpirySeconds,
+                });
+            }
+        }
         // In MLLM mode the backend handles audio end-to-end; LLM, TTS, and ASR
         // are disabled automatically — they must not be required by the SDK.
         const isMllmMode = this._advancedFeatures?.enable_mllm === true;
@@ -398,38 +474,23 @@ export class Agent<TTSSampleRate extends number = number> {
             avatar: this._avatar,
             advanced_features: this._advancedFeatures,
             parameters: this._parameters,
+            geofence: this._geofence,
+            labels: this._labels,
+            rtc: this._rtc,
+            filler_words: this._fillerWords,
         };
 
         if (isMllmMode) {
-            // Cast needed because the generated Properties type marks `tts` as
-            // required, but the REST API omits it when enable_mllm = true.
+            // Cast needed because the generated Properties type marks `tts` and
+            // `llm` as required, but the REST API omits them when enable_mllm = true.
+            // TODO: Remove this cast once Fern marks tts/llm as optional in the
+            // Properties type for MLLM mode (tracked Fern type mismatch).
             return base as Agora.StartAgentsRequest.Properties;
         }
 
         if (!this._tts) {
             throw new Error("TTS configuration is required. Use withTts() to set it.");
         }
-
-        // TODO: Once Agora provides a platform-level default LLM, replace the
-        // throw below with a fallback config so callers can omit withLlm().
-        //
-        // const llmConfig: Agora.StartAgentsRequest.Properties.Llm = this._llm
-        //     ? {
-        //           ...this._llm,
-        //           system_messages: this._instructions
-        //               ? [{ role: "system", content: this._instructions }]
-        //               : this._llm.system_messages,
-        //           greeting_message: this._greeting ?? this._llm.greeting_message,
-        //           failure_message: this._failureMessage ?? this._llm.failure_message,
-        //           max_history: this._maxHistory ?? this._llm.max_history,
-        //       }
-        //     : {
-        //           url: "<agora-default-llm-url>",
-        //           system_messages: this._instructions ? [{ role: "system", content: this._instructions }] : undefined,
-        //           greeting_message: this._greeting,
-        //           failure_message: this._failureMessage,
-        //           max_history: this._maxHistory,
-        //       };
 
         if (!this._llm) {
             throw new Error("LLM configuration is required. Use withLlm() to set it.");
@@ -448,8 +509,17 @@ export class Agent<TTSSampleRate extends number = number> {
         return { ...base, llm: llmConfig, tts: this._tts, asr: this._stt };
     }
 
-    private _clone(): Agent {
-        const newAgent = new Agent();
+    /**
+     * Creates a shallow copy of this Agent, preserving the TTSSampleRate type
+     * parameter. Builder methods that do not change the sample rate can use the
+     * return value directly. `withTts()` must cast to `Agent<SR>` afterward
+     * since it changes the type parameter — the cast is safe because all fields
+     * are copied before the new TTS config is assigned.
+     *
+     * If a new private field is added to Agent, it MUST also be added here.
+     */
+    private _clone(): Agent<TTSSampleRate> {
+        const newAgent = new Agent() as Agent<TTSSampleRate>;
         newAgent._name = this._name;
         newAgent._llm = this._llm;
         newAgent._tts = this._tts;
@@ -464,6 +534,10 @@ export class Agent<TTSSampleRate extends number = number> {
         newAgent._greeting = this._greeting;
         newAgent._failureMessage = this._failureMessage;
         newAgent._maxHistory = this._maxHistory;
+        newAgent._geofence = this._geofence;
+        newAgent._labels = this._labels;
+        newAgent._rtc = this._rtc;
+        newAgent._fillerWords = this._fillerWords;
         return newAgent;
     }
 }

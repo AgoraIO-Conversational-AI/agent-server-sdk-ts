@@ -29,7 +29,7 @@ export interface SpeechmaticsSTTOptions {
  * ```
  */
 export class SpeechmaticsSTT extends BaseSTT {
-    private options: SpeechmaticsSTTOptions;
+    private readonly options: SpeechmaticsSTTOptions;
 
     constructor(options: SpeechmaticsSTTOptions) {
         super();
@@ -41,11 +41,15 @@ export class SpeechmaticsSTT extends BaseSTT {
 
         return {
             vendor: "speechmatics",
+            // Top-level language is used by the Agora platform for routing/filtering.
+            // language inside params is forwarded directly to the Speechmatics API.
+            // Both are intentionally set to the same value.
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 api_key: apiKey,
                 language,
-                ...additionalParams,
             },
         };
     }
@@ -82,7 +86,7 @@ export interface DeepgramSTTOptions {
  * ```
  */
 export class DeepgramSTT extends BaseSTT {
-    private options: DeepgramSTTOptions;
+    private readonly options: DeepgramSTTOptions;
 
     constructor(options: DeepgramSTTOptions = {}) {
         super();
@@ -96,12 +100,13 @@ export class DeepgramSTT extends BaseSTT {
             vendor: "deepgram",
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 ...(apiKey && { api_key: apiKey }),
                 ...(model && { model }),
                 ...(language && { language }),
                 ...(smartFormat !== undefined && { smart_format: smartFormat }),
                 ...(punctuation !== undefined && { punctuation }),
-                ...additionalParams,
             },
         };
     }
@@ -134,7 +139,7 @@ export interface MicrosoftSTTOptions {
  * ```
  */
 export class MicrosoftSTT extends BaseSTT {
-    private options: MicrosoftSTTOptions;
+    private readonly options: MicrosoftSTTOptions;
 
     constructor(options: MicrosoftSTTOptions) {
         super();
@@ -148,10 +153,11 @@ export class MicrosoftSTT extends BaseSTT {
             vendor: "microsoft",
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 key,
                 region,
                 ...(language && { language }),
-                ...additionalParams,
             },
         };
     }
@@ -182,7 +188,7 @@ export interface OpenAISTTOptions {
  * ```
  */
 export class OpenAISTT extends BaseSTT {
-    private options: OpenAISTTOptions;
+    private readonly options: OpenAISTTOptions;
 
     constructor(options: OpenAISTTOptions) {
         super();
@@ -196,9 +202,10 @@ export class OpenAISTT extends BaseSTT {
             vendor: "openai",
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 api_key: apiKey,
                 ...(model && { model }),
-                ...additionalParams,
             },
         };
     }
@@ -228,7 +235,7 @@ export interface GoogleSTTOptions {
  * ```
  */
 export class GoogleSTT extends BaseSTT {
-    private options: GoogleSTTOptions;
+    private readonly options: GoogleSTTOptions;
 
     constructor(options: GoogleSTTOptions) {
         super();
@@ -242,9 +249,10 @@ export class GoogleSTT extends BaseSTT {
             vendor: "google",
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 api_key: apiKey,
                 ...(language && { language }),
-                ...additionalParams,
             },
         };
     }
@@ -279,7 +287,7 @@ export interface AmazonSTTOptions {
  * ```
  */
 export class AmazonSTT extends BaseSTT {
-    private options: AmazonSTTOptions;
+    private readonly options: AmazonSTTOptions;
 
     constructor(options: AmazonSTTOptions) {
         super();
@@ -293,11 +301,12 @@ export class AmazonSTT extends BaseSTT {
             vendor: "amazon",
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 access_key: accessKey,
                 secret_key: secretKey,
                 region,
                 ...(language && { language }),
-                ...additionalParams,
             },
         };
     }
@@ -326,7 +335,7 @@ export interface AssemblyAISTTOptions {
  * ```
  */
 export class AssemblyAISTT extends BaseSTT {
-    private options: AssemblyAISTTOptions;
+    private readonly options: AssemblyAISTTOptions;
 
     constructor(options: AssemblyAISTTOptions) {
         super();
@@ -340,8 +349,9 @@ export class AssemblyAISTT extends BaseSTT {
             vendor: "assemblyai",
             language,
             params: {
-                api_key: apiKey,
+                // additionalParams spread first so that explicit fields always win.
                 ...additionalParams,
+                api_key: apiKey,
             },
         };
     }
@@ -368,7 +378,7 @@ export interface AresSTTOptions {
  * ```
  */
 export class AresSTT extends BaseSTT {
-    private options: AresSTTOptions;
+    private readonly options: AresSTTOptions;
 
     constructor(options: AresSTTOptions = {}) {
         super();
@@ -378,59 +388,17 @@ export class AresSTT extends BaseSTT {
     toConfig(): SttConfig {
         const { language, additionalParams } = this.options;
 
+        // Only include params when there is content to send; avoids emitting
+        // params: {} when neither language nor additionalParams are provided.
+        const paramsEntries = {
+            ...(language && { language }),
+            ...additionalParams,
+        };
+
         return {
             vendor: "ares",
             language,
-            params: {
-                ...(language && { language }),
-                ...additionalParams,
-            },
-        };
-    }
-}
-
-/**
- * Constructor options for Soniox STT.
- */
-export interface SonioxSTTOptions {
-    /** Soniox API key */
-    apiKey: string;
-    /** Language code (e.g., 'en', 'es', 'fr') */
-    language: string;
-    /** Additional vendor-specific parameters */
-    additionalParams?: Record<string, unknown>;
-}
-
-/**
- * Soniox STT vendor.
- *
- * @example
- * ```typescript
- * const stt = new SonioxSTT({
- *   apiKey: process.env.SONIOX_API_KEY,
- *   language: 'en',
- * });
- * ```
- */
-export class SonioxSTT extends BaseSTT {
-    private options: SonioxSTTOptions;
-
-    constructor(options: SonioxSTTOptions) {
-        super();
-        this.options = options;
-    }
-
-    toConfig(): SttConfig {
-        const { apiKey, language, additionalParams } = this.options;
-
-        return {
-            vendor: "soniox",
-            language,
-            params: {
-                api_key: apiKey,
-                language,
-                ...additionalParams,
-            },
+            ...(Object.keys(paramsEntries).length > 0 && { params: paramsEntries }),
         };
     }
 }
@@ -459,7 +427,7 @@ export interface SarvamSTTOptions {
  * ```
  */
 export class SarvamSTT extends BaseSTT {
-    private options: SarvamSTTOptions;
+    private readonly options: SarvamSTTOptions;
 
     constructor(options: SarvamSTTOptions) {
         super();
@@ -471,11 +439,15 @@ export class SarvamSTT extends BaseSTT {
 
         return {
             vendor: "sarvam",
+            // Top-level language is used by the Agora platform for routing/filtering.
+            // language inside params is forwarded directly to the Sarvam API.
+            // Both are intentionally set to the same value.
             language,
             params: {
+                // additionalParams spread first so that explicit fields always win.
+                ...additionalParams,
                 api_key: apiKey,
                 language,
-                ...additionalParams,
             },
         };
     }

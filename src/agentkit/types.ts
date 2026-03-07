@@ -25,12 +25,14 @@ import type {
     RimeTtsParams as RimeTtsParamsType,
     FishAudioTts as FishAudioTtsType,
     FishAudioTtsParams as FishAudioTtsParamsType,
-    GroqTts as GroqTtsType,
-    GroqTtsParams as GroqTtsParamsType,
     GoogleTts as GoogleTtsType,
     GoogleTtsParams as GoogleTtsParamsType,
     AmazonTts as AmazonTtsType,
     AmazonTtsParams as AmazonTtsParamsType,
+    MinimaxTts as MinimaxTtsType,
+    MinimaxTtsParams as MinimaxTtsParamsType,
+    MurfTts as MurfTtsType,
+    MurfTtsParams as MurfTtsParamsType,
 } from "../api/index.js";
 
 // =============================================================================
@@ -54,6 +56,7 @@ export type SttConfig =
     | { vendor: 'amazon'; language?: string; params: AmazonAsrParams }
     | { vendor: 'assemblyai'; language?: string; params?: AssemblyAiParams }
     | { vendor: 'ares'; language?: string; params?: AresParams }
+    | { vendor: 'sarvam'; language?: string; params?: SarvamAsrParams }
     | StartAgentsRequest.Properties.Asr; // Fallback for shorthand/untyped configs
 
 /** STT vendor (ares, microsoft, deepgram, openai, etc.) */
@@ -67,9 +70,6 @@ export type MllmConfig = StartAgentsRequest.Properties.Mllm;
 
 /** MLLM vendor (openai, vertexai) */
 export type MllmVendor = StartAgentsRequest.Properties.Mllm.Vendor;
-
-/** MLLM style */
-export type MllmStyle = StartAgentsRequest.Properties.Mllm.Style;
 
 /** Avatar configuration */
 export type AvatarConfig = StartAgentsRequest.Properties.Avatar;
@@ -109,6 +109,21 @@ export type SilenceAction = StartAgentsRequest.Properties.Parameters.SilenceConf
 
 /** Farewell configuration */
 export type FarewellConfig = StartAgentsRequest.Properties.Parameters.FarewellConfig;
+
+/** Regional access restriction configuration */
+export type GeofenceConfig = StartAgentsRequest.Properties.Geofence;
+
+/** Allowed geographic region for server access */
+export type GeofenceArea = StartAgentsRequest.Properties.Geofence.Area;
+
+/** RTC media encryption configuration */
+export type RtcConfig = StartAgentsRequest.Properties.Rtc;
+
+/** Filler word configuration (plays filler words while waiting for LLM responses) */
+export type FillerWordsConfig = StartAgentsRequest.Properties.FillerWords;
+
+/** Custom business labels attached to the agent (returned in notification callbacks) */
+export type Labels = Record<string, string>;
 
 // =============================================================================
 // Agent Configuration (combines all the above)
@@ -424,6 +439,19 @@ export interface AresParams {
     [key: string]: unknown;
 }
 
+/**
+ * Sarvam Speech-to-Text parameters (Beta)
+ * @see https://docs.agora.io/en/conversational-ai/models/asr/sarvam
+ */
+export interface SarvamAsrParams {
+    /** Sarvam API key */
+    api_key: string;
+    /** Language code (e.g., 'en', 'hi', 'ta') */
+    language?: string;
+    /** Additional Sarvam-specific parameters */
+    [key: string]: unknown;
+}
+
 // =============================================================================
 // TTS Vendor-Specific Types (re-exports for convenience)
 // =============================================================================
@@ -442,9 +470,11 @@ export type RimeTts = RimeTtsType;
 export type RimeTtsParams = RimeTtsParamsType;
 export type FishAudioTts = FishAudioTtsType;
 export type FishAudioTtsParams = FishAudioTtsParamsType;
-export type GroqTts = GroqTtsType;
-export type GroqTtsParams = GroqTtsParamsType;
 export type GoogleTts = GoogleTtsType;
 export type GoogleTtsParams = GoogleTtsParamsType;
 export type AmazonTts = AmazonTtsType;
 export type AmazonTtsParams = AmazonTtsParamsType;
+export type MinimaxTts = MinimaxTtsType;
+export type MinimaxTtsParams = MinimaxTtsParamsType;
+export type MurfTts = MurfTtsType;
+export type MurfTtsParams = MurfTtsParamsType;

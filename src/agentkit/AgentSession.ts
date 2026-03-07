@@ -58,6 +58,11 @@ export interface AgentSessionOptions {
     enableStringUid?: boolean;
     /** Enable debug logging of API requests */
     debug?: boolean;
+    /**
+     * Optional logger for warnings. Defaults to console.warn.
+     * Set to a no-op function to silence warnings.
+     */
+    warn?: (message: string) => void;
 }
 
 /**
@@ -67,20 +72,18 @@ export interface AgentSessionOptions {
  *
  * @example
  * ```typescript
- * import { AgoraClient, Area, Agent } from 'agora-sdk';
+ * import { AgoraClient, Area, Agent, OpenAI, ElevenLabsTTS, DeepgramSTT } from 'agora-agent-sdk';
  *
  * const client = new AgoraClient({
  *   area: Area.US,
  *   appId: '...',
  *   appCertificate: '...',
- *   customerId: '...',
- *   customerSecret: '...',
  * });
  *
  * const agent = new Agent({ name: 'support-assistant', instructions: 'You are a helpful voice assistant.' })
- *   .withLlm({ url: 'https://api.openai.com/v1/chat/completions', api_key: '...' })
- *   .withTts({ vendor: 'elevenlabs', params: { key: '...', model_id: '...', voice_id: '...' } })
- *   .withStt({ vendor: 'deepgram', params: { api_key: '...' } });
+ *   .withLlm(new OpenAI({ apiKey: '...', model: 'gpt-4o-mini' }))
+ *   .withTts(new ElevenLabsTTS({ key: '...', modelId: '...', voiceId: '...', sampleRate: 24000 }))
+ *   .withStt(new DeepgramSTT({ apiKey: '...', language: 'en-US' }));
  *
  * const session = agent.createSession(client, {
  *   channel: 'support-room-123',
@@ -111,6 +114,7 @@ export class AgentSession {
     private _agentId: string | null = null;
     private _status: "idle" | "starting" | "running" | "stopping" | "stopped" | "error" = "idle";
     private _eventHandlers: Map<AgentSessionEvent, Set<AgentSessionEventHandler>> = new Map();
+    private readonly _warn: (message: string) => void;
 
     constructor(options: AgentSessionOptions) {
         this._client = options.client;
@@ -125,6 +129,7 @@ export class AgentSession {
         this._idleTimeout = options.idleTimeout;
         this._enableStringUid = options.enableStringUid;
         this._debug = options.debug;
+        this._warn = options.warn ?? ((msg) => console.warn(msg));
         // Read authMode from pool client if available, else fall back to basic
         this._authMode = (options.client as { authMode?: AgoraAuthMode }).authMode ?? "basic";
     }
@@ -141,9 +146,15 @@ export class AgentSession {
         if (this._authMode !== "app-credentials") {
             return undefined;
         }
+        if (!this._appCertificate) {
+            throw new Error(
+                "appCertificate is required for app-credentials auth mode. " +
+                "Pass appCertificate when creating AgoraClient."
+            );
+        }
         const token = generateConvoAIToken({
             appId: this._appId,
-            appCertificate: this._appCertificate!,
+            appCertificate: this._appCertificate,
             channelName: this._channel,
             account: this._agentUid,
         });
@@ -182,7 +193,7 @@ export class AgentSession {
      * Direct access to the underlying Fern-generated AgentsClient.
      * 
      * Use this to access any new endpoints that Fern generates without
-     * waiting for wrapper method updates. New endpoints are immediately
+     * waiting for agentkit method updates. New endpoints are immediately
      * available via this property.
      * 
      * Note: You'll need to pass appid and agentId manually when using raw methods.
@@ -238,14 +249,14 @@ export class AgentSession {
             }
         } else if (isHeyGenAvatar(avatar)) {
             // HeyGen requires explicit 24kHz - warn if not set
-            console.warn(
-                '⚠️  Warning: HeyGen avatar detected but TTS sample_rate is not explicitly set. ' +
+            this._warn(
+                'Warning: HeyGen avatar detected but TTS sample_rate is not explicitly set. ' +
                 'HeyGen requires 24,000 Hz. Please ensure your TTS provider is configured for 24kHz.'
             );
         } else if (isAkoolAvatar(avatar)) {
             // Akool requires explicit 16kHz - warn if not set
-            console.warn(
-                '⚠️  Warning: Akool avatar detected but TTS sample_rate is not explicitly set. ' +
+            this._warn(
+                'Warning: Akool avatar detected but TTS sample_rate is not explicitly set. ' +
                 'Akool requires 16,000 Hz. Please ensure your TTS provider is configured for 16kHz.'
             );
         }
@@ -267,14 +278,23 @@ export class AgentSession {
         // Validate avatar configuration before starting
         this._validateAvatarConfig();
 
+        // Validate that we can generate a token if one is not provided
+        if (!this._token && !this._appCertificate) {
+            throw new Error(
+                "Cannot auto-generate RTC token: appCertificate is required when a pre-built token is not provided. " +
+                "Pass appCertificate when creating AgoraClient, or supply a pre-built token via the session options."
+            );
+        }
+
         this._status = "starting";
 
         try {
+            // appCertificate presence is guaranteed by the guard above when no token is provided.
             const tokenOpts = this._token
                 ? { token: this._token }
                 : {
                       appId: this._appId,
-                      appCertificate: this._appCertificate!,
+                      appCertificate: this._appCertificate as string,
                   };
 
             const properties = this._agent.toProperties({
@@ -483,8 +503,10 @@ export class AgentSession {
             for (const handler of handlers) {
                 try {
                     handler(data);
-                } catch {
-                    // Ignore handler errors
+                } catch (err) {
+                    this._warn(
+                        `Unhandled error in '${event}' event handler: ${err instanceof Error ? err.message : String(err)}`
+                    );
                 }
             }
         }

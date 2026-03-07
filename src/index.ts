@@ -7,7 +7,7 @@ export { AgoraError, AgoraTimeoutError } from "./errors/index.js";
 export { Area } from "./core/domain/index.js";
 export * from "./exports.js";
 
-// Wrapper layer exports - clean, ergonomic API
+// Agentkit layer exports - clean, ergonomic API
 export {
     Agent,
     AgentSession,
@@ -39,8 +39,8 @@ export {
     HumeAITTS,
     RimeTTS,
     FishAudioTTS,
-    GroqTTS,
     MiniMaxTTS,
+    MurfTTS,
     SarvamTTS,
     // STT vendors
     SpeechmaticsSTT,
@@ -51,7 +51,6 @@ export {
     AmazonSTT,
     AssemblyAISTT,
     AresSTT,
-    SonioxSTT,
     SarvamSTT,
     // MLLM vendors
     OpenAIRealtime,
@@ -59,7 +58,7 @@ export {
     // Avatar vendors
     HeyGenAvatar,
     AkoolAvatar,
-} from "./wrapper/index.js";
+} from "./agentkit/index.js";
 export type {
     AgentOptions,
     AgentSessionOptions,
@@ -82,7 +81,6 @@ export type {
     TtsConfig,
     MllmConfig,
     MllmVendor,
-    MllmStyle,
     AvatarConfig,
     AvatarVendor,
     TurnDetectionConfig,
@@ -96,6 +94,11 @@ export type {
     SilenceConfig,
     SilenceAction,
     FarewellConfig,
+    GeofenceConfig,
+    GeofenceArea,
+    RtcConfig,
+    FillerWordsConfig,
+    Labels,
     AgentConfig,
     AgentConfigUpdate,
     SessionOptions,
@@ -122,8 +125,8 @@ export type {
     HumeAITTSOptions,
     RimeTTSOptions,
     FishAudioTTSOptions,
-    GroqTTSOptions,
     MiniMaxTTSOptions,
+    MurfTTSOptions,
     SarvamTTSOptions,
     SpeechmaticsSTTOptions,
     DeepgramSTTOptions,
@@ -133,10 +136,9 @@ export type {
     AmazonSTTOptions,
     AssemblyAISTTOptions,
     AresSTTOptions,
-    SonioxSTTOptions,
     SarvamSTTOptions,
     OpenAIRealtimeOptions,
     VertexAIOptions,
     HeyGenAvatarOptions,
     AkoolAvatarOptions,
-} from "./wrapper/index.js";
+} from "./agentkit/index.js";
