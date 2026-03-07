@@ -43,7 +43,7 @@ export interface ElevenLabsTTSOptions<SR extends ElevenLabsSampleRate = ElevenLa
  * ```
  */
 export class ElevenLabsTTS<SR extends ElevenLabsSampleRate = ElevenLabsSampleRate> extends BaseTTS<SR> {
-    private options: ElevenLabsTTSOptions<SR>;
+    private readonly options: ElevenLabsTTSOptions<SR>;
 
     constructor(options: ElevenLabsTTSOptions<SR>) {
         super();
@@ -100,7 +100,7 @@ export interface MicrosoftTTSOptions<SR extends MicrosoftSampleRate = MicrosoftS
  * ```
  */
 export class MicrosoftTTS<SR extends MicrosoftSampleRate = MicrosoftSampleRate> extends BaseTTS<SR> {
-    private options: MicrosoftTTSOptions<SR>;
+    private readonly options: MicrosoftTTSOptions<SR>;
 
     constructor(options: MicrosoftTTSOptions<SR>) {
         super();
@@ -151,7 +151,7 @@ export interface OpenAITTSOptions {
  * ```
  */
 export class OpenAITTS extends BaseTTS<24000> {
-    private options: OpenAITTSOptions;
+    private readonly options: OpenAITTSOptions;
 
     constructor(options: OpenAITTSOptions) {
         super();
@@ -205,7 +205,7 @@ export interface CartesiaTTSOptions<SR extends CartesiaSampleRate = CartesiaSamp
  * ```
  */
 export class CartesiaTTS<SR extends CartesiaSampleRate = CartesiaSampleRate> extends BaseTTS<SR> {
-    private options: CartesiaTTSOptions<SR>;
+    private readonly options: CartesiaTTSOptions<SR>;
 
     constructor(options: CartesiaTTSOptions<SR>) {
         super();
@@ -254,7 +254,7 @@ export interface GoogleTTSOptions {
  * ```
  */
 export class GoogleTTS extends BaseTTS {
-    private options: GoogleTTSOptions;
+    private readonly options: GoogleTTSOptions;
 
     constructor(options: GoogleTTSOptions) {
         super();
@@ -306,7 +306,7 @@ export interface AmazonTTSOptions {
  * ```
  */
 export class AmazonTTS extends BaseTTS {
-    private options: AmazonTTSOptions;
+    private readonly options: AmazonTTSOptions;
 
     constructor(options: AmazonTTSOptions) {
         super();
@@ -352,7 +352,7 @@ export interface HumeAITTSOptions {
  * ```
  */
 export class HumeAITTS extends BaseTTS {
-    private options: HumeAITTSOptions;
+    private readonly options: HumeAITTSOptions;
 
     constructor(options: HumeAITTSOptions) {
         super();
@@ -399,7 +399,7 @@ export interface RimeTTSOptions {
  * ```
  */
 export class RimeTTS extends BaseTTS {
-    private options: RimeTTSOptions;
+    private readonly options: RimeTTSOptions;
 
     constructor(options: RimeTTSOptions) {
         super();
@@ -445,7 +445,7 @@ export interface FishAudioTTSOptions {
  * ```
  */
 export class FishAudioTTS extends BaseTTS {
-    private options: FishAudioTTSOptions;
+    private readonly options: FishAudioTTSOptions;
 
     constructor(options: FishAudioTTSOptions) {
         super();
@@ -499,7 +499,7 @@ export interface MiniMaxTTSOptions {
  * ```
  */
 export class MiniMaxTTS extends BaseTTS {
-    private options: MiniMaxTTSOptions;
+    private readonly options: MiniMaxTTSOptions;
 
     constructor(options: MiniMaxTTSOptions) {
         super();
@@ -550,7 +550,7 @@ export interface SarvamTTSOptions {
  * ```
  */
 export class SarvamTTS extends BaseTTS {
-    private options: SarvamTTSOptions;
+    private readonly options: SarvamTTSOptions;
 
     constructor(options: SarvamTTSOptions) {
         super();
@@ -599,7 +599,7 @@ export interface MurfTTSOptions {
  * ```
  */
 export class MurfTTS extends BaseTTS {
-    private options: MurfTTSOptions;
+    private readonly options: MurfTTSOptions;
 
     constructor(options: MurfTTSOptions) {
         super();

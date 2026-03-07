@@ -1,12 +1,12 @@
 /**
- * Wrapper layer for the Agora Conversational AI SDK.
+ * Agentkit layer for the Agora Conversational AI SDK.
  *
  * This module provides a cleaner, more ergonomic API on top of the
  * Fern-generated SDK types and methods.
  *
  * ## Maintenance Notes
  *
- * This wrapper is designed to minimize maintenance burden:
+ * This agentkit is designed to minimize maintenance burden:
  *
  * 1. **Type aliases** (in types.ts) re-export Fern types directly.
  *    When Fern adds new fields, they're automatically available.

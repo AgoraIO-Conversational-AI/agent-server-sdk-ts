@@ -41,7 +41,7 @@ export interface OpenAIOptions {
  * ```
  */
 export class OpenAI extends BaseLLM {
-    private options: OpenAIOptions;
+    private readonly options: OpenAIOptions;
 
     constructor(options: OpenAIOptions) {
         super();
@@ -49,12 +49,23 @@ export class OpenAI extends BaseLLM {
     }
 
     toConfig(): LlmConfig {
-        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
-        
+        const {
+            apiKey,
+            model,
+            url,
+            maxHistory,
+            systemMessages,
+            greetingMessage,
+            failureMessage,
+            inputModalities,
+            params,
+        } = this.options;
+
         return {
             url: url ?? "https://api.openai.com/v1/chat/completions",
             api_key: apiKey,
-            params: params ?? { model },
+            // model is the default; explicit params entries override it.
+            params: { model, ...params },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
@@ -107,7 +118,7 @@ export interface AzureOpenAIOptions {
  * ```
  */
 export class AzureOpenAI extends BaseLLM {
-    private options: AzureOpenAIOptions;
+    private readonly options: AzureOpenAIOptions;
 
     constructor(options: AzureOpenAIOptions) {
         super();
@@ -133,7 +144,8 @@ export class AzureOpenAI extends BaseLLM {
             url: `https://${resourceName}.openai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`,
             api_key: apiKey,
             vendor: "azure",
-            params: params ?? { model },
+            // model is the default; explicit params entries override it.
+            params: { model, ...params },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
@@ -180,7 +192,7 @@ export interface AnthropicOptions {
  * ```
  */
 export class Anthropic extends BaseLLM {
-    private options: AnthropicOptions;
+    private readonly options: AnthropicOptions;
 
     constructor(options: AnthropicOptions) {
         super();
@@ -193,7 +205,8 @@ export class Anthropic extends BaseLLM {
         return {
             url: url ?? "https://api.anthropic.com/v1/messages",
             api_key: apiKey,
-            params: params ?? { model },
+            // model is the default; explicit params entries override it.
+            params: { model, ...params },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
@@ -240,7 +253,7 @@ export interface GeminiOptions {
  * ```
  */
 export class Gemini extends BaseLLM {
-    private options: GeminiOptions;
+    private readonly options: GeminiOptions;
 
     constructor(options: GeminiOptions) {
         super();
@@ -253,7 +266,8 @@ export class Gemini extends BaseLLM {
         return {
             url: url ?? "https://generativelanguage.googleapis.com/v1beta/models",
             api_key: apiKey,
-            params: params ?? { model },
+            // model is the default; explicit params entries override it.
+            params: { model, ...params },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,

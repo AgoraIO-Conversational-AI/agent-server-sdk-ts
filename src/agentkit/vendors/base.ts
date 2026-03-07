@@ -54,6 +54,19 @@ export abstract class BaseLLM {
 
 /**
  * Base class for TTS (Text-to-Speech) vendors with sample rate tracking.
+ *
+ * `SR` is a phantom type — it is never used at runtime and does not appear in
+ * the `toConfig()` return type. Its sole purpose is to thread the sample rate
+ * literal through `Agent<TTSSampleRate>` so that `withAvatar()` can enforce
+ * TTS/avatar compatibility at compile time.
+ *
+ * This means TypeScript cannot verify that a concrete subclass actually emits
+ * the sample rate it declares — e.g., `class MyTTS extends BaseTTS<24000>`
+ * could emit `sample_rate: 16000` in its config without a type error. The
+ * guarantee is therefore "the vendor class declares what it supports", not
+ * "the config it produces is verified". Runtime validation in AgentSession
+ * provides a second layer of safety for known avatar vendors.
+ *
  * @template SR - Sample rate literal type (e.g., 24000, 16000)
  */
 export abstract class BaseTTS<SR extends number = number> {
