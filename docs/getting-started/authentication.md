@@ -36,14 +36,14 @@ const token = generateConvoAIToken({
   appCertificate: 'your-app-certificate',
   channelName: 'your-channel',
   account: '1001',
-  tokenExpire: 3600,
+  tokenExpire: 86400, // default; max allowed by Agora is 24 hours (86400 s)
 });
 
 const client = new AgoraClient({
   area: Area.US,
   appId: 'your-app-id',
   appCertificate: 'your-app-certificate',
-  authToken: `agora token=${token}`,
+  authToken: token, // SDK sets Authorization: agora token=<token>
 });
 ```
 
@@ -72,3 +72,22 @@ const client = new AgoraClient({
 | Basic Auth | Legacy integrations; avoid for new projects | Customer Secret grants access to all projects on the account |
 
 The client exposes the resolved mode via `client.authMode` (returns `"app-credentials"`, `"token"`, or `"basic"`).
+
+## Token expiry
+
+When the SDK auto-generates a token (app credentials mode, or session without a pre-built `token`), the default lifetime is **86400 seconds (24 hours)** — the Agora maximum. You can customise this via `expiresIn` on `SessionOptions`:
+
+```typescript
+import { Agent, ExpiresIn } from 'agora-agent-sdk';
+
+const session = agent.createSession(client, {
+  channel: 'room-123',
+  agentUid: '1',
+  remoteUids: ['100'],
+  expiresIn: ExpiresIn.hours(12),   // 12-hour token
+  // expiresIn: ExpiresIn.minutes(30), // 30-minute token
+  // expiresIn: ExpiresIn.DAY,         // 24-hour token (max)
+});
+```
+
+`ExpiresIn` helpers validate the value and throw if it is ≤ 0, or cap and warn if it exceeds 86400 (24 h). Valid range: **1–86400 seconds**.

@@ -18,7 +18,7 @@ import type {
 } from "./types.js";
 import { validateTtsSampleRate, validateAvatarConfig, isHeyGenAvatar, isAkoolAvatar } from "./avatar-types.js";
 import type { AgoraAuthMode } from "../AgoraPoolClient.js";
-import { generateConvoAIToken } from "./token.js";
+import { generateConvoAIToken, ExpiresIn as ExpiresInHelper } from "./token.js";
 
 /**
  * Event types that can be emitted by AgentSession.
@@ -56,6 +56,12 @@ export interface AgentSessionOptions {
     idleTimeout?: number;
     /** Whether to use string UIDs */
     enableStringUid?: boolean;
+    /**
+     * Token lifetime in seconds (default: 86400 = 24 hours, Agora maximum).
+     * Only applies when the SDK auto-generates a token (i.e. no `token` is provided).
+     * Valid range: 1–86400. Use `ExpiresIn.hours()` / `ExpiresIn.minutes()` for clarity.
+     */
+    expiresIn?: number;
     /** Enable debug logging of API requests */
     debug?: boolean;
     /**
@@ -109,6 +115,7 @@ export class AgentSession {
     private readonly _remoteUids: string[];
     private readonly _idleTimeout?: number;
     private readonly _enableStringUid?: boolean;
+    private readonly _expiresIn?: number;
     private readonly _debug?: boolean;
     private readonly _authMode: AgoraAuthMode;
     private _agentId: string | null = null;
@@ -128,6 +135,7 @@ export class AgentSession {
         this._remoteUids = options.remoteUids;
         this._idleTimeout = options.idleTimeout;
         this._enableStringUid = options.enableStringUid;
+        this._expiresIn = options.expiresIn;
         this._debug = options.debug;
         this._warn = options.warn ?? ((msg) => console.warn(msg));
         // Read authMode from pool client if available, else fall back to basic
@@ -290,11 +298,16 @@ export class AgentSession {
 
         try {
             // appCertificate presence is guaranteed by the guard above when no token is provided.
+            let expiresIn = this._expiresIn;
+            if (expiresIn !== undefined) {
+                expiresIn = ExpiresInHelper.seconds(expiresIn);
+            }
             const tokenOpts = this._token
                 ? { token: this._token }
                 : {
                       appId: this._appId,
                       appCertificate: this._appCertificate as string,
+                      expiresIn,
                   };
 
             const properties = this._agent.toProperties({

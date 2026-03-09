@@ -24,7 +24,7 @@ import type {
     Labels,
 } from "./types.js";
 import { BaseLLM, BaseTTS, BaseSTT, BaseMLLM, BaseAvatar } from "./vendors/base.js";
-import { generateRtcToken, generateRtcTokenWithAccount } from "./token.js";
+import { generateConvoAIToken } from "./token.js";
 import { AgentSession } from "./AgentSession.js";
 
 /**
@@ -407,7 +407,8 @@ export class Agent<TTSSampleRate extends number = number> {
      * Converts the Agent configuration to the Fern request properties format.
      *
      * Pass either a pre-built `token` OR `appId` + `appCertificate` to have
-     * the SDK generate one automatically.
+     * the SDK generate one automatically. The generated token includes both RTC
+     * and RTM privileges (required for RTM-enabled sessions).
      */
     toProperties(opts: {
         channel: string;
@@ -417,45 +418,28 @@ export class Agent<TTSSampleRate extends number = number> {
         enableStringUid?: boolean;
     } & (
         | { token: string; appId?: undefined; appCertificate?: undefined }
-        | { token?: undefined; appId: string; appCertificate: string; tokenExpirySeconds?: number }
+        | { token?: undefined; appId: string; appCertificate: string; expiresIn?: number }
     )): Agora.StartAgentsRequest.Properties {
         let token: string;
         if (opts.token) {
             token = opts.token;
         } else {
             // opts is narrowed to the appId/appCertificate branch here
-            const { appId, appCertificate, tokenExpirySeconds } = opts as {
+            const { appId, appCertificate, expiresIn } = opts as {
                 appId: string;
                 appCertificate: string;
-                tokenExpirySeconds?: number;
+                expiresIn?: number;
             };
-            const uid = parseInt(opts.agentUid, 10);
-            if (isNaN(uid)) {
-                // Non-numeric UID: only valid when enableStringUid is true.
-                // Use buildTokenWithUserAccount so the token matches the channel's
-                // string-UID mode. Numeric UIDs always use buildTokenWithUid.
-                if (!opts.enableStringUid) {
-                    throw new Error(
-                        `Cannot generate RTC token: agentUid "${opts.agentUid}" is not a numeric string. ` +
-                        "Set enableStringUid: true to use string UIDs, or pass a pre-built token directly."
-                    );
-                }
-                token = generateRtcTokenWithAccount({
-                    appId,
-                    appCertificate,
-                    channel: opts.channel,
-                    account: opts.agentUid,
-                    expirySeconds: tokenExpirySeconds,
-                });
-            } else {
-                token = generateRtcToken({
-                    appId,
-                    appCertificate,
-                    channel: opts.channel,
-                    uid,
-                    expirySeconds: tokenExpirySeconds,
-                });
-            }
+            // Use buildTokenWithRtm (RTC + RTM) so the token works whether or not
+            // the caller enables advanced_features.enable_rtm. The account string
+            // works for both numeric and string UIDs.
+            token = generateConvoAIToken({
+                appId,
+                appCertificate,
+                channelName: opts.channel,
+                account: opts.agentUid,
+                tokenExpire: expiresIn,
+            });
         }
         // In MLLM mode the backend handles audio end-to-end; LLM, TTS, and ASR
         // are disabled automatically — they must not be required by the SDK.
