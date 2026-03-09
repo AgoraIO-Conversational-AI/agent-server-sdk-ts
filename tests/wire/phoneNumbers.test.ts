@@ -9,7 +9,7 @@ describe("PhoneNumbersClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
 
@@ -76,7 +76,7 @@ describe("PhoneNumbersClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
         const rawRequestBody = {
@@ -132,7 +132,7 @@ describe("PhoneNumbersClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
         const rawRequestBody = {
@@ -193,7 +193,7 @@ describe("PhoneNumbersClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
 
@@ -242,7 +242,7 @@ describe("PhoneNumbersClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
 
@@ -259,7 +259,7 @@ describe("PhoneNumbersClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
         const rawRequestBody = { inbound_config: { pipeline_id: "xxxxx" }, outbound_config: { pipeline_id: "xxxxx" } };

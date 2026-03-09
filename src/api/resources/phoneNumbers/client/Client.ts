@@ -434,7 +434,7 @@ export class PhoneNumbersClient {
     }
 
     protected async _getCustomAuthorizationHeaders(): Promise<Record<string, string | undefined>> {
-        const authorizationValue = await core.Supplier.get(this._options.authorization);
-        return { Authorization: authorizationValue };
+        const authTokenValue = await core.Supplier.get(this._options.authToken);
+        return { Authorization: authTokenValue };
     }
 }

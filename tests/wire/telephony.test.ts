@@ -9,7 +9,7 @@ describe("TelephonyClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
 
@@ -77,7 +77,7 @@ describe("TelephonyClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
         const rawRequestBody = {
@@ -133,7 +133,7 @@ describe("TelephonyClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
         const rawRequestBody = {
@@ -234,7 +234,7 @@ describe("TelephonyClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
 
@@ -281,7 +281,7 @@ describe("TelephonyClient", () => {
         const client = new AgoraClient({
             username: "test",
             password: "test",
-            authorization: "test",
+            authToken: "test",
             environment: server.baseUrl,
         });
         const rawRequestBody = {};
