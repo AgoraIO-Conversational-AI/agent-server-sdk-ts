@@ -155,6 +155,12 @@ export interface SessionOptions {
     idleTimeout?: number;
     /** Whether to use string UIDs */
     enableStringUid?: boolean;
+    /**
+     * Token lifetime in seconds (default: 86400 = 24 hours, Agora maximum).
+     * Only applies when the SDK auto-generates a token (i.e. no `token` is provided).
+     * Valid range: 1–86400. Use `ExpiresIn.hours()` / `ExpiresIn.minutes()` for clarity.
+     */
+    expiresIn?: number;
     /** Enable debug logging of API requests */
     debug?: boolean;
 }

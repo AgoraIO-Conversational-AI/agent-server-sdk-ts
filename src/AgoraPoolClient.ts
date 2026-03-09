@@ -3,6 +3,8 @@
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { AgoraClient as BaseAgoraClient } from "./Client.js";
 import { Area, Pool } from "./core/domain/index.js";
+import { AgoraError } from "./errors/index.js";
+import { generateConvoAIToken } from "./agentkit/token.js";
 
 /**
  * Auth mode for the client:
@@ -32,7 +34,7 @@ export declare namespace AgoraClient {
         authToken?: never;
     }
 
-    /** Use a pre-built Agora token for REST API authentication */
+    /** Use a pre-built Agora token for REST API authentication. Pass the raw token; the SDK sets `Authorization: agora token=<authToken>` automatically. */
     interface TokenAuthOptions {
         authToken: string;
         customerId?: never;
@@ -70,13 +72,13 @@ export declare namespace AgoraClient {
  * });
  * ```
  *
- * **Token auth** — pass a pre-built Agora token (e.g. generated server-side):
+ * **Token auth** — pass a raw Agora token; the SDK sets the `agora token=` header automatically:
  * ```typescript
  * const client = new AgoraClient({
  *     area: Area.US,
  *     appId: "your-app-id",
  *     appCertificate: "your-app-certificate",
- *     authToken: "agora token=<your-token>",
+ *     authToken: "<raw-token>",
  * });
  * ```
  *
@@ -125,7 +127,7 @@ export class AgoraClient extends BaseAgoraClient {
             // The generated client always emits a Basic auth header from username/password.
             // Until Fern regeneration adds native authToken support, use a fetch wrapper
             // to replace it with the agora token header on every request.
-            const authorizationHeader = opts.authToken;
+            const authorizationHeader = `agora token=${opts.authToken}`;
             const baseFetch = opts.fetch;
             fetchFn = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
                 const headers = new Headers(init?.headers);
@@ -183,5 +185,44 @@ export class AgoraClient extends BaseAgoraClient {
      */
     public getCurrentURL(): string {
         return this._pool.getCurrentURL();
+    }
+
+    /**
+     * Stop an agent by its ID.
+     *
+     * Use this when handling a stop request from your client app (e.g., an end-call
+     * button) without holding an `AgentSession` reference. Create a client with the
+     * same credentials used to start the agent and call this method.
+     *
+     * If the agent has already stopped (e.g., timed out or crashed), this method
+     * returns successfully rather than throwing.
+     *
+     * @param agentId - The agent instance ID returned by `AgentSession.start()`
+     *
+     * @example
+     * // End-call handler — no session reference needed
+     * const client = new AgoraClient({ area: Area.US, appId: '...', appCertificate: '...' });
+     * await client.stopAgent(agentId);
+     */
+    public async stopAgent(agentId: string): Promise<void> {
+        let headers: Record<string, string> | undefined;
+        if (this.authMode === "app-credentials") {
+            const token = generateConvoAIToken({
+                appId: this.appId,
+                appCertificate: this.appCertificate,
+                channelName: "stop",
+                account: agentId,
+            });
+            headers = { Authorization: `agora token=${token}` };
+        }
+
+        try {
+            await this.agents.stop({ appid: this.appId, agentId }, { headers });
+        } catch (error) {
+            if (error instanceof AgoraError && error.statusCode === 404) {
+                return; // Agent already stopped — treat as success
+            }
+            throw error;
+        }
     }
 }
