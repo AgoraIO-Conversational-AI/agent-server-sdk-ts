@@ -20,6 +20,7 @@ import {
   AgoraClient,
   Area,
   Agent,
+  ExpiresIn,
   OpenAI,
   ElevenLabsTTS,
   DeepgramSTT,
@@ -37,31 +38,115 @@ const agent = new Agent({
   greeting: 'Hello! How can I help you today?',
   maxHistory: 10,
 })
-  .withLlm(new OpenAI({
-    apiKey: 'your-openai-key',
-    model: 'gpt-4o-mini',
-  }))
-  .withTts(new ElevenLabsTTS({
-    key: 'your-elevenlabs-key',
-    modelId: 'eleven_flash_v2_5',
-    voiceId: 'your-voice-id',
-    sampleRate: 24000,
-  }))
-  .withStt(new DeepgramSTT({
-    apiKey: 'your-deepgram-key',
-    language: 'en-US',
-  }));
+  // Configure Agent flow: STT → LLM → TTS → (optional) Avatar
+  .withStt(new DeepgramSTT({ apiKey: 'your-deepgram-key', language: 'en-US' }))
+  .withLlm(new OpenAI({ apiKey: 'your-openai-key', model: 'gpt-4o-mini' }))
+  .withTts(
+    new ElevenLabsTTS({
+      key: 'your-elevenlabs-key',
+      modelId: 'eleven_flash_v2_5',
+      voiceId: 'your-voice-id',
+      sampleRate: 24000,
+    }),
+  );
+// .withAvatar(new HeyGenAvatar({ ... })) // optional
 
 const session = agent.createSession(client, {
   channel: 'support-room-123',
   agentUid: '1',
   remoteUids: ['100'],
   idleTimeout: 120,
+  expiresIn: ExpiresIn.hours(12), // optional — default is ExpiresIn.DAY (24 h)
 });
 
-const agentId = await session.start();
-await session.say('Hello! How can I help you today?');
+// start() returns a session ID unique to this agent session
+const agentSessionId = await session.start();
+
+// In production, stop is typically called when your client signals the session has ended.
+// Your server receives that request and calls session.stop().
 await session.stop();
+```
+
+### Session lifecycle
+
+`start()` joins the agent to the channel and returns a **session ID** — a unique identifier for this agent session. The session stays active until `stop()` is called.
+
+There are two ways to stop a session depending on how your server is structured:
+
+**Option 1 — Hold the session in memory:**
+
+```typescript
+// start-session handler
+const agentSessionId = await session.start(); // unique ID for this session
+// stop-session handler (same process, session still in scope)
+await session.stop();
+```
+
+**Option 2 — Store the session ID and stop by ID (stateless servers):**
+
+```typescript
+// start-session handler: return session ID to your client app
+const agentSessionId = await session.start();
+res.json({ agentSessionId });
+
+// stop-session handler: client sends back agentSessionId
+const client = new AgoraClient({
+  area: Area.US,
+  appId: '...',
+  appCertificate: '...',
+});
+await client.stopAgent(agentSessionId);
+```
+
+### Manual tokens (for debugging)
+
+Generate tokens yourself and pass them in — useful when inspecting or reusing tokens:
+
+```typescript
+import {
+  AgoraClient,
+  Area,
+  Agent,
+  generateConvoAIToken,
+  ExpiresIn,
+} from 'agora-agent-sdk';
+
+const APP_ID = 'your-app-id';
+const APP_CERT = 'your-app-certificate';
+const CHANNEL = 'support-room-123';
+const AGENT_UID = '1';
+
+// Auth header token — used by the SDK to authenticate REST API calls
+const authToken = generateConvoAIToken({
+  appId: APP_ID,
+  appCertificate: APP_CERT,
+  channelName: CHANNEL,
+  account: AGENT_UID,
+  tokenExpire: ExpiresIn.hours(12),
+});
+
+// Channel join token — embedded in the start request so the agent can join the channel
+const joinToken = generateConvoAIToken({
+  appId: APP_ID,
+  appCertificate: APP_CERT,
+  channelName: CHANNEL,
+  account: AGENT_UID,
+  tokenExpire: ExpiresIn.hours(12),
+});
+
+const client = new AgoraClient({
+  area: Area.US,
+  appId: APP_ID,
+  appCertificate: APP_CERT,
+  authToken: authToken, // Optional Debugging: uses this token for REST API auth header when set.
+});
+
+const session = agent.createSession(client, {
+  channel: CHANNEL,
+  agentUid: AGENT_UID,
+  remoteUids: ['100'],
+  token: joinToken, // channel join token
+});
 ```
 
 ## Documentation
