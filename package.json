@@ -1,8 +1,8 @@
 {
-    "name": "agora-agent-sdk",
-    "version": "0.1.0",
+    "name": "agora-agent-server-sdk",
+    "version": "1.1.0",
     "private": false,
-    "repository": "github:AgoraIO-Conversational-AI/agora-agent-ts-sdk",
+    "repository": "github:AgoraIO-Conversational-AI/agent-server-sdk-ts",
     "type": "commonjs",
     "main": "./dist/cjs/index.js",
     "module": "./dist/esm/index.mjs",
