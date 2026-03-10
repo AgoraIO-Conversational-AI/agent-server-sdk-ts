@@ -108,7 +108,6 @@ export class AgoraClient extends BaseAgoraClient {
         let authMode: AgoraAuthMode;
         let username: string;
         let password: string;
-        let fetchFn: typeof fetch | undefined;
 
         const opts = options as AgoraClient.Options & {
             customerId?: string;
@@ -124,17 +123,6 @@ export class AgoraClient extends BaseAgoraClient {
             authMode = "token";
             username = "";
             password = "";
-            // The generated client always emits a Basic auth header from username/password.
-            // Until Fern regeneration adds native authToken support, use a fetch wrapper
-            // to replace it with the agora token header on every request.
-            const authorizationHeader = `agora token=${opts.authToken}`;
-            const baseFetch = opts.fetch;
-            fetchFn = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-                const headers = new Headers(init?.headers);
-                headers.set("Authorization", authorizationHeader);
-                const fetchImpl = baseFetch ?? globalThis.fetch;
-                return fetchImpl(input, { ...init, headers });
-            };
         } else {
             authMode = "app-credentials";
             username = "";
@@ -143,11 +131,13 @@ export class AgoraClient extends BaseAgoraClient {
 
         const { customerId: _cid, customerSecret: _cs, authToken: _at, ...rest } = opts;
 
-        // BaseClientOptions requires authorization. For basic auth we pass the Basic header;
-        // for token/app-credentials the fetch wrapper or AgentSession injects it per-request.
+        // _getCustomAuthorizationHeaders() in the generated client spreads { Authorization }
+        // after _getAuthorizationHeader(), so it overrides the Basic header on every request.
         const authorization =
             authMode === "basic"
                 ? `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`
+                : authMode === "token"
+                ? `agora token=${opts.authToken!}`
                 : "";
 
         super({
@@ -155,7 +145,6 @@ export class AgoraClient extends BaseAgoraClient {
             username,
             password,
             authorization,
-            ...(fetchFn != null ? { fetch: fetchFn } : {}),
             baseUrl: () => pool.getCurrentURL(),
         });
         this._pool = pool;
