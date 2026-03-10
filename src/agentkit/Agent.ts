@@ -465,11 +465,7 @@ export class Agent<TTSSampleRate extends number = number> {
         };
 
         if (isMllmMode) {
-            // Cast needed because the generated Properties type marks `tts` and
-            // `llm` as required, but the REST API omits them when enable_mllm = true.
-            // TODO: Remove this cast once Fern marks tts/llm as optional in the
-            // Properties type for MLLM mode (tracked Fern type mismatch).
-            return base as Agora.StartAgentsRequest.Properties;
+            return base;
         }
 
         if (!this._tts) {

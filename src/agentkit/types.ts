@@ -80,13 +80,53 @@ export type AvatarVendor = StartAgentsRequest.Properties.Avatar.Vendor;
 /** Turn detection configuration */
 export type TurnDetectionConfig = StartAgentsRequest.Properties.TurnDetection;
 
-/** Turn detection type (agora_vad, server_vad, semantic_vad) */
+// --- New SOS/EOS turn detection types (preferred) ---
+
+/** Detailed nested config for turn detection (`turn_detection.config`) */
+export type TurnDetectionNestedConfig = StartAgentsRequest.Properties.TurnDetection.Config;
+
+/** Start of Speech (SoS) detection configuration (`turn_detection.config.start_of_speech`) */
+export type StartOfSpeechConfig = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech;
+
+/** Start of speech detection mode: `"vad"` | `"keywords"` | `"disabled"` */
+export type StartOfSpeechMode = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech.Mode;
+
+/** VAD config for SoS detection (`start_of_speech.vad_config`) */
+export type StartOfSpeechVadConfig = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech.VadConfig;
+
+/** Keyword trigger config for SoS detection (`start_of_speech.keywords_config`) */
+export type StartOfSpeechKeywordsConfig = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech.KeywordsConfig;
+
+/** End of Speech (EoS) detection configuration (`turn_detection.config.end_of_speech`) */
+export type EndOfSpeechConfig = StartAgentsRequest.Properties.TurnDetection.Config.EndOfSpeech;
+
+/** End of speech detection mode: `"vad"` | `"semantic"` */
+export type EndOfSpeechMode = StartAgentsRequest.Properties.TurnDetection.Config.EndOfSpeech.Mode;
+
+/** VAD config for EoS detection (`end_of_speech.vad_config`) */
+export type EndOfSpeechVadConfig = StartAgentsRequest.Properties.TurnDetection.Config.EndOfSpeech.VadConfig;
+
+/** Semantic config for EoS detection (`end_of_speech.semantic_config`) */
+export type EndOfSpeechSemanticConfig = StartAgentsRequest.Properties.TurnDetection.Config.EndOfSpeech.SemanticConfig;
+
+// --- Deprecated turn detection types ---
+
+/**
+ * @deprecated Use `TurnDetectionConfig` with `config.start_of_speech` and `config.end_of_speech` instead.
+ * The `type` field and `agora_vad` / `server_vad` / `semantic_vad` values are being removed in a future release.
+ */
 export type TurnDetectionType = StartAgentsRequest.Properties.TurnDetection.Type;
 
-/** Interrupt mode (interrupt, append, ignore, keyword, adaptive) */
+/**
+ * @deprecated Use `StartOfSpeechConfig` with `mode: "vad" | "keywords" | "disabled"` and the corresponding
+ * `vad_config`, `keywords_config`, or `disabled_config` instead.
+ */
 export type InterruptMode = StartAgentsRequest.Properties.TurnDetection.InterruptMode;
 
-/** Eagerness level (auto, low, high) */
+/**
+ * @deprecated Only applies to `server_vad` / `semantic_vad` modes with OpenAI Realtime API (MLLM).
+ * Has no equivalent in the standard ASR + LLM + TTS pipeline.
+ */
 export type Eagerness = StartAgentsRequest.Properties.TurnDetection.Eagerness;
 
 /** SAL (Selective Attention Locking) configuration */
