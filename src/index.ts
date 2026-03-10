@@ -11,6 +11,7 @@ export * from "./exports.js";
 export {
     Agent,
     AgentSession,
+    ExpiresIn,
     generateRtcToken,
     generateConvoAIToken,
     isHeyGenAvatar,

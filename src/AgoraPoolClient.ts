@@ -18,7 +18,7 @@ export type AgoraAuthMode = "basic" | "token" | "app-credentials";
 export declare namespace AgoraClient {
     export type Options = BaseOptions & AuthOptions;
 
-    interface BaseOptions extends Omit<BaseClientOptions, "baseUrl" | "environment" | "username" | "password"> {
+    interface BaseOptions extends Omit<BaseClientOptions, "baseUrl" | "environment" | "username" | "password" | "authorization"> {
         /** The area to use for regional URL selection */
         area: Area;
         /** Agora App ID — used as the `appid` path parameter and for RTC token generation */
@@ -143,10 +143,18 @@ export class AgoraClient extends BaseAgoraClient {
 
         const { customerId: _cid, customerSecret: _cs, authToken: _at, ...rest } = opts;
 
+        // BaseClientOptions requires authorization. For basic auth we pass the Basic header;
+        // for token/app-credentials the fetch wrapper or AgentSession injects it per-request.
+        const authorization =
+            authMode === "basic"
+                ? `Basic ${Buffer.from(`${username}:${password}`).toString("base64")}`
+                : "";
+
         super({
             ...rest,
             username,
             password,
+            authorization,
             ...(fetchFn != null ? { fetch: fetchFn } : {}),
             baseUrl: () => pool.getCurrentURL(),
         });
