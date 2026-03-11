@@ -33,6 +33,10 @@ const agent = new Agent({
 | `avatar` | `AvatarConfig` | Avatar configuration (prefer `withAvatar()` for type safety) |
 | `advancedFeatures` | `AdvancedFeatures` | Enable MLLM mode, AI-VAD, etc. |
 | `parameters` | `SessionParams` | Session parameters (silence config, farewell config) |
+| `geofence` | `GeofenceConfig` | Regional access restriction |
+| `labels` | `Labels` | Custom key-value labels (returned in callbacks) |
+| `rtc` | `RtcConfig` | RTC media encryption |
+| `fillerWords` | `FillerWordsConfig` | Filler words while waiting for LLM |
 
 ## Builder methods
 
@@ -45,10 +49,19 @@ Each method returns a new `Agent` instance with the updated configuration.
 | `withStt` | `withStt(vendor: BaseSTT): Agent` | Set the STT vendor |
 | `withMllm` | `withMllm(vendor: BaseMLLM): Agent` | Set the MLLM vendor (for multimodal flow) |
 | `withAvatar` | `withAvatar<SR>(vendor: BaseAvatar<SR>): Agent` | Set the avatar vendor (enforces TTS sample rate match) |
-| `withTurnDetection` | `withTurnDetection(config: TurnDetectionConfig): Agent` | Configure turn detection |
+| `withTurnDetection` | `withTurnDetection(config: TurnDetectionConfig): Agent` | Configure turn detection (use `config.start_of_speech` / `config.end_of_speech` for SOS/EOS) |
 | `withInstructions` | `withInstructions(text: string): Agent` | Override the system prompt |
 | `withGreeting` | `withGreeting(text: string): Agent` | Override the greeting message |
 | `withName` | `withName(name: string): Agent` | Override the agent name |
+| `withSal` | `withSal(config: SalConfig): Agent` | Set SAL configuration |
+| `withAdvancedFeatures` | `withAdvancedFeatures(features: AdvancedFeatures): Agent` | Set advanced features |
+| `withParameters` | `withParameters(parameters: SessionParams): Agent` | Set session parameters |
+| `withFailureMessage` | `withFailureMessage(message: string): Agent` | Set failure message |
+| `withMaxHistory` | `withMaxHistory(maxHistory: number): Agent` | Set max history length |
+| `withGeofence` | `withGeofence(geofence: GeofenceConfig): Agent` | Set geofence configuration |
+| `withLabels` | `withLabels(labels: Labels): Agent` | Set custom labels |
+| `withRtc` | `withRtc(rtc: RtcConfig): Agent` | Set RTC configuration |
+| `withFillerWords` | `withFillerWords(fillerWords: FillerWordsConfig): Agent` | Set filler words configuration |
 
 ## Creating a session
 

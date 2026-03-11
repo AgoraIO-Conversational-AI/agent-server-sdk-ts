@@ -89,7 +89,9 @@ console.log('Gemini agent running:', agentId);
 
 ## Turn detection in MLLM mode
 
-You can configure turn detection alongside MLLM to control when the model should respond:
+You can configure turn detection alongside MLLM to control when the model should respond. The preferred approach uses the SOS/EOS (Start of Speech / End of Speech) model via `config.start_of_speech` and `config.end_of_speech` — see [Agent Reference](../reference/agent.md) for full type definitions.
+
+Legacy format (deprecated in favor of SOS/EOS):
 
 ```typescript
 const agent = new Agent({

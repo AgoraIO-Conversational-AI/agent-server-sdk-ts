@@ -30,6 +30,10 @@ new Agent<TTSSampleRate extends number = number>(options?: AgentOptions)
 | `avatar` | `AvatarConfig` | `undefined` | Avatar configuration |
 | `advancedFeatures` | `AdvancedFeatures` | `undefined` | Enable MLLM mode, AI-VAD, etc. |
 | `parameters` | `SessionParams` | `undefined` | Session parameters (silence config, farewell config) |
+| `geofence` | `GeofenceConfig` | `undefined` | Regional access restriction |
+| `labels` | `Labels` | `undefined` | Custom key-value labels (returned in callbacks) |
+| `rtc` | `RtcConfig` | `undefined` | RTC media encryption |
+| `fillerWords` | `FillerWordsConfig` | `undefined` | Filler words while waiting for LLM |
 
 ## Builder methods
 
@@ -57,7 +61,7 @@ Set the avatar vendor. The `this` constraint enforces that the Agent's TTS sampl
 
 ### `withTurnDetection(config: TurnDetectionConfig): Agent<TTSSampleRate>`
 
-Configure turn detection (type, interrupt mode, eagerness).
+Configure turn detection. Use `config.start_of_speech` and `config.end_of_speech` for the preferred SOS/EOS model.
 
 ### `withInstructions(instructions: string): Agent<TTSSampleRate>`
 
@@ -71,6 +75,42 @@ Override the greeting message.
 
 Override the agent name.
 
+### `withSal(config: SalConfig): Agent<TTSSampleRate>`
+
+Set SAL (Selective Attention Locking) configuration.
+
+### `withAdvancedFeatures(features: AdvancedFeatures): Agent<TTSSampleRate>`
+
+Set advanced features (e.g. `enable_mllm`, `enable_rtm`).
+
+### `withParameters(parameters: SessionParams): Agent<TTSSampleRate>`
+
+Set session parameters (silence config, farewell config, data channel, etc.).
+
+### `withFailureMessage(message: string): Agent<TTSSampleRate>`
+
+Set the message spoken via TTS when the LLM call fails.
+
+### `withMaxHistory(maxHistory: number): Agent<TTSSampleRate>`
+
+Set the maximum conversation history length.
+
+### `withGeofence(geofence: GeofenceConfig): Agent<TTSSampleRate>`
+
+Set geofence configuration (restricts backend server regions).
+
+### `withLabels(labels: Labels): Agent<TTSSampleRate>`
+
+Set custom labels (key-value pairs returned in notification callbacks).
+
+### `withRtc(rtc: RtcConfig): Agent<TTSSampleRate>`
+
+Set RTC configuration.
+
+### `withFillerWords(fillerWords: FillerWordsConfig): Agent<TTSSampleRate>`
+
+Set filler words configuration (played while waiting for LLM response).
+
 ## Getter properties
 
 | Property | Type | Description |
@@ -80,9 +120,19 @@ Override the agent name.
 | `tts` | `TtsConfig \| undefined` | TTS config (set via `withTts`) |
 | `stt` | `SttConfig \| undefined` | STT config (set via `withStt`) |
 | `mllm` | `MllmConfig \| undefined` | MLLM config (set via `withMllm`) |
+| `avatar` | `AvatarConfig \| undefined` | Avatar config (set via `withAvatar`) |
 | `turnDetection` | `TurnDetectionConfig \| undefined` | Turn detection config |
 | `instructions` | `string \| undefined` | System prompt |
 | `greeting` | `string \| undefined` | Greeting message |
+| `failureMessage` | `string \| undefined` | Message spoken when LLM fails |
+| `maxHistory` | `number \| undefined` | Max conversation history length |
+| `sal` | `SalConfig \| undefined` | SAL configuration |
+| `advancedFeatures` | `AdvancedFeatures \| undefined` | Advanced features |
+| `parameters` | `SessionParams \| undefined` | Session parameters |
+| `geofence` | `GeofenceConfig \| undefined` | Geofence configuration |
+| `labels` | `Labels \| undefined` | Custom labels |
+| `rtc` | `RtcConfig \| undefined` | RTC configuration |
+| `fillerWords` | `FillerWordsConfig \| undefined` | Filler words configuration |
 | `config` | `AgentOptions` | Full read-only configuration snapshot |
 
 ## `createSession(client, options): AgentSession`
