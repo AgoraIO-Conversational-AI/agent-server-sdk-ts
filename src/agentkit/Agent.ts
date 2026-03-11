@@ -277,6 +277,99 @@ export class Agent<TTSSampleRate extends number = number> {
     }
 
     /**
+     * Returns a new Agent with the specified SAL (Selective Attention Locking) configuration.
+     */
+    withSal(config: SalConfig): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._sal = config;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified advanced features configuration.
+     *
+     * Use this to enable features like MLLM mode (`enable_mllm: true`), RTM, and others.
+     */
+    withAdvancedFeatures(features: AdvancedFeatures): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._advancedFeatures = features;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified session parameters.
+     *
+     * Use this to configure silence behaviour, graceful hang-up, data channel, and more.
+     */
+    withParameters(parameters: SessionParams): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._parameters = parameters;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified failure message.
+     *
+     * The failure message is played via TTS when the LLM call fails.
+     */
+    withFailureMessage(message: string): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._failureMessage = message;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified maximum conversation history length.
+     */
+    withMaxHistory(maxHistory: number): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._maxHistory = maxHistory;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified geofence configuration.
+     *
+     * Restricts which geographic regions the agent's backend servers may run in.
+     */
+    withGeofence(geofence: GeofenceConfig): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._geofence = geofence;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified custom labels.
+     *
+     * Labels are key-value pairs attached to the agent and returned in notification callbacks.
+     */
+    withLabels(labels: Labels): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._labels = labels;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified RTC configuration.
+     */
+    withRtc(rtc: RtcConfig): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._rtc = rtc;
+        return newAgent;
+    }
+
+    /**
+     * Returns a new Agent with the specified filler words configuration.
+     *
+     * Filler words are played while the agent waits for the LLM to respond.
+     */
+    withFillerWords(fillerWords: FillerWordsConfig): Agent<TTSSampleRate> {
+        const newAgent = this._clone();
+        newAgent._fillerWords = fillerWords;
+        return newAgent;
+    }
+
+    /**
      * Get the agent name.
      */
     get name(): string | undefined {
@@ -330,6 +423,76 @@ export class Agent<TTSSampleRate extends number = number> {
      */
     get greeting(): string | undefined {
         return this._greeting;
+    }
+
+    /**
+     * Get the failure message (played via TTS when the LLM call fails).
+     */
+    get failureMessage(): string | undefined {
+        return this._failureMessage;
+    }
+
+    /**
+     * Get the maximum conversation history length.
+     */
+    get maxHistory(): number | undefined {
+        return this._maxHistory;
+    }
+
+    /**
+     * Get the avatar configuration.
+     */
+    get avatar(): AvatarConfig | undefined {
+        return this._avatar;
+    }
+
+    /**
+     * Get the SAL (Selective Attention Locking) configuration.
+     */
+    get sal(): SalConfig | undefined {
+        return this._sal;
+    }
+
+    /**
+     * Get the advanced features configuration.
+     */
+    get advancedFeatures(): AdvancedFeatures | undefined {
+        return this._advancedFeatures;
+    }
+
+    /**
+     * Get the session parameters configuration.
+     */
+    get parameters(): SessionParams | undefined {
+        return this._parameters;
+    }
+
+    /**
+     * Get the geofence configuration.
+     */
+    get geofence(): GeofenceConfig | undefined {
+        return this._geofence;
+    }
+
+    /**
+     * Get the custom labels.
+     */
+    get labels(): Labels | undefined {
+        return this._labels;
+    }
+
+    /**
+     * Get the RTC configuration.
+     */
+    get rtc(): RtcConfig | undefined {
+        return this._rtc;
+    }
+
+    /**
+     * Get the filler words configuration.
+     */
+    get fillerWords(): FillerWordsConfig | undefined {
+        return this._fillerWords;
     }
 
     /**

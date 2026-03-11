@@ -33,6 +33,8 @@ import type {
     MinimaxTtsParams as MinimaxTtsParamsType,
     MurfTts as MurfTtsType,
     MurfTtsParams as MurfTtsParamsType,
+    SarvamTts as SarvamTtsType,
+    SarvamTtsParams as SarvamTtsParamsType,
 } from "../api/index.js";
 
 // =============================================================================
@@ -97,6 +99,12 @@ export type StartOfSpeechVadConfig = StartAgentsRequest.Properties.TurnDetection
 /** Keyword trigger config for SoS detection (`start_of_speech.keywords_config`) */
 export type StartOfSpeechKeywordsConfig = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech.KeywordsConfig;
 
+/** Disabled mode config for SoS detection (`start_of_speech.disabled_config`) */
+export type StartOfSpeechDisabledConfig = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech.DisabledConfig;
+
+/** Voice processing strategy when SoS is disabled: `"append"` | `"ignored"` */
+export type StartOfSpeechDisabledConfigStrategy = StartAgentsRequest.Properties.TurnDetection.Config.StartOfSpeech.DisabledConfig.Strategy;
+
 /** End of Speech (EoS) detection configuration (`turn_detection.config.end_of_speech`) */
 export type EndOfSpeechConfig = StartAgentsRequest.Properties.TurnDetection.Config.EndOfSpeech;
 
@@ -150,11 +158,17 @@ export type SilenceAction = StartAgentsRequest.Properties.Parameters.SilenceConf
 /** Farewell configuration */
 export type FarewellConfig = StartAgentsRequest.Properties.Parameters.FarewellConfig;
 
+/** Agent data transmission channel (`"rtm"` | `"datastream"`) */
+export type ParametersDataChannel = StartAgentsRequest.Properties.Parameters.DataChannel;
+
 /** Regional access restriction configuration */
 export type GeofenceConfig = StartAgentsRequest.Properties.Geofence;
 
 /** Allowed geographic region for server access */
 export type GeofenceArea = StartAgentsRequest.Properties.Geofence.Area;
+
+/** Geographic region to exclude when `area` is `"GLOBAL"` */
+export type GeofenceExcludeArea = StartAgentsRequest.Properties.Geofence.ExcludeArea;
 
 /** RTC media encryption configuration */
 export type RtcConfig = StartAgentsRequest.Properties.Rtc;
@@ -162,8 +176,36 @@ export type RtcConfig = StartAgentsRequest.Properties.Rtc;
 /** Filler word configuration (plays filler words while waiting for LLM responses) */
 export type FillerWordsConfig = StartAgentsRequest.Properties.FillerWords;
 
+/** Filler word trigger configuration (when to play filler words) */
+export type FillerWordsTrigger = StartAgentsRequest.Properties.FillerWords.Trigger;
+
+/** Fixed-time trigger config for filler words (`trigger.fixed_time_config`) */
+export type FillerWordsTriggerFixedTimeConfig = StartAgentsRequest.Properties.FillerWords.Trigger.FixedTimeConfig;
+
+/** Filler word content configuration (source and selection of filler words) */
+export type FillerWordsContent = StartAgentsRequest.Properties.FillerWords.Content;
+
+/** Static filler word content config (`content.static_config`) */
+export type FillerWordsContentStaticConfig = StartAgentsRequest.Properties.FillerWords.Content.StaticConfig;
+
+/** Filler word selection rule: `"shuffle"` | `"round_robin"` */
+export type FillerWordsContentSelectionRule = StartAgentsRequest.Properties.FillerWords.Content.StaticConfig.SelectionRule;
+
 /** Custom business labels attached to the agent (returned in notification callbacks) */
 export type Labels = Record<string, string>;
+
+// =============================================================================
+// LLM Sub-types
+// =============================================================================
+
+/** LLM greeting broadcast configuration (`llm.greeting_configs`) */
+export type LlmGreetingConfigs = StartAgentsRequest.Properties.Llm.GreetingConfigs;
+
+/** Greeting broadcast mode: `"single_every"` | `"single_first"` */
+export type LlmGreetingConfigsMode = StartAgentsRequest.Properties.Llm.GreetingConfigs.Mode;
+
+/** MCP server config item (`llm.mcp_servers[]`) */
+export type McpServersItem = StartAgentsRequest.Properties.Llm.McpServers.Item;
 
 // =============================================================================
 // Agent Configuration (combines all the above)
@@ -353,6 +395,12 @@ interface BaseLlmConfig {
     failure_message?: string;
     /** LLM provider (e.g., 'azure', 'custom') */
     vendor?: string;
+    /** Greeting broadcast configuration for multi-user channels (`llm.greeting_configs`) */
+    greeting_configs?: LlmGreetingConfigs;
+    /** Key-value pairs injected into system_messages / greeting_message via `{{variable_name}}` syntax */
+    template_variables?: Record<string, string>;
+    /** MCP server configurations enabling the agent to call tools from external services */
+    mcp_servers?: McpServersItem[];
 }
 
 /**
@@ -524,3 +572,5 @@ export type MinimaxTts = MinimaxTtsType;
 export type MinimaxTtsParams = MinimaxTtsParamsType;
 export type MurfTts = MurfTtsType;
 export type MurfTtsParams = MurfTtsParamsType;
+export type SarvamTts = SarvamTtsType;
+export type SarvamTtsParams = SarvamTtsParamsType;
