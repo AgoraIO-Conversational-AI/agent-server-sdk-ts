@@ -3,9 +3,10 @@
 [![fern shield](https://img.shields.io/badge/%F0%9F%8C%BF-Built%20with%20Fern-brightgreen)](https://buildwithfern.com?utm_source=github&utm_medium=github&utm_campaign=readme&utm_source=https%3A%2F%2Fgithub.com%2FAgoraIO-Conversational-AI%2Fagent-server-sdk-ts)
 [![npm shield](https://img.shields.io/npm/v/agora-agent-server-sdk)](https://www.npmjs.com/package/agora-agent-server-sdk)
 
-The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs,
-enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS)
+The Agora Conversational AI SDK provides convenient access to the Agora Conversational AI APIs, 
+enabling you to build voice-powered AI agents with support for both cascading flows (ASR -> LLM -> TTS) 
 and multimodal flows (MLLM) for real-time audio processing.
+
 
 ## Installation
 
@@ -212,109 +213,147 @@ await client.agents.start({
 });
 ```
 
+## MLLM Flow (Multimodal)
+
+For real-time audio processing using OpenAI's Realtime API or Google Gemini Live, use the MLLM (Multimodal Large Language Model) flow instead of the cascading ASR -> LLM -> TTS flow. See the [MLLM Overview](https://docs.agora.io/en/conversational-ai/models/mllm/overview) for more details.
+
+```typescript
+import { AgoraClient, Agora } from "agora-agent-server-sdk";
+const client = new AgoraClient({ customerId: "YOUR_CUSTOMER_ID", customerSecret: "YOUR_CUSTOMER_SECRET" });
+// Configure MLLM with typed parameters
+const mllm: Agora.StartAgentsRequest.Properties.Mllm = {
+    url: "wss://api.openai.com/v1/realtime",
+    api_key: "<your_openai_api_key>",
+    vendor: Agora.StartAgentsRequest.Properties.Mllm.Vendor.Openai,
+    params: {
+        model: "gpt-4o-realtime-preview",
+        voice: "alloy"
+    },
+    input_modalities: ["audio"],
+    output_modalities: ["text", "audio"],
+    greeting_message: "Hello! I'm ready to chat in real-time."
+};
+
+// Configure turn detection for MLLM
+const turnDetection: Agora.StartAgentsRequest.Properties.TurnDetection = {
+    type: Agora.StartAgentsRequest.Properties.TurnDetection.Type.ServerVad,
+    threshold: 0.5,
+    silence_duration_ms: 500
+};
+
+await client.agents.start({
+    appid: "your_app_id",
+    name: "mllm_agent",
+    properties: {
+        channel: "channel_name",
+        token: "your_token",
+        agent_rtc_uid: "1001",
+        remote_rtc_uids: ["1002"],
+        idle_timeout: 120,
+        advanced_features: { enable_mllm: true },
+        mllm,
+        turn_detection: turnDetection,
+        // TTS and LLM are still required but not used when MLLM is enabled
+        tts: { vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft, params: {} },
+        llm: { url: "https://api.openai.com/v1/chat/completions" }
+    }
+});
+```
+
+
 ## Using Named Types
 
 The SDK exports all request types under the `Agora` namespace. You can use these types for better IDE autocompletion and type safety:
 
 ```typescript
-import { AgoraClient, Agora } from 'agora-agent-server-sdk';
-const client = new AgoraClient({
-  customerId: 'YOUR_CUSTOMER_ID',
-  customerSecret: 'YOUR_CUSTOMER_SECRET',
-});
+import { AgoraClient, Agora } from "agora-agent-server-sdk";
+const client = new AgoraClient({ customerId: "YOUR_CUSTOMER_ID", customerSecret: "YOUR_CUSTOMER_SECRET" });
 // Use named types for better type safety and autocompletion
 const tts: Agora.StartAgentsRequest.Properties.Tts = {
-  vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft,
-  params: {
-    key: '<your_tts_api_key>',
-    region: 'eastus',
-    voice_name: 'en-US-AndrewMultilingualNeural',
-  },
+    vendor: Agora.StartAgentsRequest.Properties.Tts.Vendor.Microsoft,
+    params: {
+        key: "<your_tts_api_key>",
+        region: "eastus",
+        voice_name: "en-US-AndrewMultilingualNeural"
+    }
 };
 
 const llm: Agora.StartAgentsRequest.Properties.Llm = {
-  url: 'https://api.openai.com/v1/chat/completions',
-  api_key: '<your_llm_key>',
-  system_messages: [
-    { role: 'system', content: 'You are a helpful assistant.' },
-  ],
-  params: { model: 'gpt-4o-mini' },
-  max_history: 32,
-  greeting_message: 'Hello, how can I assist you today?',
-  failure_message: 'Please hold on a second.',
+    url: "https://api.openai.com/v1/chat/completions",
+    api_key: "<your_llm_key>",
+    system_messages: [{ role: "system", content: "You are a helpful assistant." }],
+    params: { model: "gpt-4o-mini" },
+    max_history: 32,
+    greeting_message: "Hello, how can I assist you today?",
+    failure_message: "Please hold on a second."
 };
 
 const asr: Agora.StartAgentsRequest.Properties.Asr = {
-  language: 'en-US',
-  vendor: Agora.StartAgentsRequest.Properties.Asr.Vendor.Deepgram,
+    language: "en-US",
+    vendor: Agora.StartAgentsRequest.Properties.Asr.Vendor.Deepgram
 };
 
 await client.agents.start({
-  appid: 'your_app_id',
-  name: 'unique_agent_name',
-  properties: {
-    channel: 'channel_name',
-    token: 'your_token',
-    agent_rtc_uid: '1001',
-    remote_rtc_uids: ['1002'],
-    idle_timeout: 120,
-    advanced_features: { enable_aivad: true },
-    asr,
-    tts,
-    llm,
-  },
+    appid: "your_app_id",
+    name: "unique_agent_name",
+    properties: {
+        channel: "channel_name",
+        token: "your_token",
+        agent_rtc_uid: "1001",
+        remote_rtc_uids: ["1002"],
+        idle_timeout: 120,
+        advanced_features: { enable_aivad: true },
+        asr,
+        tts,
+        llm
+    }
 });
 ```
+
 
 ## Usage
 
 Instantiate and use the client with the following:
 
 ```typescript
-import { AgoraClient } from 'agora-agent-server-sdk';
+import { AgoraClient } from "agora-agent-server-sdk";
 
-const client = new AgoraClient({
-  username: 'YOUR_USERNAME',
-  password: 'YOUR_PASSWORD',
-  authorization: 'YOUR_AUTHORIZATION',
-});
+const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD", authorization: "YOUR_AUTHORIZATION" });
 await client.agents.start({
-  appid: 'appid',
-  name: 'unique_name',
-  properties: {
-    channel: 'channel_name',
-    token: 'token',
-    agent_rtc_uid: '1001',
-    remote_rtc_uids: ['1002'],
-    idle_timeout: 120,
-    asr: {
-      language: 'en-US',
-    },
-    tts: {
-      vendor: 'microsoft',
-      params: {
-        key: 'key',
-        region: 'region',
-        voice_name: 'voice_name',
-      },
-    },
-    llm: {
-      url: 'https://api.openai.com/v1/chat/completions',
-      api_key: '<your_llm_key>',
-      system_messages: [
-        {
-          role: 'system',
-          content: 'You are a helpful chatbot.',
+    appid: "appid",
+    name: "unique_name",
+    properties: {
+        channel: "channel_name",
+        token: "token",
+        agent_rtc_uid: "1001",
+        remote_rtc_uids: ["1002"],
+        idle_timeout: 120,
+        asr: {
+            language: "en-US"
         },
-      ],
-      params: {
-        model: 'gpt-4o-mini',
-      },
-      max_history: 32,
-      greeting_message: 'Hello, how can I assist you today?',
-      failure_message: 'Please hold on a second.',
-    },
-  },
+        tts: {
+            vendor: "microsoft",
+            params: {
+                key: "key",
+                region: "region",
+                voice_name: "voice_name"
+            }
+        },
+        llm: {
+            url: "https://api.openai.com/v1/chat/completions",
+            api_key: "<your_llm_key>",
+            system_messages: [{
+                    "role": "system",
+                    "content": "You are a helpful chatbot."
+                }],
+            params: {
+                "model": "gpt-4o-mini"
+            },
+            max_history: 32,
+            greeting_message: "Hello, how can I assist you today?",
+            failure_message: "Please hold on a second."
+        }
+    }
 });
 ```
 
@@ -356,26 +395,22 @@ try {
 List endpoints are paginated. The SDK provides an iterator so that you can simply loop over the items:
 
 ```typescript
-import { AgoraClient } from 'agora-agent-server-sdk';
+import { AgoraClient } from "agora-agent-server-sdk";
 
-const client = new AgoraClient({
-  username: 'YOUR_USERNAME',
-  password: 'YOUR_PASSWORD',
-  authorization: 'YOUR_AUTHORIZATION',
-});
+const client = new AgoraClient({ username: "YOUR_USERNAME", password: "YOUR_PASSWORD", authorization: "YOUR_AUTHORIZATION" });
 const pageableResponse = await client.agents.list({
-  appid: 'appid',
+    appid: "appid"
 });
 for await (const item of pageableResponse) {
-  console.log(item);
+    console.log(item);
 }
 
 // Or you can manually iterate page-by-page
 let page = await client.agents.list({
-  appid: 'appid',
+    appid: "appid"
 });
 while (page.hasNextPage()) {
-  page = page.getNextPage();
+    page = page.getNextPage();
 }
 
 // You can also access the underlying response
@@ -478,15 +513,12 @@ const client = new AgoraClient({
     }
 });
 ```
-
 The `logging` object can have the following properties:
-
 - `level`: The log level to use. Defaults to `logging.LogLevel.Info`.
 - `logger`: The logger to use. Defaults to a `logging.ConsoleLogger`.
 - `silent`: Whether to silence the logger. Defaults to `true`.
 
 The `level` property can be one of the following values:
-
 - `logging.LogLevel.Debug`
 - `logging.LogLevel.Info`
 - `logging.LogLevel.Warn`
@@ -498,7 +530,6 @@ To provide a custom logger, you can pass in an object that implements the `loggi
 <summary>Custom logger examples</summary>
 
 Here's an example using the popular `winston` logging library.
-
 ```ts
 import winston from 'winston';
 
@@ -526,12 +557,15 @@ const logger: logging.ILogger = {
   error: (msg, ...args) => pinoLogger.error(args, msg),
 };
 ```
-
 </details>
+
 
 ### Runtime Compatibility
 
+
 The SDK works in the following runtimes:
+
+
 
 - Node.js 18+
 - Vercel
