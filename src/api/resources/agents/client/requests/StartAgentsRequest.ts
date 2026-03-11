@@ -78,10 +78,10 @@ export namespace StartAgentsRequest {
         /** Automatic Speech Recognition (ASR) configuration. */
         asr?: Properties.Asr;
         /** Text-to-speech (TTS) module configuration. */
-        tts: Agora.Tts;
+        tts?: Agora.Tts;
         /** Large language model (LLM) configuration. */
-        llm: Properties.Llm;
-        /** Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing. */
+        llm?: Properties.Llm;
+        /** Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing. MLLM is an exclusive alternative to the standard `asr` + `llm` + `tts` pipeline. */
         mllm?: Properties.Mllm;
         /** Avatar configuration. */
         avatar?: Properties.Avatar;
@@ -325,7 +325,7 @@ export namespace StartAgentsRequest {
         }
 
         /**
-         * Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing.
+         * Multimodal Large Language Model (MLLM) configuration for real-time audio and text processing. MLLM is an exclusive alternative to the standard `asr` + `llm` + `tts` pipeline.
          */
         export interface Mllm {
             /** The MLLM WebSocket URL for real-time communication. */
