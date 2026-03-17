@@ -17,6 +17,12 @@ export interface OpenAIOptions extends BaseLlmOptions {
     url?: string;
     /** Maximum number of conversation history messages to cache */
     maxHistory?: number;
+    /** Sampling temperature (0.0–2.0) */
+    temperature?: number;
+    /** Nucleus sampling (0.0–1.0) */
+    topP?: number;
+    /** Maximum tokens to generate */
+    maxTokens?: number;
     /** System messages for the LLM */
     systemMessages?: Record<string, unknown>[];
     /** Greeting message for the agent */
@@ -54,6 +60,9 @@ export class OpenAI extends BaseLLM {
             model,
             url,
             maxHistory,
+            temperature,
+            topP,
+            maxTokens,
             systemMessages,
             greetingMessage,
             failureMessage,
@@ -64,8 +73,14 @@ export class OpenAI extends BaseLLM {
         return {
             url: url ?? "https://api.openai.com/v1/chat/completions",
             api_key: apiKey,
-            // model is the default; explicit params entries override it.
-            params: { model, ...params },
+            // model is the default; params entries extend it; named fields win.
+            params: {
+                model,
+                ...params,
+                ...(temperature !== undefined && { temperature }),
+                ...(topP !== undefined && { top_p: topP }),
+                ...(maxTokens !== undefined && { max_tokens: maxTokens }),
+            },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
@@ -97,6 +112,12 @@ export interface AzureOpenAIOptions extends BaseLlmOptions {
     apiVersion?: string;
     /** Maximum number of conversation history messages to cache */
     maxHistory?: number;
+    /** Sampling temperature (0.0–2.0) */
+    temperature?: number;
+    /** Nucleus sampling (0.0–1.0) */
+    topP?: number;
+    /** Maximum tokens to generate */
+    maxTokens?: number;
     /** System messages for the LLM */
     systemMessages?: Record<string, unknown>[];
     /** Greeting message for the agent */
@@ -138,6 +159,9 @@ export class AzureOpenAI extends BaseLLM {
             deploymentName,
             apiVersion = "2023-05-15",
             maxHistory,
+            temperature,
+            topP,
+            maxTokens,
             systemMessages,
             greetingMessage,
             failureMessage,
@@ -150,8 +174,14 @@ export class AzureOpenAI extends BaseLLM {
             api_key: apiKey,
             // "azure" is required by Agora for Azure OpenAI; user-supplied vendor overrides if needed.
             vendor: this.vendor ?? "azure",
-            // model is the default; explicit params entries override it.
-            params: { model, ...params },
+            // model is the default; params entries extend it; named fields win.
+            params: {
+                model,
+                ...params,
+                ...(temperature !== undefined && { temperature }),
+                ...(topP !== undefined && { top_p: topP }),
+                ...(maxTokens !== undefined && { max_tokens: maxTokens }),
+            },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
@@ -178,6 +208,12 @@ export interface AnthropicOptions extends BaseLlmOptions {
     url?: string;
     /** Maximum number of conversation history messages to cache */
     maxHistory?: number;
+    /** Maximum tokens to generate */
+    maxTokens?: number;
+    /** Sampling temperature (0.0–1.0) */
+    temperature?: number;
+    /** Nucleus sampling (0.0–1.0) */
+    topP?: number;
     /** System messages for the LLM */
     systemMessages?: Record<string, unknown>[];
     /** Greeting message for the agent */
@@ -210,13 +246,19 @@ export class Anthropic extends BaseLLM {
     }
 
     toConfig(): LlmConfig {
-        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
+        const { apiKey, model, url, maxHistory, maxTokens, temperature, topP, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
 
         return {
             url: url ?? "https://api.anthropic.com/v1/messages",
             api_key: apiKey,
-            // model is the default; explicit params entries override it.
-            params: { model, ...params },
+            // model is the default; params entries extend it; named fields win.
+            params: {
+                model,
+                ...params,
+                ...(maxTokens !== undefined && { max_tokens: maxTokens }),
+                ...(temperature !== undefined && { temperature }),
+                ...(topP !== undefined && { top_p: topP }),
+            },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
@@ -244,6 +286,14 @@ export interface GeminiOptions extends BaseLlmOptions {
     url?: string;
     /** Maximum number of conversation history messages to cache */
     maxHistory?: number;
+    /** Sampling temperature (0.0–2.0) */
+    temperature?: number;
+    /** Nucleus sampling (0.0–1.0) */
+    topP?: number;
+    /** Top-k sampling */
+    topK?: number;
+    /** Maximum output tokens to generate */
+    maxOutputTokens?: number;
     /** System messages for the LLM */
     systemMessages?: Record<string, unknown>[];
     /** Greeting message for the agent */
@@ -276,13 +326,20 @@ export class Gemini extends BaseLLM {
     }
 
     toConfig(): LlmConfig {
-        const { apiKey, model, url, maxHistory, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
+        const { apiKey, model, url, maxHistory, temperature, topP, topK, maxOutputTokens, systemMessages, greetingMessage, failureMessage, inputModalities, params } = this.options;
 
         return {
             url: url ?? "https://generativelanguage.googleapis.com/v1beta/models",
             api_key: apiKey,
-            // model is the default; explicit params entries override it.
-            params: { model, ...params },
+            // model is the default; params entries extend it; named fields win.
+            params: {
+                model,
+                ...params,
+                ...(temperature !== undefined && { temperature }),
+                ...(topP !== undefined && { top_p: topP }),
+                ...(topK !== undefined && { top_k: topK }),
+                ...(maxOutputTokens !== undefined && { max_output_tokens: maxOutputTokens }),
+            },
             max_history: maxHistory,
             system_messages: systemMessages,
             greeting_message: greetingMessage,
