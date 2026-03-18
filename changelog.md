@@ -6,10 +6,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ## [v1.1.0] — 2026-03-17
 
-### Added
-
-- `GroqTTS` vendor
-
 ### Fixed
 
 - `ElevenLabsTTS`: added missing voice tuning params — `optimizeStreamingLatency`, `stability`, `similarityBoost`, `style`, `useSpeakerBoost`
