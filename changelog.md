@@ -14,6 +14,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - `ElevenLabsTTS`: added missing voice tuning params — `optimizeStreamingLatency`, `stability`, `similarityBoost`, `style`, `useSpeakerBoost`
 - `Gemini` LLM: `toConfig()` now serializes `temperature`, `topP`, `topK`, and `maxOutputTokens` (fields existed on the interface but were silently dropped)
+- `AzureOpenAI` LLM: corrected default `apiVersion` from `2023-05-15` to `2024-08-01-preview`
+- `SpeechmaticsSTT`, `SarvamSTT`: added optional `model` field
 
 ## [v1.0.0] — 2026-03-11
 
