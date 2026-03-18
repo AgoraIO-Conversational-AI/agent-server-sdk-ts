@@ -489,50 +489,6 @@ export class FishAudioTTS extends BaseTTS {
 }
 
 /**
- * Constructor options for Groq TTS.
- */
-export interface GroqTTSOptions {
-    /** Groq API key */
-    key: string;
-    /** Model name */
-    model?: string;
-    /** Skip patterns for bracketed content */
-    skipPatterns?: number[];
-}
-
-/**
- * Groq TTS vendor.
- *
- * @example
- * ```typescript
- * const tts = new GroqTTS({
- *   key: process.env.GROQ_API_KEY,
- * });
- * ```
- */
-export class GroqTTS extends BaseTTS {
-    private readonly options: GroqTTSOptions;
-
-    constructor(options: GroqTTSOptions) {
-        super();
-        this.options = options;
-    }
-
-    toConfig(): TtsConfig {
-        const { key, model, skipPatterns } = this.options;
-
-        return {
-            vendor: "groq",
-            params: {
-                key,
-                ...(model && { model }),
-            },
-            ...(skipPatterns && { skip_patterns: skipPatterns }),
-        };
-    }
-}
-
-/**
  * Constructor options for MiniMax TTS.
  */
 export interface MiniMaxTTSOptions {
