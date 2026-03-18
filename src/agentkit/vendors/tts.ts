@@ -25,6 +25,16 @@ export interface ElevenLabsTTSOptions<SR extends ElevenLabsSampleRate = ElevenLa
      * - 22050, 44100 Hz: High quality, no avatar support
      */
     sampleRate?: SR;
+    /** Optimize streaming latency (0-4, higher = lower latency but lower quality) */
+    optimizeStreamingLatency?: number;
+    /** Voice stability (0.0-1.0) */
+    stability?: number;
+    /** Voice similarity boost (0.0-1.0) */
+    similarityBoost?: number;
+    /** Voice style (0.0-1.0) */
+    style?: number;
+    /** Enable speaker boost */
+    useSpeakerBoost?: boolean;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -51,7 +61,7 @@ export class ElevenLabsTTS<SR extends ElevenLabsSampleRate = ElevenLabsSampleRat
     }
 
     toConfig(): TtsConfig {
-        const { key, modelId, voiceId, baseUrl, sampleRate, skipPatterns } = this.options;
+        const { key, modelId, voiceId, baseUrl, sampleRate, optimizeStreamingLatency, stability, similarityBoost, style, useSpeakerBoost, skipPatterns } = this.options;
 
         return {
             vendor: "elevenlabs",
@@ -61,6 +71,11 @@ export class ElevenLabsTTS<SR extends ElevenLabsSampleRate = ElevenLabsSampleRat
                 voice_id: voiceId,
                 ...(baseUrl && { base_url: baseUrl }),
                 ...(sampleRate && { sample_rate: sampleRate }),
+                ...(optimizeStreamingLatency !== undefined && { optimize_streaming_latency: optimizeStreamingLatency }),
+                ...(stability !== undefined && { stability }),
+                ...(similarityBoost !== undefined && { similarity_boost: similarityBoost }),
+                ...(style !== undefined && { style }),
+                ...(useSpeakerBoost !== undefined && { use_speaker_boost: useSpeakerBoost }),
             },
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };
