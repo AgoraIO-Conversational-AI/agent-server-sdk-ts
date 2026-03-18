@@ -13,6 +13,8 @@ export interface SpeechmaticsSTTOptions {
     apiKey: string;
     /** Language code (e.g., 'en', 'es', 'fr') */
     language: string;
+    /** Model name */
+    model?: string;
     /** Additional vendor-specific parameters */
     additionalParams?: Record<string, unknown>;
 }
@@ -37,7 +39,7 @@ export class SpeechmaticsSTT extends BaseSTT {
     }
 
     toConfig(): SttConfig {
-        const { apiKey, language, additionalParams } = this.options;
+        const { apiKey, language, model, additionalParams } = this.options;
 
         return {
             vendor: "speechmatics",
@@ -50,6 +52,7 @@ export class SpeechmaticsSTT extends BaseSTT {
                 ...additionalParams,
                 api_key: apiKey,
                 language,
+                ...(model !== undefined && { model }),
             },
         };
     }
@@ -411,6 +414,8 @@ export interface SarvamSTTOptions {
     apiKey: string;
     /** Language code (e.g., 'en', 'hi', 'ta') */
     language: string;
+    /** Model name */
+    model?: string;
     /** Additional vendor-specific parameters */
     additionalParams?: Record<string, unknown>;
 }
@@ -435,7 +440,7 @@ export class SarvamSTT extends BaseSTT {
     }
 
     toConfig(): SttConfig {
-        const { apiKey, language, additionalParams } = this.options;
+        const { apiKey, language, model, additionalParams } = this.options;
 
         return {
             vendor: "sarvam",
@@ -448,6 +453,7 @@ export class SarvamSTT extends BaseSTT {
                 ...additionalParams,
                 api_key: apiKey,
                 language,
+                ...(model !== undefined && { model }),
             },
         };
     }

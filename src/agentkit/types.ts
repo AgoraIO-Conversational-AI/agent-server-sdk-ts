@@ -65,7 +65,7 @@ export type SttConfig =
 export type SttVendor = StartAgentsRequest.Properties.Asr.Vendor;
 
 /** TTS (Text-to-Speech) configuration - discriminated union */
-export type TtsConfig = Tts;
+export type TtsConfig = Tts | { vendor: "groq"; params?: Record<string, unknown>; skip_patterns?: number[] };
 
 /** MLLM (Multimodal LLM) configuration */
 export type MllmConfig = StartAgentsRequest.Properties.Mllm;

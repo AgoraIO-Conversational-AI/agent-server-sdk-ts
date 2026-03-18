@@ -108,7 +108,7 @@ export interface AzureOpenAIOptions extends BaseLlmOptions {
     resourceName: string;
     /** Deployment name in Azure */
     deploymentName: string;
-    /** Azure API version (defaults to '2023-05-15') */
+    /** Azure API version (defaults to '2024-08-01-preview') */
     apiVersion?: string;
     /** Maximum number of conversation history messages to cache */
     maxHistory?: number;
@@ -157,7 +157,7 @@ export class AzureOpenAI extends BaseLLM {
             model,
             resourceName,
             deploymentName,
-            apiVersion = "2023-05-15",
+            apiVersion = "2024-08-01-preview",
             maxHistory,
             temperature,
             topP,
