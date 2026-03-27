@@ -10,6 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - **`AresSTT`** — Removed redundant `language` key from the `params` dict. Language is now emitted only at the top level. `params` is only included when `additionalParams` is provided.
 - **`OpenAIRealtime` / `VertexAI` (MLLM)** — Agent-level `greeting`, `failureMessage`, and `maxHistory` overrides are now correctly applied when the agent is in MLLM mode. Previously these values were silently dropped.
+- **`VertexAI` (MLLM)** — `messages` is now correctly placed inside `params` (required by the Gemini Live API). Previously it was emitted at the top level and silently ignored.
 
 ### Changed
 
