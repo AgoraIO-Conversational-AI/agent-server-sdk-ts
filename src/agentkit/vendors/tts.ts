@@ -164,7 +164,7 @@ export interface OpenAITTSOptions {
  * @example
  * ```typescript
  * const tts = new OpenAITTS({
- *   key: process.env.OPENAI_API_KEY,
+ *   apiKey: process.env.OPENAI_API_KEY,
  *   voice: 'alloy',
  * });
  * ```
@@ -180,6 +180,7 @@ export class OpenAITTS extends BaseTTS<24000> {
     toConfig(): TtsConfig {
         const { apiKey, voice, model, responseFormat, speed, skipPatterns } = this.options;
 
+        // Cast required: Fern-generated OpenAiTtsParams still uses `key`; actual API uses `api_key`.
         return {
             vendor: "openai",
             params: {
@@ -188,9 +189,9 @@ export class OpenAITTS extends BaseTTS<24000> {
                 ...(model && { model }),
                 ...(responseFormat && { response_format: responseFormat }),
                 ...(speed !== undefined && { speed }),
-            },
+            } as unknown as import("../types.js").OpenAiTtsParams,
             ...(skipPatterns && { skip_patterns: skipPatterns }),
-        };
+        } as TtsConfig;
     }
 }
 
@@ -219,7 +220,7 @@ export interface CartesiaTTSOptions<SR extends CartesiaSampleRate = CartesiaSamp
  * @example
  * ```typescript
  * const tts = new CartesiaTTS({
- *   key: process.env.CARTESIA_API_KEY,
+ *   apiKey: process.env.CARTESIA_API_KEY,
  *   voiceId: 'voice-id-here',
  *   sampleRate: 24000,
  * });
@@ -236,6 +237,7 @@ export class CartesiaTTS<SR extends CartesiaSampleRate = CartesiaSampleRate> ext
     toConfig(): TtsConfig {
         const { apiKey, voiceId, modelId, sampleRate, skipPatterns } = this.options;
 
+        // Cast required: Fern-generated CartesiaTtsParams still uses `key`/`voice_id`; actual API uses `api_key` and nested voice object.
         return {
             vendor: "cartesia",
             params: {
@@ -243,9 +245,9 @@ export class CartesiaTTS<SR extends CartesiaSampleRate = CartesiaSampleRate> ext
                 voice: { mode: "id", id: voiceId },
                 ...(modelId && { model_id: modelId }),
                 ...(sampleRate && { sample_rate: sampleRate }),
-            },
+            } as unknown as import("../types.js").CartesiaTtsParams,
             ...(skipPatterns && { skip_patterns: skipPatterns }),
-        };
+        } as TtsConfig;
     }
 }
 

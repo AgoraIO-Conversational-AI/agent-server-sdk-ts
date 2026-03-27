@@ -83,7 +83,7 @@ function validExample4(): Agent<24000> {
     return new Agent({ instructions: "Test" })
         .withTts(
             new OpenAITTS({
-                key: "test",
+                apiKey: "test",
                 voice: "alloy",
             })
         )
@@ -101,7 +101,7 @@ function validExample5(): Agent<16000> {
     return new Agent({ instructions: "Test" })
         .withTts(
             new CartesiaTTS({
-                key: "test",
+                apiKey: "test",
                 voiceId: "test",
                 sampleRate: 16000,
             })
@@ -314,7 +314,7 @@ function typeInference2() {
 function typeInference3() {
     const openAIAgent = new Agent({ instructions: "Test" }).withTts(
         new OpenAITTS({
-            key: "test",
+            apiKey: "test",
             voice: "alloy",
         })
     );
