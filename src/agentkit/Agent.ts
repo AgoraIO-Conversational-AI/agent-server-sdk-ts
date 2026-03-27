@@ -640,14 +640,16 @@ export class Agent<TTSSampleRate extends number = number> {
             if (mllmConfig) {
                 // Vendor config wins: only apply agent-level values when the vendor hasn't already set them.
                 // Consistent with Python (setdefault) and Go (!exists) semantics.
-                if (this._greeting !== undefined && mllmConfig["greeting_message"] === undefined) {
-                    mllmConfig["greeting_message"] = this._greeting;
+                // Cast to Record to write fields absent from the stale Fern-generated MllmConfig type.
+                const c = mllmConfig as Record<string, unknown>;
+                if (this._greeting !== undefined && c["greeting_message"] === undefined) {
+                    c["greeting_message"] = this._greeting;
                 }
-                if (this._failureMessage !== undefined && mllmConfig["failure_message"] === undefined) {
-                    mllmConfig["failure_message"] = this._failureMessage;
+                if (this._failureMessage !== undefined && c["failure_message"] === undefined) {
+                    c["failure_message"] = this._failureMessage;
                 }
-                if (this._maxHistory !== undefined && mllmConfig["max_history"] === undefined) {
-                    mllmConfig["max_history"] = this._maxHistory;
+                if (this._maxHistory !== undefined && c["max_history"] === undefined) {
+                    c["max_history"] = this._maxHistory;
                 }
             }
             return { ...base, mllm: mllmConfig };
