@@ -143,11 +143,15 @@ export class MicrosoftTTS<SR extends MicrosoftSampleRate = MicrosoftSampleRate> 
  */
 export interface OpenAITTSOptions {
     /** OpenAI API key */
-    key: string;
+    apiKey: string;
     /** Voice name (e.g., 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer') */
     voice: string;
     /** Model name (e.g., 'tts-1', 'tts-1-hd') */
     model?: string;
+    /** Audio format (e.g., 'pcm') */
+    responseFormat?: string;
+    /** Speech speed multiplier */
+    speed?: number;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -174,14 +178,16 @@ export class OpenAITTS extends BaseTTS<24000> {
     }
 
     toConfig(): TtsConfig {
-        const { key, voice, model, skipPatterns } = this.options;
+        const { apiKey, voice, model, responseFormat, speed, skipPatterns } = this.options;
 
         return {
             vendor: "openai",
             params: {
-                key,
+                api_key: apiKey,
                 voice,
                 ...(model && { model }),
+                ...(responseFormat && { response_format: responseFormat }),
+                ...(speed !== undefined && { speed }),
             },
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };
@@ -193,7 +199,7 @@ export class OpenAITTS extends BaseTTS<24000> {
  */
 export interface CartesiaTTSOptions<SR extends CartesiaSampleRate = CartesiaSampleRate> {
     /** Cartesia API key */
-    key: string;
+    apiKey: string;
     /** Voice ID */
     voiceId: string;
     /** Model ID */
@@ -228,13 +234,13 @@ export class CartesiaTTS<SR extends CartesiaSampleRate = CartesiaSampleRate> ext
     }
 
     toConfig(): TtsConfig {
-        const { key, voiceId, modelId, sampleRate, skipPatterns } = this.options;
+        const { apiKey, voiceId, modelId, sampleRate, skipPatterns } = this.options;
 
         return {
             vendor: "cartesia",
             params: {
-                key,
-                voice_id: voiceId,
+                api_key: apiKey,
+                voice: { mode: "id", id: voiceId },
                 ...(modelId && { model_id: modelId }),
                 ...(sampleRate && { sample_rate: sampleRate }),
             },
@@ -405,6 +411,12 @@ export interface RimeTTSOptions {
     speaker: string;
     /** Model ID */
     modelId?: string;
+    /** Language code */
+    lang?: string;
+    /** Sampling rate in Hz */
+    samplingRate?: number;
+    /** Speed multiplier */
+    speedAlpha?: number;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -429,7 +441,7 @@ export class RimeTTS extends BaseTTS {
     }
 
     toConfig(): TtsConfig {
-        const { key, speaker, modelId, skipPatterns } = this.options;
+        const { key, speaker, modelId, lang, samplingRate, speedAlpha, skipPatterns } = this.options;
 
         return {
             vendor: "rime",
@@ -437,6 +449,9 @@ export class RimeTTS extends BaseTTS {
                 key,
                 speaker,
                 ...(modelId && { model_id: modelId }),
+                ...(lang && { lang }),
+                ...(samplingRate !== undefined && { samplingRate }),
+                ...(speedAlpha !== undefined && { speedAlpha }),
             },
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };

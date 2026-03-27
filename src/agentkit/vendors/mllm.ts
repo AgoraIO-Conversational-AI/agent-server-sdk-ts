@@ -29,6 +29,12 @@ export interface OpenAIRealtimeOptions {
     messages?: Record<string, unknown>[];
     /** Additional MLLM parameters */
     params?: Record<string, unknown>;
+    /** Predefined tools available to the model (e.g., ['_publish_message']) */
+    predefinedTools?: string[];
+    /** Message played on failure */
+    failureMessage?: string;
+    /** Maximum conversation history length */
+    maxHistory?: number;
 }
 
 /**
@@ -84,6 +90,9 @@ export class OpenAIRealtime extends BaseMLLM {
             ...(inputModalities && { input_modalities: inputModalities }),
             ...(outputModalities && { output_modalities: outputModalities }),
             ...(messages && { messages }),
+            ...(this.options.predefinedTools && { predefined_tools: this.options.predefinedTools }),
+            ...(this.options.failureMessage && { failure_message: this.options.failureMessage }),
+            ...(this.options.maxHistory !== undefined && { max_history: this.options.maxHistory }),
         };
     }
 }
@@ -114,6 +123,12 @@ export interface VertexAIOptions {
     messages?: Record<string, unknown>[];
     /** Additional MLLM parameters */
     additionalParams?: Record<string, unknown>;
+    /** Predefined tools available to the model (e.g., ['_publish_message']) */
+    predefinedTools?: string[];
+    /** Message played on failure */
+    failureMessage?: string;
+    /** Maximum conversation history length */
+    maxHistory?: number;
 }
 
 /**
@@ -180,6 +195,9 @@ export class VertexAI extends BaseMLLM {
             ...(inputModalities && { input_modalities: inputModalities }),
             ...(outputModalities && { output_modalities: outputModalities }),
             ...(messages && { messages }),
+            ...(this.options.predefinedTools && { predefined_tools: this.options.predefinedTools }),
+            ...(this.options.failureMessage && { failure_message: this.options.failureMessage }),
+            ...(this.options.maxHistory !== undefined && { max_history: this.options.maxHistory }),
         };
     }
 }

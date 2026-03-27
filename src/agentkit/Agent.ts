@@ -636,7 +636,13 @@ export class Agent<TTSSampleRate extends number = number> {
         };
 
         if (isMllmMode) {
-            return base;
+            const mllmConfig = this._mllm ? {
+                ...this._mllm,
+                ...(this._greeting !== undefined && { greeting_message: this._greeting }),
+                ...(this._failureMessage !== undefined && { failure_message: this._failureMessage }),
+                ...(this._maxHistory !== undefined && { max_history: this._maxHistory }),
+            } : undefined;
+            return { ...base, mllm: mllmConfig };
         }
 
         if (!this._tts) {
