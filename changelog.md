@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [v1.2.0] — 2026-03-27
+
+### Fixed
+
+- **`AresSTT`** — Removed redundant `language` key from the `params` dict. Language is now emitted only at the top level. `params` is only included when `additionalParams` is provided.
+- **`OpenAIRealtime` / `VertexAI` (MLLM)** — Agent-level `greeting`, `failureMessage`, and `maxHistory` overrides are now correctly applied when the agent is in MLLM mode. Previously these values were silently dropped.
+
+### Changed
+
+- **`OpenAITTS`** — Renamed constructor option `key` → `apiKey` to match the Agora server API expectation. ⚠️ **Breaking change.**
+- **`CartesiaTTS`** — Renamed constructor option `key` → `apiKey`. Voice is now serialized as `{"mode": "id", "id": "<voiceId>"}` instead of a flat `voice_id` string. ⚠️ **Breaking change.**
+- **`HeyGenAvatar`** — Removed legacy options `avatarName`, `voiceId`, `language`, `version`. Added `agoraToken`, `avatarId`, `enable`, `disableIdleTimeout`, `activityIdleTimeout`. The config now includes a top-level `enable` field (defaults `true`). ⚠️ **Breaking change.**
+
+### Added
+
+- **`OpenAITTS`** — New optional parameters: `responseFormat` (string, e.g. `"pcm"`) and `speed` (number).
+- **`CartesiaTTS`** — `voiceId` user-facing option is preserved; voice is serialized to the required nested object format automatically.
+- **`RimeTTS`** — New optional parameters: `lang` (string), `samplingRate` (number, serialized as `samplingRate`), `speedAlpha` (number, serialized as `speedAlpha`).
+- **`OpenAIRealtime`** — New optional parameters: `predefinedTools` (string[]), `failureMessage` (string), `maxHistory` (number).
+- **`VertexAI` (MLLM)** — New optional parameters: `predefinedTools` (string[]), `failureMessage` (string), `maxHistory` (number).
+- **`HeyGenAvatar`** — New options: `agoraToken` (string), `avatarId` (string), `enable` (boolean, default `true`), `disableIdleTimeout` (boolean), `activityIdleTimeout` (number).
+
 ## [v1.1.0] — 2026-03-17
 
 ### Fixed

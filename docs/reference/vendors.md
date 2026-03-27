@@ -127,9 +127,11 @@ Fixed at 24kHz — no configurable sample rate.
 
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `key` | `string` | Yes | OpenAI API key |
+| `apiKey` | `string` | Yes | OpenAI API key |
 | `voice` | `string` | Yes | Voice name (`'alloy'`, `'echo'`, `'fable'`, `'onyx'`, `'nova'`, `'shimmer'`) |
 | `model` | `string` | No | Model name (e.g., `'tts-1'`, `'tts-1-hd'`) |
+| `responseFormat` | `string` | No | Audio format (e.g., `'pcm'`) |
+| `speed` | `number` | No | Speech speed multiplier |
 | `skipPatterns` | `number[]` | No | Skip patterns for bracketed content |
 
 ### CartesiaTTS
@@ -140,8 +142,8 @@ new CartesiaTTS<SR extends CartesiaSampleRate>(options: CartesiaTTSOptions<SR>)
 
 | Option | Type | Required | Description |
 |---|---|---|---|
-| `key` | `string` | Yes | Cartesia API key |
-| `voiceId` | `string` | Yes | Voice ID |
+| `apiKey` | `string` | Yes | Cartesia API key |
+| `voiceId` | `string` | Yes | Voice ID (serialized as `{"mode": "id", "id": "..."}`) |
 | `modelId` | `string` | No | Model ID |
 | `sampleRate` | `8000 \| 16000 \| 22050 \| 24000 \| 44100 \| 48000` | No | Audio sample rate in Hz |
 | `skipPatterns` | `number[]` | No | Skip patterns for bracketed content |
@@ -155,7 +157,7 @@ The following vendors share a similar pattern. See `src/agentkit/vendors/tts.ts`
 | `GoogleTTS` | `key`, `voiceName`, `languageCode?` |
 | `AmazonTTS` | `accessKey`, `secretKey`, `region`, `voiceId` |
 | `HumeAITTS` | `key`, `configId?` |
-| `RimeTTS` | `key`, `speaker`, `modelId?` |
+| `RimeTTS` | `key`, `speaker`, `modelId?`, `lang?`, `samplingRate?`, `speedAlpha?` |
 | `FishAudioTTS` | `key`, `referenceId` |
 | `MiniMaxTTS` | `key`, `groupId`, `model`, `voiceId`, `url` |
 | `MurfTTS` | `key`, `voiceId`, `style?` |
@@ -209,6 +211,9 @@ new OpenAIRealtime(options: OpenAIRealtimeOptions)
 | `model` | `string` | No | Model name (e.g., `'gpt-4o-realtime-preview'`) |
 | `url` | `string` | No | WebSocket URL |
 | `greetingMessage` | `string` | No | Agent greeting message |
+| `failureMessage` | `string` | No | Message played when the model call fails |
+| `maxHistory` | `number` | No | Maximum conversation history length |
+| `predefinedTools` | `string[]` | No | Predefined tools (e.g., `['_publish_message']`) |
 | `inputModalities` | `string[]` | No | Input modalities (e.g., `['audio']`) |
 | `outputModalities` | `string[]` | No | Output modalities (e.g., `['text', 'audio']`) |
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages for short-term memory |
@@ -229,6 +234,9 @@ new VertexAI(options: VertexAIOptions)
 | `instructions` | `string` | No | System instructions for the model |
 | `voice` | `string` | No | Voice name (e.g., `'Aoede'`, `'Charon'`) |
 | `greetingMessage` | `string` | No | Agent greeting message |
+| `failureMessage` | `string` | No | Message played when the model call fails |
+| `maxHistory` | `number` | No | Maximum conversation history length |
+| `predefinedTools` | `string[]` | No | Predefined tools (e.g., `['_publish_message']`) |
 | `inputModalities` | `string[]` | No | Input modalities |
 | `outputModalities` | `string[]` | No | Output modalities |
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages |
