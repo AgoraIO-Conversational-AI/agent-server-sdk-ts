@@ -636,12 +636,20 @@ export class Agent<TTSSampleRate extends number = number> {
         };
 
         if (isMllmMode) {
-            const mllmConfig = this._mllm ? {
-                ...this._mllm,
-                ...(this._greeting !== undefined && { greeting_message: this._greeting }),
-                ...(this._failureMessage !== undefined && { failure_message: this._failureMessage }),
-                ...(this._maxHistory !== undefined && { max_history: this._maxHistory }),
-            } : undefined;
+            let mllmConfig = this._mllm ? { ...this._mllm } : undefined;
+            if (mllmConfig) {
+                // Vendor config wins: only apply agent-level values when the vendor hasn't already set them.
+                // Consistent with Python (setdefault) and Go (!exists) semantics.
+                if (this._greeting !== undefined && mllmConfig["greeting_message"] === undefined) {
+                    mllmConfig["greeting_message"] = this._greeting;
+                }
+                if (this._failureMessage !== undefined && mllmConfig["failure_message"] === undefined) {
+                    mllmConfig["failure_message"] = this._failureMessage;
+                }
+                if (this._maxHistory !== undefined && mllmConfig["max_history"] === undefined) {
+                    mllmConfig["max_history"] = this._maxHistory;
+                }
+            }
             return { ...base, mllm: mllmConfig };
         }
 
