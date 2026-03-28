@@ -143,11 +143,15 @@ export class MicrosoftTTS<SR extends MicrosoftSampleRate = MicrosoftSampleRate> 
  */
 export interface OpenAITTSOptions {
     /** OpenAI API key */
-    key: string;
+    apiKey: string;
     /** Voice name (e.g., 'alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer') */
     voice: string;
     /** Model name (e.g., 'tts-1', 'tts-1-hd') */
     model?: string;
+    /** Audio format (e.g., 'pcm') */
+    responseFormat?: string;
+    /** Speech speed multiplier */
+    speed?: number;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -160,7 +164,7 @@ export interface OpenAITTSOptions {
  * @example
  * ```typescript
  * const tts = new OpenAITTS({
- *   key: process.env.OPENAI_API_KEY,
+ *   apiKey: process.env.OPENAI_API_KEY,
  *   voice: 'alloy',
  * });
  * ```
@@ -174,17 +178,20 @@ export class OpenAITTS extends BaseTTS<24000> {
     }
 
     toConfig(): TtsConfig {
-        const { key, voice, model, skipPatterns } = this.options;
+        const { apiKey, voice, model, responseFormat, speed, skipPatterns } = this.options;
 
+        // Cast required: Fern-generated OpenAiTtsParams still uses `key`; actual API uses `api_key`.
         return {
             vendor: "openai",
             params: {
-                key,
+                api_key: apiKey,
                 voice,
                 ...(model && { model }),
-            },
+                ...(responseFormat && { response_format: responseFormat }),
+                ...(speed !== undefined && { speed }),
+            } as unknown as import("../types.js").OpenAiTtsParams,
             ...(skipPatterns && { skip_patterns: skipPatterns }),
-        };
+        } as TtsConfig;
     }
 }
 
@@ -193,7 +200,7 @@ export class OpenAITTS extends BaseTTS<24000> {
  */
 export interface CartesiaTTSOptions<SR extends CartesiaSampleRate = CartesiaSampleRate> {
     /** Cartesia API key */
-    key: string;
+    apiKey: string;
     /** Voice ID */
     voiceId: string;
     /** Model ID */
@@ -213,7 +220,7 @@ export interface CartesiaTTSOptions<SR extends CartesiaSampleRate = CartesiaSamp
  * @example
  * ```typescript
  * const tts = new CartesiaTTS({
- *   key: process.env.CARTESIA_API_KEY,
+ *   apiKey: process.env.CARTESIA_API_KEY,
  *   voiceId: 'voice-id-here',
  *   sampleRate: 24000,
  * });
@@ -228,18 +235,19 @@ export class CartesiaTTS<SR extends CartesiaSampleRate = CartesiaSampleRate> ext
     }
 
     toConfig(): TtsConfig {
-        const { key, voiceId, modelId, sampleRate, skipPatterns } = this.options;
+        const { apiKey, voiceId, modelId, sampleRate, skipPatterns } = this.options;
 
+        // Cast required: Fern-generated CartesiaTtsParams still uses `key`/`voice_id`; actual API uses `api_key` and nested voice object.
         return {
             vendor: "cartesia",
             params: {
-                key,
-                voice_id: voiceId,
+                api_key: apiKey,
+                voice: { mode: "id", id: voiceId },
                 ...(modelId && { model_id: modelId }),
                 ...(sampleRate && { sample_rate: sampleRate }),
-            },
+            } as unknown as import("../types.js").CartesiaTtsParams,
             ...(skipPatterns && { skip_patterns: skipPatterns }),
-        };
+        } as TtsConfig;
     }
 }
 
@@ -405,6 +413,12 @@ export interface RimeTTSOptions {
     speaker: string;
     /** Model ID */
     modelId?: string;
+    /** Language code */
+    lang?: string;
+    /** Sampling rate in Hz */
+    samplingRate?: number;
+    /** Speed multiplier */
+    speedAlpha?: number;
     /** Skip patterns for bracketed content */
     skipPatterns?: number[];
 }
@@ -429,7 +443,7 @@ export class RimeTTS extends BaseTTS {
     }
 
     toConfig(): TtsConfig {
-        const { key, speaker, modelId, skipPatterns } = this.options;
+        const { key, speaker, modelId, lang, samplingRate, speedAlpha, skipPatterns } = this.options;
 
         return {
             vendor: "rime",
@@ -437,6 +451,9 @@ export class RimeTTS extends BaseTTS {
                 key,
                 speaker,
                 ...(modelId && { model_id: modelId }),
+                ...(lang && { lang }),
+                ...(samplingRate !== undefined && { samplingRate }),
+                ...(speedAlpha !== undefined && { speedAlpha }),
             },
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };

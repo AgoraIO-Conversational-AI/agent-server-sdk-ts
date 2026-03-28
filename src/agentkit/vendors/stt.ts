@@ -391,17 +391,10 @@ export class AresSTT extends BaseSTT {
     toConfig(): SttConfig {
         const { language, additionalParams } = this.options;
 
-        // Only include params when there is content to send; avoids emitting
-        // params: {} when neither language nor additionalParams are provided.
-        const paramsEntries = {
-            ...(language && { language }),
-            ...additionalParams,
-        };
-
         return {
             vendor: "ares",
-            language,
-            ...(Object.keys(paramsEntries).length > 0 && { params: paramsEntries }),
+            ...(language && { language }),
+            ...(additionalParams && Object.keys(additionalParams).length > 0 && { params: additionalParams }),
         };
     }
 }
