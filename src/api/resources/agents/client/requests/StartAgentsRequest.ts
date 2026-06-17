@@ -180,6 +180,7 @@ export namespace StartAgentsRequest {
              * - `liveavatar`: LiveAvatar (Beta)
              * - `anam`: Anam (Beta)
              * - `generic`: Generic (Beta)
+             * - `sensetime`: SenseTime Avatar
              */
             vendor?: Avatar.Vendor;
             /** The configuration parameters for the avatar vendor. See [AI Avatar Overview](https://docs.agora.io/en/conversational-ai/models/avatar/overview) for details. */
@@ -193,6 +194,7 @@ export namespace StartAgentsRequest {
              * - `liveavatar`: LiveAvatar (Beta)
              * - `anam`: Anam (Beta)
              * - `generic`: Generic (Beta)
+             * - `sensetime`: SenseTime Avatar
              */
             export const Vendor = {
                 Akool: "akool",
@@ -203,6 +205,9 @@ export namespace StartAgentsRequest {
                 /**
                  * Generic avatar (Beta) */
                 Generic: "generic",
+                /**
+                 * SenseTime Avatar */
+                Sensetime: "sensetime",
                 /**
                  * Deprecated: HeyGen has renamed to LiveAvatar. Use `liveavatar` instead. */
                 Heygen: "heygen",

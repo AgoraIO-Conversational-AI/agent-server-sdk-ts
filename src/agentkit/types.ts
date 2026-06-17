@@ -96,7 +96,9 @@ export type AvatarVendor = StartAgentsRequest.Properties.Avatar.Vendor;
 export type TurnDetectionLanguage = AsrLanguage;
 
 /** Turn detection configuration */
-export type TurnDetectionConfig = StartAgentsRequest.Properties.TurnDetection;
+export type TurnDetectionConfig = Omit<StartAgentsRequest.Properties.TurnDetection, "language"> & {
+    language?: TurnDetectionLanguage;
+};
 
 // --- New SOS/EOS turn detection types (preferred) ---
 

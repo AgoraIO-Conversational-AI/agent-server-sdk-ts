@@ -58,29 +58,30 @@ describe("LLM vendor helpers", () => {
         });
     });
 
-    test("VertexAILLM includes project routing in Gemini-style params", () => {
-        expect(
-            new VertexAILLM({
-                apiKey: "vertex-token",
-                model: "gemini-2.0-flash",
-                projectId: "project",
-                location: "us-central1",
-                topP: 0.8,
-                topK: 40,
-                maxOutputTokens: 1024,
-            }).toConfig(),
-        ).toMatchObject({
+    test("VertexAILLM builds correct URL and excludes project routing from params", () => {
+        const config = new VertexAILLM({
+            apiKey: "vertex-token",
+            model: "gemini-2.0-flash",
+            projectId: "project",
+            location: "us-central1",
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 1024,
+        }).toConfig();
+        expect(config).toMatchObject({
             api_key: "vertex-token",
             style: "gemini",
             params: {
                 model: "gemini-2.0-flash",
-                project_id: "project",
-                location: "us-central1",
                 top_p: 0.8,
                 top_k: 40,
                 max_output_tokens: 1024,
             },
         });
+        expect(config.url).toContain("project");
+        expect(config.url).toContain("us-central1");
+        expect((config.params as Record<string, unknown>)?.project_id).toBeUndefined();
+        expect((config.params as Record<string, unknown>)?.location).toBeUndefined();
     });
 
     test("AmazonBedrock serializes as Bedrock-style with top-level AWS routing", () => {

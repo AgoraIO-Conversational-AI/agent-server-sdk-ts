@@ -120,6 +120,14 @@ jobs:
           done
           exit 1
 
+      - name: Deprecate legacy package name
+        continue-on-error: true
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm deprecate "agora-agent-server-sdk@<${RELEASE_TAG#v}" "This package has been renamed to agora-agents. Please install agora-agents instead." || true
+          npm deprecate "agora-agent-server-sdk@${RELEASE_TAG#v}" "This package has been renamed to agora-agents. Please install agora-agents instead." || true
+
       - name: Extract release notes
         run: |
           TAG="${RELEASE_TAG}"

@@ -29,6 +29,7 @@ import {
 
 async function main(): Promise<void> {
   const client = new AgoraClient({
+
     area: Area.US,
     appId: 'your-app-id',
     appCertificate: 'your-app-certificate',

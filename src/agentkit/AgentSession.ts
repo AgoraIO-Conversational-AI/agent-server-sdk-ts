@@ -110,6 +110,7 @@ export interface AgentSessionOptions {
  *
  * const client = new AgoraClient({
  *   area: Area.US,
+
  *   appId: '...',
  *   appCertificate: '...',
  * });

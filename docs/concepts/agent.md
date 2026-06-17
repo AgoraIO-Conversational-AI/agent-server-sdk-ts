@@ -114,6 +114,7 @@ const base = new Agent()
   .withStt(new DeepgramSTT({ apiKey: 'your-deepgram-key', model: 'nova-2' }));
 
 // Two sessions from the same agent config — safe, no shared mutable state
+
 const sessionA = base.createSession(client, { channel: 'room-a', agentUid: '1', remoteUids: ['100'] });
 const sessionB = base.createSession(client, { channel: 'room-b', agentUid: '1', remoteUids: ['200'] });
 ```

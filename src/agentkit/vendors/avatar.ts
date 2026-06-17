@@ -10,6 +10,8 @@ import type { AkoolSampleRate, HeyGenSampleRate, LiveAvatarSampleRate } from "./
 import { BaseAvatar } from "./base.js";
 
 /**
+ * Constructor options for HeyGen Avatar.
+/**
  * Constructor options for LiveAvatar.
  */
 export interface LiveAvatarAvatarOptions {
@@ -21,7 +23,7 @@ export interface LiveAvatarAvatarOptions {
     agoraUid: string;
     /** Avatar ConvoAI token. Omit to auto-generate at session start. */
     agoraToken?: string;
-    /** Avatar ID */
+    /** HeyGen avatar ID */
     avatarId?: string;
     /** Whether to disable idle timeout (default: false) */
     disableIdleTimeout?: boolean;

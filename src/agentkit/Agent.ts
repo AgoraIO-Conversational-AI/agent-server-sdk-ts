@@ -74,7 +74,7 @@ function isTurnDetectionLanguage(value: string): value is TurnDetectionLanguage 
 
 function assertTurnDetectionLanguage(value: string): asserts value is TurnDetectionLanguage {
     if (!isTurnDetectionLanguage(value)) {
-        throw new Error(`Invalid interaction language: ${value}`);
+        throw new Error(`Invalid turnDetection.language: ${value}`);
     }
 }
 
@@ -850,7 +850,11 @@ export class Agent<TTSSampleRate extends number = number> {
                     c.failure_message = this._failureMessage;
                 }
             }
-            return { ...base, mllm: mllmConfig, turn_detection: this._turnDetection };
+            return {
+                ...base,
+                mllm: mllmConfig,
+                turn_detection: this._turnDetection as Agora.StartAgentsRequest.Properties.TurnDetection | undefined,
+            };
         }
 
         const skipCategories = new Set(opts.skipVendorValidationCategories ?? []);
@@ -878,26 +882,29 @@ export class Agent<TTSSampleRate extends number = number> {
         const llmConfig: Agora.Llm | undefined = this._llm
             ? {
                   ...this._llm,
-                  system_messages: this._instructions
-                      ? [{ role: "system", content: this._instructions }]
-                      : this._llm.system_messages,
-                  greeting_message: this._greeting ?? this._llm.greeting_message,
-                  greeting_configs: this._greetingConfigs ?? this._llm.greeting_configs,
-                  failure_message: this._failureMessage ?? this._llm.failure_message,
-                  max_history: this._maxHistory ?? this._llm.max_history,
+                  system_messages:
+                      this._llm.system_messages !== undefined
+                          ? this._llm.system_messages
+                          : this._instructions
+                            ? [{ role: "system", content: this._instructions }]
+                            : undefined,
+                  greeting_message: this._llm.greeting_message ?? this._greeting,
+                  greeting_configs: this._llm.greeting_configs ?? this._greetingConfigs,
+                  failure_message: this._llm.failure_message ?? this._failureMessage,
+                  max_history: this._llm.max_history ?? this._maxHistory,
               }
             : undefined;
 
+        const turnDetectionConfig = this._resolveTurnDetectionConfig();
         const asrConfig =
             this._stt !== undefined || !allowMissingAsr
-                ? (this._resolveAsrConfig() as Agora.Asr | undefined)
+                ? (this._resolveAsrConfig(turnDetectionConfig) as Agora.Asr | undefined)
                 : undefined;
-        const turnDetectionConfig = this._resolveTurnDetectionConfig();
         const ttsConfig = this._tts;
 
         return {
             ...base,
-            turn_detection: turnDetectionConfig,
+            turn_detection: turnDetectionConfig as Agora.StartAgentsRequest.Properties.TurnDetection,
             ...(llmConfig && { llm: llmConfig }),
             ...(ttsConfig && { tts: ttsConfig }),
             ...(asrConfig && { asr: asrConfig }),
@@ -939,12 +946,12 @@ export class Agent<TTSSampleRate extends number = number> {
         return newAgent;
     }
 
-    private _resolveAsrConfig(): SttConfig | undefined {
+    private _resolveAsrConfig(turnDetectionConfig: TurnDetectionConfig): SttConfig | undefined {
         const asrConfig = { ...(this._stt ?? {}) } as SttConfig & { language?: string };
         if (this._stt === undefined) {
             asrConfig.vendor = "ares";
         }
-        delete asrConfig.language;
+        asrConfig.language = turnDetectionConfig.language;
 
         return Object.keys(asrConfig).length > 0 ? asrConfig : undefined;
     }
@@ -952,12 +959,7 @@ export class Agent<TTSSampleRate extends number = number> {
     private _resolveTurnDetectionConfig(): TurnDetectionConfig {
         const turnDetection = { ...(this._turnDetection ?? {}) } as TurnDetectionConfig & { language?: string };
         const existingTurnDetectionLanguage = turnDetection.language;
-        const existingAsrLanguage = this._stt?.language;
-        const language =
-            existingTurnDetectionLanguage ??
-            (existingAsrLanguage !== undefined && isTurnDetectionLanguage(existingAsrLanguage)
-                ? existingAsrLanguage
-                : DEFAULT_TURN_DETECTION_LANGUAGE);
+        const language = existingTurnDetectionLanguage ?? DEFAULT_TURN_DETECTION_LANGUAGE;
 
         assertTurnDetectionLanguage(language);
         turnDetection.language = language;

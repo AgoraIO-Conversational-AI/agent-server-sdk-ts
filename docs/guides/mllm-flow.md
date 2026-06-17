@@ -99,6 +99,7 @@ import { AgoraClient, Area, Agent, XaiGrok } from 'agora-agents';
 
 const client = new AgoraClient({
   area: Area.US,
+
   appId: 'your-app-id',
   appCertificate: 'your-app-certificate',
 });

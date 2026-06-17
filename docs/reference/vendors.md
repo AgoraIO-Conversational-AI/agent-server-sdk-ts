@@ -10,6 +10,7 @@ All vendor classes are imported from `agora-agents`.
 
 ## LLM vendors
 
+
 ### OpenAI
 
 <!-- snippet: fragment -->
@@ -245,6 +246,7 @@ new DeepgramSTT(options: DeepgramSTTOptions)
 | `apiKey` | `string` | No | Deepgram API key. Optional only for `nova-2` and `nova-3` Agora-managed usage. |
 | `model` | `string` | No | Model (e.g., `'nova-2'`, `'enhanced'`) |
 | `language` | `string` | No | Language code (e.g., `'en-US'`) |
+| `keyterm` | `string` | No | Boost specialized terms and brands; serialized as `asr.params.keyterm` |
 | `smartFormat` | `boolean` | No | Enable smart formatting |
 | `punctuation` | `boolean` | No | Enable punctuation |
 | `additionalParams` | `Record<string, unknown>` | No | Additional vendor params |
@@ -253,7 +255,7 @@ For `nova-2` and `nova-3`, omit `apiKey` to use Agora-managed credentials. For a
 
 ### Other STT vendors
 
-Use `turnDetection.language` for Agora interaction language; it defaults to `en-US`. Provider-specific language values stay under `asr.params` and may use a different format.
+Use `turnDetection.language` for Agora interaction language; it defaults to `en-US`. Provider-specific language values stay under `asr.params` and may use a different format. AgentKit populates REST `asr.language` from `turnDetection.language`.
 
 | Class | Key params |
 |---|---|
@@ -263,7 +265,7 @@ Use `turnDetection.language` for Agora interaction language; it defaults to `en-
 | `GoogleSTT` | `projectId`, `location`, `adcCredentialsString`, `language`, `model?` |
 | `AmazonSTT` | `accessKey`, `secretKey`, `region`, `language` |
 | `AssemblyAISTT` | `apiKey`, `language`, `uri?` |
-| `AresSTT` | `language?` |
+| `AresSTT` | — |
 | `SarvamSTT` | `apiKey`, `language` |
 
 ---
@@ -420,6 +422,26 @@ Requires TTS at **16,000 Hz**. See [Avatar Integration](../guides/avatars.md).
 | `enable` | `boolean` | No | Enable/disable the avatar (default: true) |
 
 ### AnamAvatar
+
+<!-- snippet: fragment -->
+```typescript
+new GenericAvatar(options: GenericAvatarOptions)
+```
+
+Generic avatars can omit `agoraAppId`, `agoraChannel`, and `agoraToken`. AgentKit fills them from the session at `start()`.
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | Custom avatar provider API key |
+| `apiBaseUrl` | `string` | Yes | Avatar provider API base URL |
+| `avatarId` | `string` | Yes | Avatar ID |
+| `agoraUid` | `string` | Yes | RTC UID for the avatar stream |
+| `agoraAppId` | `string` | No | Agora App ID override |
+| `agoraChannel` | `string` | No | Agora channel override |
+| `agoraToken` | `string` | No | Avatar token override |
+| `enable` | `boolean` | No | Enable/disable the avatar (default: true) |
+
+
 
 <!-- snippet: fragment -->
 ```typescript

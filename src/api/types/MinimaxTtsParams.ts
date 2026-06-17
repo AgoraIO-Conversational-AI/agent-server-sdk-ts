@@ -7,12 +7,20 @@ export interface MinimaxTtsParams {
     /** MiniMax API key */
     key: string;
     /** MiniMax group identifier */
-    group_id: string;
-    /** TTS model (e.g., speech-02-turbo) */
+    group_id?: string;
+    /** BYOK TTS model. Managed MiniMax preset models are selected through the top-level preset field instead. */
     model: string;
     voice_setting: MinimaxTtsParams.VoiceSetting;
+    /** Audio output settings. */
+    audio_setting?: MinimaxTtsParams.AudioSetting;
+    /** Custom pronunciation dictionary settings. */
+    pronunciation_dict?: MinimaxTtsParams.PronunciationDict;
+    /** Weighted voice blending configuration. */
+    timber_weights?: MinimaxTtsParams.TimberWeights.Item[];
+    /** Language boost mode. */
+    language_boost?: string;
     /** WebSocket endpoint (e.g., wss://api-uw.minimax.io/ws/v1/t2a_v2) */
-    url: string;
+    url?: string;
     /** Accepts any additional properties */
     [key: string]: any;
 }
@@ -21,7 +29,52 @@ export namespace MinimaxTtsParams {
     export interface VoiceSetting {
         /** Voice style identifier (e.g., English_captivating_female1) */
         voice_id: string;
+        /** Speech speed multiplier. */
+        speed?: number;
+        /** Voice volume multiplier. */
+        vol?: number;
+        /** Voice pitch adjustment. */
+        pitch?: number;
+        /** Emotion preset. */
+        emotion?: string;
+        /** Whether to read LaTeX expressions. */
+        latex_read?: boolean;
+        /** Whether to normalize English text before synthesis. */
+        english_normalization?: boolean;
         /** Accepts any additional properties */
         [key: string]: any;
+    }
+
+    /**
+     * Audio output settings.
+     */
+    export interface AudioSetting {
+        /** Audio sample rate in Hz. */
+        sample_rate?: number;
+        /** Accepts any additional properties */
+        [key: string]: any;
+    }
+
+    /**
+     * Custom pronunciation dictionary settings.
+     */
+    export interface PronunciationDict {
+        /** Tone override list. */
+        tone?: string[];
+        /** Accepts any additional properties */
+        [key: string]: any;
+    }
+
+    export type TimberWeights = TimberWeights.Item[];
+
+    export namespace TimberWeights {
+        export interface Item {
+            /** Voice identifier for blending. */
+            voice_id?: string;
+            /** Relative blend weight. */
+            weight?: number;
+            /** Accepts any additional properties */
+            [key: string]: any;
+        }
     }
 }

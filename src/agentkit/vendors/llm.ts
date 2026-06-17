@@ -158,8 +158,10 @@ export interface AzureOpenAIOptions extends BaseLlmOptions {
     apiKey: string;
     /** Model/deployment name */
     model: string;
-    /** Azure resource name (e.g., 'my-resource') */
-    resourceName: string;
+    /** Azure resource name (e.g., 'my-resource'). Required when endpoint is not set. */
+    resourceName?: string;
+    /** Full Azure base URL (e.g., for sovereign clouds or private endpoints). Takes precedence over resourceName. */
+    endpoint?: string;
     /** Deployment name in Azure */
     deploymentName: string;
     /** Azure API version (defaults to '2024-08-01-preview') */
@@ -206,7 +208,9 @@ export class AzureOpenAI extends BaseLLM {
         super(options);
         requireString(options.apiKey, "apiKey", "AzureOpenAI");
         requireString(options.model, "model", "AzureOpenAI");
-        requireString(options.resourceName, "resourceName", "AzureOpenAI");
+        if (!options.resourceName && !options.endpoint) {
+            throw new Error("AzureOpenAI requires either resourceName or endpoint");
+        }
         requireString(options.deploymentName, "deploymentName", "AzureOpenAI");
         this.options = options;
     }
@@ -216,6 +220,7 @@ export class AzureOpenAI extends BaseLLM {
             apiKey,
             model,
             resourceName,
+            endpoint,
             deploymentName,
             apiVersion = "2024-08-01-preview",
             maxHistory,
@@ -230,8 +235,11 @@ export class AzureOpenAI extends BaseLLM {
             headers,
         } = this.options;
 
+        const rawBase = endpoint ?? `https://${resourceName}.openai.azure.com`;
+        const baseUrl = rawBase.replace(/\/$/, "");
+
         return {
-            url: `https://${resourceName}.openai.azure.com/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`,
+            url: `${baseUrl}/openai/deployments/${deploymentName}/chat/completions?api-version=${apiVersion}`,
             api_key: apiKey,
             // "azure" is required by Agora for Azure OpenAI; user-supplied vendor overrides if needed.
             vendor: this.vendor ?? "azure",
@@ -360,7 +368,6 @@ export class Anthropic extends BaseLLM {
         };
     }
 }
-
 /**
  * Constructor options for Google Gemini LLM.
  */
@@ -564,13 +571,12 @@ export class VertexAILLM extends BaseLLM {
 
     toConfig(): LlmConfig {
         const o = this.options;
+        const defaultUrl = `https://${o.location}-aiplatform.googleapis.com/v1/projects/${o.projectId}/locations/${o.location}/publishers/google/models/${o.model}:streamGenerateContent?alt=sse`;
         return {
-            url: o.url ?? "https://aiplatform.googleapis.com/v1/projects",
+            url: o.url ?? defaultUrl,
             api_key: o.apiKey,
             params: {
                 model: o.model,
-                project_id: o.projectId,
-                location: o.location,
                 ...o.params,
                 ...(o.temperature !== undefined && { temperature: o.temperature }),
                 ...(o.topP !== undefined && { top_p: o.topP }),

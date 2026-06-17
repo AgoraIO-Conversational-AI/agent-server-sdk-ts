@@ -7,6 +7,7 @@ import {
     FishAudioTTS,
     GoogleTTS,
     HumeAITTS,
+    MicrosoftTTS,
     MiniMaxTTS,
     MurfTTS,
     OpenAITTS,
@@ -145,6 +146,14 @@ describe("TTS vendor helpers", () => {
             model: "speech-02-turbo",
             voice_setting: { voice_id: "voice" },
             url: "wss://api-uw.minimax.io/ws/v1/t2a_v2",
+        });
+
+        expect(
+            new MicrosoftTTS({ key: "ms-key", region: "eastus", voiceName: "en-US-JennyNeural" }).toConfig().params,
+        ).toMatchObject({
+            key: "ms-key",
+            region: "eastus",
+            voice_name: "en-US-JennyNeural",
         });
 
         expect(

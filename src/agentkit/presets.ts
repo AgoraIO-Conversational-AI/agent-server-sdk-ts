@@ -116,7 +116,7 @@ function omitUndefinedKeys<T extends Record<string, unknown>>(value: T): T | und
 }
 
 export function inferAsrPreset(asr?: Agora.Asr): AsrInference | undefined {
-    if (!asr || asr.vendor !== "deepgram" || asr.params?.api_key) return undefined;
+    if (!asr || asr.vendor !== "deepgram" || asr.params?.key) return undefined;
     const preset = deepgramModelToPreset[normalizeModelName(asr.params?.model) ?? ""];
     if (!preset) return undefined;
     return {
@@ -155,7 +155,12 @@ export function inferTtsPreset(tts?: Agora.Tts): TtsInference | undefined {
     }
     if (tts.vendor === "minimax") {
         if (tts.params?.key) return undefined;
-        const preset = minimaxModelToPreset[normalizeModelName(tts.params?.model) ?? ""];
+        // Model is no longer in params for the preset path; fall back to the top-level hint.
+        const model =
+            normalizeModelName(tts.params?.model) ??
+            normalizeModelName((tts as unknown as Record<string, unknown>)._minimaxPresetModel as string) ??
+            "";
+        const preset = minimaxModelToPreset[model];
         if (!preset) return undefined;
         return {
             category: "tts",
@@ -212,8 +217,9 @@ function stripInferredPresetFields(
                 }) as unknown as typeof tts.params,
             };
         } else if (ttsInference.vendor === "minimax" && tts.vendor === "minimax") {
+            const { _minimaxPresetModel: _stripped, ...ttsWithoutHint } = tts as unknown as Record<string, unknown>;
             tts = {
-                ...tts,
+                ...(ttsWithoutHint as unknown as typeof tts),
                 params: omitUndefinedKeys({
                     ...tts.params,
                     key: undefined,
@@ -223,6 +229,10 @@ function stripInferredPresetFields(
                 }) as unknown as typeof tts.params,
             };
         }
+    }
+    if (tts && "_minimaxPresetModel" in (tts as unknown as Record<string, unknown>)) {
+        const { _minimaxPresetModel: _discarded, ...rest } = tts as unknown as Record<string, unknown>;
+        tts = rest as unknown as typeof tts;
     }
 
     return {

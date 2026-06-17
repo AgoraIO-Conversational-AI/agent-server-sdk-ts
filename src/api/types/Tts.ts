@@ -3,6 +3,8 @@
 import type * as Agora from "../index.js";
 
 export type Tts =
+    | Agora.Tts.Tencent
+    | Agora.Tts.Bytedance
     | Agora.Tts.Microsoft
     | Agora.Tts.Elevenlabs
     | Agora.Tts.Minimax
@@ -15,9 +17,20 @@ export type Tts =
     | Agora.Tts.Google
     | Agora.Tts.Amazon
     | Agora.Tts.Sarvam
-    | Agora.Tts.Deepgram;
+    | Agora.Tts.Deepgram
+    | Agora.Tts.Cosyvoice
+    | Agora.Tts.BytedanceDuplex
+    | Agora.Tts.Stepfun;
 
 export namespace Tts {
+    export interface Tencent extends Agora.TencentTts {
+        vendor: "tencent";
+    }
+
+    export interface Bytedance extends Agora.BytedanceTts {
+        vendor: "bytedance";
+    }
+
     export interface Microsoft extends Agora.MicrosoftTts {
         vendor: "microsoft";
     }
@@ -68,5 +81,17 @@ export namespace Tts {
 
     export interface Deepgram extends Agora.DeepgramTts {
         vendor: "deepgram";
+    }
+
+    export interface Cosyvoice extends Agora.CosyvoiceTts {
+        vendor: "cosyvoice";
+    }
+
+    export interface BytedanceDuplex extends Agora.BytedanceDuplexTts {
+        vendor: "bytedance_duplex";
+    }
+
+    export interface Stepfun extends Agora.StepfunTts {
+        vendor: "stepfun";
     }
 }

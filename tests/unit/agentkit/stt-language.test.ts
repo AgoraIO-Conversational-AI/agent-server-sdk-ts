@@ -27,9 +27,9 @@ function baseAgent() {
 }
 
 describe("STT language serialization", () => {
-    test("sends matching BCP-47 STT language as turn_detection.language and vendor param", () => {
+    test("keeps STT language on vendor params and defaults turn_detection", () => {
         const properties = baseAgent()
-            .withStt(new SpeechmaticsSTT({ apiKey: "stt-key", language: "en-US" }))
+            .withStt(new SpeechmaticsSTT({ apiKey: "stt-key", language: "en" }))
             .toProperties({
                 channel: "channel",
                 token: "token",
@@ -39,9 +39,10 @@ describe("STT language serialization", () => {
 
         expect(properties.asr).toMatchObject({
             vendor: "speechmatics",
+            language: "en-US",
             params: {
                 api_key: "stt-key",
-                language: "en-US",
+                language: "en",
             },
         });
         expect(properties.turn_detection).toMatchObject({ language: "en-US" });
@@ -60,6 +61,7 @@ describe("STT language serialization", () => {
         expect(properties.turn_detection).toMatchObject({ language: "en-US" });
         expect(properties.asr).toMatchObject({
             vendor: "speechmatics",
+            language: "en-US",
             params: {
                 api_key: "stt-key",
                 language: "en",
@@ -94,6 +96,7 @@ describe("STT language serialization", () => {
 
         expect(properties.asr).toMatchObject({
             vendor: "speechmatics",
+            language: "fr-FR",
             params: {
                 language: "en",
             },
@@ -103,7 +106,7 @@ describe("STT language serialization", () => {
 
     test("rejects invalid turn detection language", () => {
         expect(() =>
-            new Agent({ turnDetection: { language: "en" as never } })
+            new Agent({ turnDetection: { language: "xx" as never } })
                 .withLlm(
                     new OpenAI({
                         apiKey: "llm-key",
@@ -125,7 +128,7 @@ describe("STT language serialization", () => {
                     agentUid: "1001",
                     remoteUids: ["1002"],
                 }),
-        ).toThrow("Invalid interaction language: en");
+        ).toThrow("Invalid turnDetection.language: xx");
     });
 
     test("sends default interaction language when STT is omitted", () => {
@@ -136,12 +139,14 @@ describe("STT language serialization", () => {
             remoteUids: ["1002"],
         });
 
-        expect(properties.asr).toEqual({ vendor: "ares" });
+        expect(properties.asr).toEqual({ vendor: "ares", language: "en-US" });
         expect(properties.turn_detection).toEqual({ language: "en-US" });
     });
 
     test("serializes documented provider params without promoting provider language", () => {
-        expect(new DeepgramSTT({ model: "nova-3", language: "en-US" }).toConfig().params).toMatchObject({
+        const deepgramManaged = new DeepgramSTT({ model: "nova-3", language: "en-US" }).toConfig();
+        expect(deepgramManaged).not.toHaveProperty("language");
+        expect(deepgramManaged.params).toMatchObject({
             model: "nova-3",
             language: "en-US",
         });
@@ -156,21 +161,28 @@ describe("STT language serialization", () => {
         });
 
         expect(
-            new OpenAISTT({ apiKey: "openai-key", model: "gpt-4o-mini-transcribe", language: "en" }).toConfig().params,
+            new OpenAISTT({
+                apiKey: "openai-key",
+                model: "gpt-4o-mini-transcribe",
+                language: "en",
+                prompt: "Transcribe English speech",
+            }).toConfig().params,
         ).toEqual({
             api_key: "openai-key",
             input_audio_transcription: {
                 model: "gpt-4o-mini-transcribe",
                 language: "en",
+                prompt: "Transcribe English speech",
             },
         });
 
-        expect(new OpenAISTT({ apiKey: "openai-key" }).toConfig().params).toEqual({
-            api_key: "openai-key",
-            input_audio_transcription: {
-                model: "whisper-1",
-            },
-        });
+        expect(() => new OpenAISTT({ apiKey: "openai-key", language: "en" }).toConfig()).toThrow(
+            "OpenAISTT: inputAudioTranscription.prompt is required",
+        );
+
+        expect(() => new OpenAISTT({ apiKey: "openai-key", prompt: "Transcribe speech" }).toConfig()).toThrow(
+            "OpenAISTT: inputAudioTranscription.language is required",
+        );
 
         expect(
             new GoogleSTT({
@@ -202,13 +214,53 @@ describe("STT language serialization", () => {
             language_code: "en-US",
         });
 
-        expect(
-            new AssemblyAISTT({ apiKey: "assembly-key", language: "en-US", uri: "wss://example.test/ws" }).toConfig()
-                .params,
-        ).toMatchObject({
+        const assemblyAiConfig = new AssemblyAISTT({
+            apiKey: "assembly-key",
+            language: "en-US",
+            uri: "wss://example.test/ws",
+        }).toConfig();
+        expect(assemblyAiConfig).not.toHaveProperty("language");
+        expect(assemblyAiConfig.params).toMatchObject({
             api_key: "assembly-key",
             language: "en-US",
             uri: "wss://example.test/ws",
         });
+    });
+
+    test("keeps AssemblyAI params nested and sources asr language from turn detection", () => {
+        const properties = new Agent({ turnDetection: { language: "fr-FR" } })
+            .withLlm(
+                new OpenAI({
+                    apiKey: "llm-key",
+                    model: "gpt-4o-mini",
+                    url: "https://api.openai.com/v1/chat/completions",
+                }),
+            )
+            .withTts(
+                new ElevenLabsTTS({
+                    key: "tts-key",
+                    voiceId: "voice",
+                    modelId: "eleven_flash_v2_5",
+                    baseUrl: "wss://api.elevenlabs.io/v1",
+                }),
+            )
+            .withStt(new AssemblyAISTT({ apiKey: "assembly-key", language: "en-US", uri: "wss://example.test/ws" }))
+            .toProperties({
+                channel: "channel",
+                token: "token",
+                agentUid: "1001",
+                remoteUids: ["1002"],
+            });
+
+        expect(properties.asr).toEqual({
+            vendor: "assemblyai",
+            language: "fr-FR",
+            params: {
+                api_key: "assembly-key",
+                language: "en-US",
+                uri: "wss://example.test/ws",
+            },
+        });
+        expect(properties.turn_detection).toEqual({ language: "fr-FR" });
     });
 });

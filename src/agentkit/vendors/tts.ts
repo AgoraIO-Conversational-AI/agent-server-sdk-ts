@@ -653,6 +653,7 @@ type MiniMaxTTSCommonOptions = {
     key?: string;
     /** MiniMax group identifier */
     groupId: string;
+
     /** TTS model (e.g., 'speech-02-turbo') */
     model: string;
     /** Voice style identifier (e.g., 'English_captivating_female1') */
@@ -712,11 +713,14 @@ export class MiniMaxTTS extends BaseTTS {
             vendor: "minimax",
             params: {
                 ...(key && { key }),
-                ...(groupId && { group_id: groupId }),
-                model,
+                ...(key && groupId && { group_id: groupId }),
+                ...(key && { model }),
                 ...(voiceId && { voice_setting: { voice_id: voiceId } }),
-                ...(url && { url }),
+                ...(key && url && { url }),
             } as unknown as import("../types.js").MinimaxTtsParams,
+            // Preset path: model not in params; stored as top-level hint for preset
+            // inference. Stripped by stripInferredPresetFields before the POST body.
+            ...(!key && { _minimaxPresetModel: model }),
             ...(skipPatterns && { skip_patterns: skipPatterns }),
         };
     }

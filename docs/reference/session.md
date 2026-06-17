@@ -8,6 +8,7 @@ description: Full API reference for the AgentSession class.
 
 <!-- snippet: fragment -->
 
+<!-- snippet: fragment -->
 ```typescript
 import { AgentSession } from 'agora-agents';
 ```
@@ -91,6 +92,13 @@ Fetch turn-by-turn analytics for this session, including start/end events and la
 - Requires a valid `agentId` (i.e., `start()` must have been called)
 - `options.page_index`: page number, starting from `1`
 - `options.page_size`: number of turns per page
+
+### `getAllTurns(options?: Omit<GetTurnsOptions, "page_index">): Promise<ConversationTurns>`
+
+Fetch all turn analytics pages and merge the `turns` array.
+
+- Requires a valid `agentId`
+- For very long sessions, prefer processing pages with `getTurns()` to avoid holding all turns in memory
 
 ### `getAllTurns(options?: Omit<GetTurnsOptions, "page_index">): Promise<ConversationTurns>`
 

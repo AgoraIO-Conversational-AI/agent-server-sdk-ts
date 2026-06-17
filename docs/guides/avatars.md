@@ -174,6 +174,7 @@ import {
 
 const client = new AgoraClient({
   area: Area.US,
+
   appId: 'your-app-id',
   appCertificate: 'your-app-certificate',
 });
@@ -239,6 +240,27 @@ await session.start();
 |---|---|---|---|
 | `apiKey` | `string` | Yes | Akool API key |
 | `avatarId` | `string` | No | Akool avatar ID |
+| `enable` | `boolean` | No | Enable/disable the avatar (default: true) |
+
+## AnamAvatar constructor options
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | Anam API key |
+| `personaId` | `string` | No | Anam persona ID |
+| `enable` | `boolean` | No | Enable/disable the avatar (default: true) |
+
+## GenericAvatar constructor options
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | Custom avatar provider API key |
+| `apiBaseUrl` | `string` | Yes | Avatar provider API base URL |
+| `avatarId` | `string` | Yes | Avatar ID |
+| `agoraUid` | `string` | Yes | RTC UID for the avatar stream |
+| `agoraAppId` | `string` | No | Omit to use the session App ID |
+| `agoraChannel` | `string` | No | Omit to use the session channel |
+| `agoraToken` | `string` | No | Avatar token override. Omit to auto-generate at `session.start()` |
 | `enable` | `boolean` | No | Enable/disable the avatar (default: true) |
 
 ## AnamAvatar constructor options

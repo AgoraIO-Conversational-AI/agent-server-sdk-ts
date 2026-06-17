@@ -4,6 +4,8 @@ import type * as Agora from "../index.js";
 
 export type Asr =
     | Agora.Asr.Ares
+    | Agora.Asr.Fengming
+    | Agora.Asr.Tencent
     | Agora.Asr.Microsoft
     | Agora.Asr.Deepgram
     | Agora.Asr.Openai
@@ -11,11 +13,22 @@ export type Asr =
     | Agora.Asr.Amazon
     | Agora.Asr.Assemblyai
     | Agora.Asr.Speechmatics
-    | Agora.Asr.Sarvam;
+    | Agora.Asr.Sarvam
+    | Agora.Asr.Xfyun
+    | Agora.Asr.XfyunBigmodel
+    | Agora.Asr.XfyunDialect;
 
 export namespace Asr {
     export interface Ares extends Agora.AresAsr {
         vendor: "ares";
+    }
+
+    export interface Fengming extends Agora.FengmingAsr {
+        vendor: "fengming";
+    }
+
+    export interface Tencent extends Agora.TencentAsr {
+        vendor: "tencent";
     }
 
     export interface Microsoft extends Agora.MicrosoftAsr {
@@ -48,5 +61,17 @@ export namespace Asr {
 
     export interface Sarvam extends Agora.SarvamAsr {
         vendor: "sarvam";
+    }
+
+    export interface Xfyun extends Agora.XfyunAsr {
+        vendor: "xfyun";
+    }
+
+    export interface XfyunBigmodel extends Agora.XfyunBigmodelAsr {
+        vendor: "xfyun_bigmodel";
+    }
+
+    export interface XfyunDialect extends Agora.XfyunDialectAsr {
+        vendor: "xfyun_dialect";
     }
 }

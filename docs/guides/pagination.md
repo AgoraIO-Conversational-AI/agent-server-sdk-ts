@@ -51,3 +51,19 @@ const allTurns = await session.getAllTurns({ page_size: 20 });
 ```
 
 For very long sessions, prefer page-by-page processing with `getTurns()` to avoid holding all turn data in memory.
+
+## Agent turn analytics
+
+`AgentSession.getTurns()` supports the Conversational AI turn analytics pagination parameters directly:
+
+```typescript
+const firstPage = await session.getTurns({ page_index: 1, page_size: 20 });
+```
+
+Use `getAllTurns()` when you want AgentKit to fetch and merge every page:
+
+```typescript
+const allTurns = await session.getAllTurns({ page_size: 20 });
+```
+
+For very long sessions, prefer page-by-page processing with `getTurns()` to avoid holding all turn data in memory.

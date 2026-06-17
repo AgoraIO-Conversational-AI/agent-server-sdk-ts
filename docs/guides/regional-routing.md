@@ -61,6 +61,7 @@ import { AgoraClient, Area, Agent, OpenAI, ElevenLabsTTS, DeepgramSTT } from 'ag
 
 const client = new AgoraClient({
   area: Area.EU,
+
   appId: 'your-app-id',
   appCertificate: 'your-app-certificate',
 });

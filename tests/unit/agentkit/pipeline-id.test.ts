@@ -151,6 +151,67 @@ describe("Agent pipelineId", () => {
         expect(request.properties.tts?.params?.api_key).toBe("tts-key");
     });
 
+    test("pipelineId allows a single LLM override without TTS or ASR", async () => {
+        const { client, start } = createClient();
+        const agent = new Agent({ name: "support", pipelineId: "studio-pipeline-id" }).withLlm(
+            new OpenAI({
+                apiKey: "openai-key",
+                url: "https://api.openai.com/v1/chat/completions",
+                model: "gpt-4o",
+            }),
+        );
+
+        const session = agent.createSession(client, {
+            channel: "channel",
+            token: "token",
+            agentUid: "1",
+            remoteUids: ["100"],
+        });
+
+        await session.start();
+
+        const request = getStartRequest(start);
+        expect(request.properties).not.toHaveProperty("asr");
+        expect(request.properties).not.toHaveProperty("tts");
+        expect(request.properties.llm?.api_key).toBe("openai-key");
+        expect(request.properties.llm?.params?.model).toBe("gpt-4o");
+    });
+
+    test("pipelineId allows multiple overrides without ASR", async () => {
+        const { client, start } = createClient();
+        const agent = new Agent({ name: "support", pipelineId: "studio-pipeline-id" })
+            .withLlm(
+                new OpenAI({
+                    apiKey: "openai-key",
+                    url: "https://api.openai.com/v1/chat/completions",
+                    model: "gpt-4o",
+                }),
+            )
+            .withTts(
+                new OpenAITTS({
+                    apiKey: "tts-key",
+                    baseUrl: "https://api.openai.com/v1/audio/speech",
+                    model: "tts-1-hd",
+                    voice: "alloy",
+                }),
+            );
+
+        const session = agent.createSession(client, {
+            channel: "channel",
+            token: "token",
+            agentUid: "1",
+            remoteUids: ["100"],
+        });
+
+        await session.start();
+
+        const request = getStartRequest(start);
+        expect(request.properties).not.toHaveProperty("asr");
+        expect(request.properties.llm?.api_key).toBe("openai-key");
+        expect(request.properties.tts?.vendor).toBe("openai");
+        expect(request.properties.tts?.params?.api_key).toBe("tts-key");
+    });
+
     test("pipeline_id is not sent inside properties", async () => {
         const { client, start } = createClient();
         const agent = new Agent({ name: "support", pipelineId: "studio-pipeline-id" });
