@@ -622,6 +622,7 @@ describe("Scenario 8 — MLLM mode", () => {
         expect(request.properties.mllm?.vendor).toBe("openai");
         expect(request.properties.mllm?.enable).toBe(true);
         expect((request.properties.mllm as Record<string, unknown>)?.api_key).toBe("openai-rt-key");
+        expect((request.properties.mllm as Record<string, unknown>)?.url).toBe("wss://api.openai.com/v1/realtime");
         expect((request.properties.mllm as Record<string, unknown>)?.params).toMatchObject({
             model: "gpt-4o-realtime-preview",
             voice: "alloy",
@@ -1240,7 +1241,7 @@ describe("TTS vendor coverage", () => {
 // ---------------------------------------------------------------------------
 
 describe("MLLM vendor coverage", () => {
-    test("OpenAIRealtime toConfig has vendor=openai and api_key", () => {
+    test("OpenAIRealtime toConfig has vendor=openai, api_key, and default url", () => {
         const config = new OpenAIRealtime({
             apiKey: "rt-key",
             model: "gpt-4o-realtime-preview",
@@ -1249,10 +1250,29 @@ describe("MLLM vendor coverage", () => {
 
         expect(config.vendor).toBe("openai");
         expect((config as Record<string, unknown>)?.api_key).toBe("rt-key");
+        expect((config as Record<string, unknown>)?.url).toBe("wss://api.openai.com/v1/realtime");
         expect((config as Record<string, unknown>)?.params).toMatchObject({
             model: "gpt-4o-realtime-preview",
             voice: "alloy",
         });
+    });
+
+    test("OpenAIRealtime toConfig preserves a custom url", () => {
+        const config = new OpenAIRealtime({
+            apiKey: "rt-key",
+            url: "wss://openai.example.com/v1/realtime",
+        }).toConfig();
+
+        expect((config as Record<string, unknown>)?.url).toBe("wss://openai.example.com/v1/realtime");
+    });
+
+    test("OpenAIRealtime toConfig uses the default url for an empty string", () => {
+        const config = new OpenAIRealtime({
+            apiKey: "rt-key",
+            url: "",
+        }).toConfig();
+
+        expect((config as Record<string, unknown>)?.url).toBe("wss://api.openai.com/v1/realtime");
     });
 
     test("GeminiLive toConfig has vendor=gemini and api_key", () => {

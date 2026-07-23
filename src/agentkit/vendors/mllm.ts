@@ -23,7 +23,7 @@ export interface OpenAIRealtimeOptions {
     instructions?: string;
     /** Audio transcription settings */
     inputAudioTranscription?: Record<string, unknown>;
-    /** WebSocket URL for real-time communication */
+    /** WebSocket URL. Defaults to `wss://api.openai.com/v1/realtime` when omitted or empty. */
     url?: string;
     /** Agent greeting message */
     greetingMessage?: string;
@@ -99,7 +99,7 @@ export class OpenAIRealtime extends BaseMLLM {
         return {
             vendor: "openai",
             api_key: apiKey,
-            ...(url && { url }),
+            url: url || "wss://api.openai.com/v1/realtime",
             ...(hasParams && { params: mergedParams }),
             ...(greetingMessage && { greeting_message: greetingMessage }),
             ...(inputModalities && { input_modalities: inputModalities }),

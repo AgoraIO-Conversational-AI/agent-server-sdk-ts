@@ -396,7 +396,7 @@ new OpenAIRealtime(options: OpenAIRealtimeOptions)
 |---|---|---|---|
 | `apiKey` | `string` | Yes | OpenAI API key |
 | `model` | `string` | No | Model name (e.g., `'gpt-4o-realtime-preview'`) |
-| `url` | `string` | No | WebSocket URL |
+| `url` | `string` | No | WebSocket URL (defaults to `wss://api.openai.com/v1/realtime` when omitted or empty) |
 | `greetingMessage` | `string` | No | Agent greeting message |
 | `failureMessage` | `string` | No | Message played when the model call fails |
 | `inputModalities` | `string[]` | No | Input modalities (e.g., `['audio']`) |
