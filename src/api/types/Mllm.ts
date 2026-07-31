@@ -21,6 +21,8 @@ export interface Mllm {
     /** Array of conversation items used for short-term memory management. */
     messages?: Record<string, unknown>[] | null;
     params?: Agora.MllmParams;
+    /** The number of conversation history messages cached in the MLLM. Applicable to Azure OpenAI Realtime API only. */
+    max_history?: number;
     /** MLLM input modalities. */
     input_modalities?: string[] | null;
     /** MLLM output modalities. */
@@ -40,9 +42,11 @@ export namespace Mllm {
     /** MLLM provider. */
     export const Vendor = {
         Openai: "openai",
+        Azure: "azure",
         Gemini: "gemini",
         Vertexai: "vertexai",
         Xai: "xai",
+        QwenOmni: "qwen_omni",
     } as const;
     export type Vendor = (typeof Vendor)[keyof typeof Vendor];
 }
