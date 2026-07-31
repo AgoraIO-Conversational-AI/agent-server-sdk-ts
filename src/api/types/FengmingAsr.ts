@@ -7,8 +7,7 @@ import type * as Agora from "../index.js";
  */
 export interface FengmingAsr {
     language?: Agora.AsrLanguage;
-    /** Agora Fengming ASR configuration parameters. */
-    params?: Record<string, unknown>;
+    params?: Agora.FengmingAsrParams;
     /** Accepts any additional properties */
     [key: string]: any;
 }
