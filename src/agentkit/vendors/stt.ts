@@ -415,6 +415,8 @@ export class AssemblyAISTT extends BaseSTT {
  * Constructor options for Agora ARES STT.
  */
 export interface AresSTTOptions {
+    /** Hotwords that improve recognition accuracy */
+    keywords?: string[];
     /** Additional vendor-specific parameters */
     additionalParams?: Record<string, unknown>;
 }
@@ -436,11 +438,18 @@ export class AresSTT extends BaseSTT {
     }
 
     toConfig(): SttConfig {
-        const { additionalParams } = this.options;
+        const { keywords, additionalParams } = this.options;
+        const hasParams =
+            keywords !== undefined || (additionalParams !== undefined && Object.keys(additionalParams).length > 0);
 
         return {
             vendor: "ares",
-            ...(additionalParams && Object.keys(additionalParams).length > 0 && { params: additionalParams }),
+            ...(hasParams && {
+                params: {
+                    ...additionalParams,
+                    ...(keywords !== undefined && { keywords }),
+                },
+            }),
         };
     }
 }

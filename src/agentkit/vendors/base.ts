@@ -236,11 +236,31 @@ export abstract class BaseCNSTT extends ScopedBaseSTT<"cn"> {
 /**
  * Base class for MLLM (Multimodal Large Language Model) vendors.
  */
-export abstract class BaseMLLM {
+abstract class ScopedBaseMLLM<TScope extends VendorScope> {
+    readonly areaScope: TScope;
+
+    constructor(areaScope: TScope) {
+        this.areaScope = areaScope;
+    }
+
     /**
      * Converts the vendor configuration to the Agora API format.
      */
     abstract toConfig(): MllmConfig;
+}
+
+/** Base class for global MLLM vendors. */
+export abstract class BaseMLLM extends ScopedBaseMLLM<"global"> {
+    constructor() {
+        super("global");
+    }
+}
+
+/** Base class for Chinese mainland MLLM vendors. */
+export abstract class BaseCNMLLM extends ScopedBaseMLLM<"cn"> {
+    constructor() {
+        super("cn");
+    }
 }
 
 /**

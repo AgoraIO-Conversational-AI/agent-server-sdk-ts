@@ -65,7 +65,7 @@ Each method returns a new `Agent` instance with the updated configuration. Vendo
 | `withLlm` | `withLlm(vendor: LlmVendor): Agent<TTSSampleRate, TArea>` | Set the LLM vendor (global or CN) |
 | `withTts` | `withTts<SR>(vendor: TtsVendor<SR>): Agent<SR, TArea>` | Set the TTS vendor (tracks sample rate type) |
 | `withStt` | `withStt(vendor: SttVendor): Agent<TTSSampleRate, TArea>` | Set the STT vendor (global or CN) |
-| `withMllm` | `withMllm(vendor: BaseMLLM): Agent<TTSSampleRate, TArea>` | Set the MLLM vendor (for multimodal flow). Not compatible with `withAvatar()`. |
+| `withMllm` | `withMllm(vendor: GlobalMllmVendor \| CNMllmVendor): Agent<TTSSampleRate, TArea>` | Set the global or Chinese mainland MLLM vendor. Not compatible with `withAvatar()`. |
 | `withAvatar` | `withAvatar<SR>(this: Agent<SR, TArea>, vendor: AvatarVendor<SR>): Agent<SR, TArea>` | Set the avatar vendor (enforces TTS sample rate match). Requires the cascading pipeline; not supported with `withMllm()`. |
 | `withTurnDetection` | `withTurnDetection(config: TurnDetectionConfig): Agent<TTSSampleRate, TArea>` | Configure `turn_detection.language` and cascading-flow SOS/EOS detection |
 | `withInterruption` | `withInterruption(config: InterruptionConfig): Agent<TTSSampleRate, TArea>` | Configure unified interruption behavior |

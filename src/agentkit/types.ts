@@ -49,6 +49,8 @@ import type {
     SpeakAgentsRequest,
     StartAgentsRequest,
     Tts,
+    TypecastTtsParams as TypecastTtsParamsType,
+    TypecastTts as TypecastTtsType,
     UpdateAgentsRequest,
     XAiAsrParams as XAiAsrParamsType,
     XAiAsr as XAiAsrType,
@@ -100,7 +102,7 @@ export type TtsConfig = Tts;
 /** MLLM (Multimodal LLM) configuration */
 export type MllmConfig = Mllm;
 
-/** MLLM vendor (openai, gemini, vertexai, xai) */
+/** MLLM wire vendor name (openai, azure, gemini, vertexai, xai, qwen_omni) */
 export type MllmVendor = Mllm.Vendor;
 
 /** Avatar configuration */
@@ -703,4 +705,6 @@ export type SarvamTts = SarvamTtsType;
 export type SarvamTtsParams = SarvamTtsParamsType;
 export type XAiTts = XAiTtsType;
 export type XAiTtsParams = XAiTtsParamsType;
+export type TypecastTts = TypecastTtsType;
+export type TypecastTtsParams = TypecastTtsParamsType;
 export type SpatiusAvatarParams = SpatiusAvatarParamsType;

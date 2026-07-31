@@ -7,10 +7,31 @@ function requireString(value: unknown, field: string, vendor: string): asserts v
     }
 }
 
+export interface FengmingSTTOptions {
+    /** Hotwords that improve recognition accuracy */
+    keywords?: string[];
+    /** Additional vendor-specific parameters */
+    additionalParams?: Record<string, unknown>;
+}
+
 export class FengmingSTT extends BaseCNSTT {
+    constructor(private readonly options: FengmingSTTOptions = {}) {
+        super();
+    }
+
     toConfig(): SttConfig {
+        const { keywords, additionalParams } = this.options;
+        const hasParams =
+            keywords !== undefined || (additionalParams !== undefined && Object.keys(additionalParams).length > 0);
+
         return {
             vendor: "fengming",
+            ...(hasParams && {
+                params: {
+                    ...additionalParams,
+                    ...(keywords !== undefined && { keywords }),
+                },
+            }),
         } as unknown as SttConfig;
     }
 }

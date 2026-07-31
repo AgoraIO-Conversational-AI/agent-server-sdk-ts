@@ -20,7 +20,7 @@ Avatars attach a visual representation to the agent's audio output.
 
 ## Avatars require the cascading pipeline
 
-Avatars currently only work with the cascading **ASR + LLM + TTS** pipeline. They are **not** supported with MLLM (`OpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`). AgentKit rejects the combination at `Agent.toProperties()` and at `AgentSession.start()` so you see a clear error before the request reaches the backend:
+Avatars currently only work with the cascading **ASR + LLM + TTS** pipeline. They are **not** supported with MLLM (`OpenAIRealtime`, `AzureOpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`, `QwenOmni`). AgentKit rejects the combination at `Agent.toProperties()` and at `AgentSession.start()` so you see a clear error before the request reaches the backend:
 
 ```
 Avatars are only supported with the cascading ASR + LLM + TTS pipeline.

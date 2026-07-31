@@ -103,10 +103,12 @@ export type {
     AvatarVendor,
     CNAvatarVendor,
     CNLlmVendor,
+    CNMllmVendor,
     CNSttVendor,
     CNTtsVendor,
     GlobalAvatarVendor,
     GlobalLlmVendor,
+    GlobalMllmVendor,
     GlobalSttVendor,
     GlobalTtsVendor,
     LlmVendor,
@@ -237,6 +239,8 @@ export type {
     TurnDetectionLanguage,
     TurnDetectionNestedConfig,
     TurnDetectionType,
+    TypecastTts,
+    TypecastTtsParams,
     XAiAsr,
     XAiAsrParams,
     XAiTts,
@@ -272,6 +276,7 @@ export {
     BaseAvatar,
     BaseCNAvatar,
     BaseCNLLM,
+    BaseCNMLLM,
     BaseCNSTT,
     BaseCNTTS,
     BaseLLM,
@@ -288,6 +293,7 @@ export type {
     BytedanceTTSOptions,
     CosyVoiceTTSOptions,
     DeepSeekLLMOptions,
+    FengmingSTTOptions,
     MicrosoftCNSampleRate,
     MicrosoftCNSTTOptions,
     MicrosoftCNTTSOptions,
@@ -347,15 +353,20 @@ export {
     VertexAILLM,
 } from "./vendors/llm.js";
 export type {
+    AzureOpenAIRealtimeOptions,
+    AzureOpenAIRealtimeParams,
     GeminiLiveOptions,
     OpenAIRealtimeOptions,
+    QwenOmniOptions,
     VertexAIOptions,
     XaiGrokOptions,
 } from "./vendors/mllm.js";
 // MLLM vendor classes
 export {
+    AzureOpenAIRealtime,
     GeminiLive,
     OpenAIRealtime,
+    QwenOmni,
     VertexAI,
     XaiGrok,
 } from "./vendors/mllm.js";
@@ -401,6 +412,7 @@ export type {
     OpenAITTSOptions,
     RimeTTSOptions,
     SarvamTTSOptions,
+    TypecastTTSOptions,
     XAiTTSOptions,
 } from "./vendors/tts.js";
 // TTS vendor classes
@@ -421,5 +433,6 @@ export {
     OpenAITTS,
     RimeTTS,
     SarvamTTS,
+    TypecastTTS,
     XAiTTS,
 } from "./vendors/tts.js";

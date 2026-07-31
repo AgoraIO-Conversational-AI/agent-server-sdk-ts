@@ -7,7 +7,19 @@
  */
 
 import type { MllmConfig, MllmTurnDetectionConfig } from "../types.js";
-import { BaseMLLM } from "./base.js";
+import { BaseCNMLLM, BaseMLLM } from "./base.js";
+
+function requireString(value: unknown, field: string, vendor: string): asserts value is string {
+    if (typeof value !== "string" || value.length === 0) {
+        throw new Error(`${vendor} requires ${field}`);
+    }
+}
+
+function requireObject(value: unknown, field: string, vendor: string): asserts value is Record<string, unknown> {
+    if (value == null || typeof value !== "object" || Array.isArray(value)) {
+        throw new Error(`${vendor} requires ${field}`);
+    }
+}
 
 /**
  * Constructor options for OpenAI Realtime API.
@@ -107,6 +119,105 @@ export class OpenAIRealtime extends BaseMLLM {
             ...(messages && { messages }),
             ...(this.options.failureMessage && { failure_message: this.options.failureMessage }),
             ...(turnDetection && { turn_detection: turnDetection }),
+        };
+    }
+}
+
+/** Parameters accepted by Azure OpenAI Realtime. */
+export interface AzureOpenAIRealtimeParams {
+    /** System instructions that define agent behavior */
+    instructions?: string;
+    /** Model or deployment model identifier */
+    model?: string;
+    /** Voice identifier for audio output */
+    voice?: string;
+}
+
+/** Constructor options for Azure OpenAI Realtime API. */
+export interface AzureOpenAIRealtimeOptions {
+    /** Azure OpenAI API key */
+    apiKey: string;
+    /** Azure OpenAI Realtime WebSocket URL, including deployment routing when required */
+    url: string;
+    /** Model or deployment model identifier */
+    model?: string;
+    /** Voice identifier for audio output */
+    voice?: string;
+    /** System instructions that define agent behavior */
+    instructions?: string;
+    /** Number of conversation history messages cached by the MLLM */
+    maxHistory?: number;
+    /** Agent greeting message */
+    greetingMessage?: string;
+    /** Output modalities (e.g., ['text', 'audio']) */
+    outputModalities?: string[];
+    /** Conversation messages for short-term memory */
+    messages?: Record<string, unknown>[];
+    /** Azure Realtime model parameters */
+    params?: AzureOpenAIRealtimeParams;
+    /** Required MLLM turn detection configuration. Overrides top-level turn_detection. */
+    turnDetection: MllmTurnDetectionConfig;
+}
+
+/**
+ * Azure OpenAI Realtime MLLM vendor for global deployments.
+ *
+ * @example
+ * ```typescript
+ * const agent = new Agent({ client }).withMllm(new AzureOpenAIRealtime({
+ *   apiKey: process.env.AZURE_OPENAI_API_KEY,
+ *   url: 'wss://example.openai.azure.com/openai/realtime',
+ *   model: 'gpt-4o-realtime-preview',
+ *   maxHistory: 32,
+ *   turnDetection: { mode: 'server_vad' },
+ * }));
+ * ```
+ */
+export class AzureOpenAIRealtime extends BaseMLLM {
+    private readonly options: AzureOpenAIRealtimeOptions;
+
+    constructor(options: AzureOpenAIRealtimeOptions) {
+        super();
+        requireString(options.apiKey, "apiKey", "AzureOpenAIRealtime");
+        requireString(options.url, "url", "AzureOpenAIRealtime");
+        requireObject(options.turnDetection, "turnDetection", "AzureOpenAIRealtime");
+        this.options = options;
+    }
+
+    toConfig(): MllmConfig {
+        const {
+            apiKey,
+            url,
+            model,
+            voice,
+            instructions,
+            maxHistory,
+            greetingMessage,
+            outputModalities,
+            messages,
+            params,
+            turnDetection,
+        } = this.options;
+        const mergedParams = {
+            ...(params?.model !== undefined && { model: params.model }),
+            ...(params?.voice !== undefined && { voice: params.voice }),
+            ...(params?.instructions !== undefined && { instructions: params.instructions }),
+            ...(model !== undefined && { model }),
+            ...(voice !== undefined && { voice }),
+            ...(instructions !== undefined && { instructions }),
+        };
+        const hasParams = Object.keys(mergedParams).length > 0;
+
+        return {
+            vendor: "azure",
+            api_key: apiKey,
+            url,
+            ...(hasParams && { params: mergedParams }),
+            ...(maxHistory !== undefined && { max_history: maxHistory }),
+            ...(greetingMessage && { greeting_message: greetingMessage }),
+            ...(outputModalities && { output_modalities: outputModalities }),
+            ...(messages && { messages }),
+            turn_detection: turnDetection,
         };
     }
 }
@@ -424,6 +535,94 @@ export class XaiGrok extends BaseMLLM {
             ...(greetingMessage && { greeting_message: greetingMessage }),
             ...(failureMessage && { failure_message: failureMessage }),
             ...(turnDetection && { turn_detection: turnDetection }),
+        };
+    }
+}
+
+/** Constructor options for Alibaba Cloud Qwen Omni Realtime. */
+export interface QwenOmniOptions {
+    /** Alibaba Cloud DashScope API key */
+    apiKey: string;
+    /** Qwen Omni model identifier */
+    model: string;
+    /** Qwen Omni Realtime WebSocket URL. Uses the server-side CN endpoint when omitted. */
+    url?: string;
+    /** Voice identifier for audio output */
+    voice?: string;
+    /** System instructions that define agent behavior */
+    instructions?: string;
+    /** Agent greeting message */
+    greetingMessage?: string;
+    /** Message played on failure */
+    failureMessage?: string;
+    /** Input modalities (e.g., ['audio'], ['audio', 'text']) */
+    inputModalities?: string[];
+    /** Output modalities (e.g., ['text', 'audio']) */
+    outputModalities?: string[];
+    /** Conversation messages for short-term memory */
+    messages?: Record<string, unknown>[];
+    /** Additional Qwen Omni parameters */
+    params?: Record<string, unknown>;
+    /** Required MLLM turn detection configuration. Overrides top-level turn_detection. */
+    turnDetection: MllmTurnDetectionConfig;
+}
+
+/**
+ * Alibaba Cloud Qwen Omni Realtime MLLM vendor for Chinese mainland deployments.
+ *
+ * @example
+ * ```typescript
+ * const agent = new Agent({ client }).withMllm(new QwenOmni({
+ *   apiKey: process.env.DASHSCOPE_API_KEY,
+ *   model: 'qwen-omni-turbo-realtime',
+ *   greetingMessage: '你好，有什么可以帮你？',
+ *   turnDetection: { mode: 'server_vad' },
+ * }));
+ * ```
+ */
+export class QwenOmni extends BaseCNMLLM {
+    private readonly options: QwenOmniOptions;
+
+    constructor(options: QwenOmniOptions) {
+        super();
+        requireString(options.apiKey, "apiKey", "QwenOmni");
+        requireString(options.model, "model", "QwenOmni");
+        requireObject(options.turnDetection, "turnDetection", "QwenOmni");
+        this.options = options;
+    }
+
+    toConfig(): MllmConfig {
+        const {
+            apiKey,
+            model,
+            url,
+            voice,
+            instructions,
+            greetingMessage,
+            failureMessage,
+            inputModalities,
+            outputModalities,
+            messages,
+            params,
+            turnDetection,
+        } = this.options;
+
+        return {
+            vendor: "qwen_omni",
+            api_key: apiKey,
+            ...(url !== undefined && { url }),
+            params: {
+                ...params,
+                model,
+                ...(voice !== undefined && { voice }),
+                ...(instructions !== undefined && { instructions }),
+            },
+            ...(greetingMessage && { greeting_message: greetingMessage }),
+            ...(failureMessage && { failure_message: failureMessage }),
+            ...(inputModalities && { input_modalities: inputModalities }),
+            ...(outputModalities && { output_modalities: outputModalities }),
+            ...(messages && { messages }),
+            turn_detection: turnDetection,
         };
     }
 }
