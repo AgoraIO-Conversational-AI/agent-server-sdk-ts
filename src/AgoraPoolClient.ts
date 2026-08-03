@@ -4,8 +4,55 @@ import type { AgoraArea } from "./agentkit/area.js";
 import { generateConvoAIToken } from "./agentkit/token.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { AgoraClient as BaseAgoraClient } from "./Client.js";
-import { Pool } from "./core/domain/index.js";
+import { Area, CNAPIPath, GlobalAPIPath, Pool } from "./core/domain/index.js";
 import { AgoraError } from "./errors/index.js";
+
+const API_BASE_URL_ENV = "AGORA_AGENTS_API_BASE_URL";
+
+function getConfiguredApiBaseUrl(): string | undefined {
+    const baseUrl = process.env[API_BASE_URL_ENV]?.trim();
+    return baseUrl || undefined;
+}
+
+function buildApiUrl(baseUrl: string, area: AgoraArea): string {
+    let parsedUrl: URL;
+    try {
+        parsedUrl = new URL(baseUrl);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`invalid ${API_BASE_URL_ENV}: ${message}`);
+    }
+
+    const apiPath = area === Area.CN ? CNAPIPath : GlobalAPIPath;
+    parsedUrl.pathname = `${parsedUrl.pathname.replace(/\/+$/, "")}${apiPath}`;
+    return parsedUrl.toString();
+}
+
+class ConfiguredBaseUrlPool extends Pool {
+    constructor(
+        area: AgoraArea,
+        private readonly configuredBaseUrl: string,
+    ) {
+        super(area);
+    }
+
+    override selectBestDomain(_signal?: AbortSignal): Promise<void> {
+        return Promise.resolve();
+    }
+
+    override nextRegion(): void {
+        // Configured endpoints intentionally do not participate in regional failover.
+    }
+
+    override getCurrentURL(): string {
+        return this.configuredBaseUrl;
+    }
+}
+
+function createClientPool(area: AgoraArea): Pool {
+    const configuredBaseUrl = getConfiguredApiBaseUrl();
+    return configuredBaseUrl ? new ConfiguredBaseUrlPool(area, buildApiUrl(configuredBaseUrl, area)) : new Pool(area);
+}
 
 /**
  * Auth mode for the client:
@@ -107,7 +154,7 @@ export class AgoraClient<TArea extends AgoraArea = AgoraArea> extends BaseAgoraC
     public readonly area: TArea;
 
     constructor(options: AgoraClient.Options<TArea>) {
-        const pool = new Pool(options.area);
+        const pool = createClientPool(options.area);
 
         let authMode: AgoraAuthMode;
         let username: string;
