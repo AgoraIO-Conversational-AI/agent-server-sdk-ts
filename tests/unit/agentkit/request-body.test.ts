@@ -15,7 +15,14 @@ import {
     OpenAI,
     VertexAILLM,
 } from "../../../src/agentkit/vendors/llm.js";
-import { GeminiLive, OpenAIRealtime, VertexAI, XaiGrok } from "../../../src/agentkit/vendors/mllm.js";
+import {
+    AzureOpenAIRealtime,
+    GeminiLive,
+    OpenAIRealtime,
+    QwenOmni,
+    VertexAI,
+    XaiGrok,
+} from "../../../src/agentkit/vendors/mllm.js";
 import {
     AmazonSTT,
     AresSTT,
@@ -43,6 +50,7 @@ import {
     OpenAITTS,
     RimeTTS,
     SarvamTTS,
+    TypecastTTS,
     XAiTTS,
 } from "../../../src/agentkit/vendors/tts.js";
 import type * as Agora from "../../../src/api/index.js";
@@ -776,6 +784,17 @@ describe("ASR vendor coverage", () => {
         expect(p.asr?.params).toBeUndefined();
     });
 
+    test("AresSTT serializes keywords with passthrough params", () => {
+        const p = new Agent({ client: TEST_AGENT_CLIENT })
+            .withStt(new AresSTT({ keywords: ["Agora", "Shengwang"], additionalParams: { custom: true } }))
+            .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
+
+        expect(p.asr?.params).toMatchObject({
+            custom: true,
+            keywords: ["Agora", "Shengwang"],
+        });
+    });
+
     test("SpeechmaticsSTT serializes api_key and language in params", () => {
         const p = new Agent({ client: TEST_AGENT_CLIENT })
             .withStt(new SpeechmaticsSTT({ apiKey: "sm-key", language: "en" }))
@@ -1234,6 +1253,28 @@ describe("TTS vendor coverage", () => {
         expect(p.tts?.vendor).toBe("murf");
         expect((p.tts?.params as Record<string, unknown>)?.api_key).toBe("murf-key");
     });
+
+    test("TypecastTTS serializes generated Typecast params", () => {
+        const p = new Agent({ client: TEST_AGENT_CLIENT })
+            .withLlm(STUB_LLM)
+            .withTts(
+                new TypecastTTS({
+                    apiKey: "typecast-key",
+                    voiceId: "tc_60e5426de8b95f1d3000d7b5",
+                    model: "ssfm-v30",
+                    skipPatterns: [1, 2],
+                }),
+            )
+            .toProperties({ ...SESSION_OPTS });
+
+        expect(p.tts?.vendor).toBe("typecast");
+        expect(p.tts?.params).toMatchObject({
+            api_key: "typecast-key",
+            voice_id: "tc_60e5426de8b95f1d3000d7b5",
+            model: "ssfm-v30",
+        });
+        expect(p.tts?.skip_patterns).toEqual([1, 2]);
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -1275,6 +1316,71 @@ describe("MLLM vendor coverage", () => {
         expect((config as Record<string, unknown>)?.url).toBe("wss://api.openai.com/v1/realtime");
     });
 
+    test("AzureOpenAIRealtime serializes only the supported Azure fields", () => {
+        const properties = new Agent({ client: TEST_AGENT_CLIENT })
+            .withMllm(
+                new AzureOpenAIRealtime({
+                    apiKey: "APIKEY",
+                    url: "AZURE_URL",
+                    messages: [{ role: "user", content: "can you please count to 3 after greeting。" }],
+                    params: {
+                        instructions: "You are a Conversational AI Agent, developed by Agora.",
+                        model: "gpt-realtime-2",
+                        voice: "alloy",
+                    },
+                    outputModalities: ["audio"],
+                    maxHistory: 20,
+                    greetingMessage: "Hey There Sir",
+                    turnDetection: { mode: "server_vad" },
+                }),
+            )
+            .toProperties({ ...SESSION_OPTS });
+
+        expect(properties.mllm).toEqual({
+            enable: true,
+            url: "AZURE_URL",
+            api_key: "APIKEY",
+            messages: [{ role: "user", content: "can you please count to 3 after greeting。" }],
+            params: {
+                instructions: "You are a Conversational AI Agent, developed by Agora.",
+                model: "gpt-realtime-2",
+                voice: "alloy",
+            },
+            output_modalities: ["audio"],
+            max_history: 20,
+            greeting_message: "Hey There Sir",
+            vendor: "azure",
+            turn_detection: { mode: "server_vad" },
+        });
+        const paramsWithUnsupportedField = {
+            model: "params-model",
+            voice: "params-voice",
+            instructions: "params-instructions",
+            unsupported: true,
+        };
+        expect(
+            new AzureOpenAIRealtime({
+                apiKey: "key",
+                url: "wss://example.com",
+                params: paramsWithUnsupportedField,
+                model: "option-model",
+                voice: "option-voice",
+                instructions: "option-instructions",
+                turnDetection: { mode: "server_vad" },
+            }).toConfig().params,
+        ).toEqual({ model: "option-model", voice: "option-voice", instructions: "option-instructions" });
+        expect(
+            new AzureOpenAIRealtime({
+                apiKey: "key",
+                url: "wss://example.com",
+                turnDetection: { mode: "server_vad" },
+            }).areaScope,
+        ).toBe("global");
+        expect(() => new AzureOpenAIRealtime({ apiKey: "key", url: "wss://example.com" } as never)).toThrow(
+            "AzureOpenAIRealtime requires turnDetection",
+        );
+    });
+
     test("GeminiLive toConfig has vendor=gemini and api_key", () => {
         const config = new GeminiLive({
             apiKey: "gemini-key",
@@ -1312,6 +1418,32 @@ describe("MLLM vendor coverage", () => {
         expect((config as Record<string, unknown>)?.api_key).toBe("xai-key");
         expect((config as Record<string, unknown>)?.url).toBe("wss://api.x.ai/v1/realtime");
         expect((config as Record<string, unknown>)?.params).toMatchObject({ voice: "eve" });
+    });
+
+    test("QwenOmni serializes the CN qwen_omni vendor", () => {
+        const config = new QwenOmni({
+            apiKey: "dashscope-key",
+            model: "qwen-omni-turbo-realtime",
+            voice: "Cherry",
+            turnDetection: { mode: "server_vad" },
+        }).toConfig();
+
+        expect(config.vendor).toBe("qwen_omni");
+        expect(config.api_key).toBe("dashscope-key");
+        expect(config.params).toMatchObject({
+            model: "qwen-omni-turbo-realtime",
+            voice: "Cherry",
+        });
+        expect(
+            new QwenOmni({
+                apiKey: "key",
+                model: "qwen-omni-turbo-realtime",
+                turnDetection: { mode: "server_vad" },
+            }).areaScope,
+        ).toBe("cn");
+        expect(() => new QwenOmni({ apiKey: "key", model: "qwen-omni-turbo-realtime" } as never)).toThrow(
+            "QwenOmni requires turnDetection",
+        );
     });
 });
 

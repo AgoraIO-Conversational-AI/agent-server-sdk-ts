@@ -12,12 +12,12 @@ The `agora-agents` package lets you build real-time voice AI agents on the [Agor
 
 **Cascading flow** uses ASR -> LLM -> TTS and supports the broadest set of vendor combinations.
 
-**MLLM flow** uses a multimodal model such as OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok for end-to-end audio.
+**MLLM flow** uses a multimodal model such as OpenAI Realtime, Azure OpenAI Realtime, Gemini Live, Vertex AI, xAI Grok, or Qwen Omni for end-to-end audio.
 
 ## Start here
 
 - Start with [Quick Start](./getting-started/quick-start.md). It shows the baseline app-credentials setup and starts a cascading ASR -> LLM -> TTS agent.
-- Use [MLLM Flow Guide](./guides/mllm-flow.md) when your agent uses one realtime multimodal model, such as OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok.
+- Use [MLLM Flow Guide](./guides/mllm-flow.md) when your agent uses one realtime multimodal model, including global providers and Chinese mainland Qwen Omni.
 - Use [Cascading Flow Guide](./guides/cascading-flow.md) for more examples of the default ASR -> LLM -> TTS flow, including provider-specific configuration.
 
 ## How the SDK is organized
@@ -46,7 +46,7 @@ npm install agora-agents
 | [AgentSession](./concepts/session.md) | State machine, lifecycle methods, events |
 | [Vendors](./concepts/vendors.md) | LLM, TTS, STT, MLLM, and Avatar provider catalog |
 | [Cascading Flow Guide](./guides/cascading-flow.md) | Step-by-step ASR -> LLM -> TTS |
-| [MLLM Flow Guide](./guides/mllm-flow.md) | OpenAI Realtime, Gemini Live, Vertex AI, and xAI Grok |
+| [MLLM Flow Guide](./guides/mllm-flow.md) | Global MLLM providers and Chinese mainland Qwen Omni |
 | [Avatar Integration](./guides/avatars.md) | LiveAvatar, Generic Avatar, Anam, Akool, SenseTime (CN), and HeyGen integration |
 | [Agent Builder Features](./guides/agent-builder-features.md) | Turn detection, SAL, filler words, and advanced agent options |
 | [Regional Routing](./guides/regional-routing.md) | Area enum, domain pool, failover |

@@ -52,6 +52,7 @@ const llm = new OpenAI({
 | `DeepgramTTS`   | Deepgram         | Configurable                            |
 | `GradiumTTS`    | Gradium          | Configurable                            |
 | `MistralTTS`    | Mistral          | Not configurable                        |
+| `TypecastTTS`   | Typecast         | Not configurable                        |
 | `GenericTTS`    | Generic OpenAI-compatible HTTP TTS | Configurable                  |
 | `SarvamTTS`     | Sarvam AI        | Configurable                            |
 | `XAiTTS`        | xAI              | Configurable                            |
@@ -87,7 +88,7 @@ The `sampleRate` is critical when using avatars. See [Avatar Integration](../gui
 | `GoogleSTT`       | Google Speech     | `projectId`, `location`, `adcCredentialsString`, `language` |
 | `AmazonSTT`       | Amazon Transcribe | `accessKey`, `secretKey`, `region`, `language`   |
 | `AssemblyAISTT`   | AssemblyAI        | `apiKey`, `language`, `uri?`                     |
-| `AresSTT`         | Agora ARES        | —                                                |
+| `AresSTT`         | Agora ARES        | `keywords?`, `additionalParams?`                 |
 | `SarvamSTT`       | Sarvam AI         | `apiKey`, `language`                             |
 | `XAiSTT`          | xAI               | `apiKey`, `language?`, `baseUrl?`, `sampleRate?` |
 
@@ -110,9 +111,11 @@ MLLM (Multimodal LLM) vendors handle audio end-to-end — no separate STT or TTS
 | Class            | Provider                        | Key constructor params                                                                                                                                                                    |
 | ---------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `OpenAIRealtime` | OpenAI Realtime API             | `apiKey`, `model?`, `url?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                                                 |
+| `AzureOpenAIRealtime` | Azure OpenAI Realtime (global) | `apiKey`, `url`, `turnDetection`, `model?`, `voice?`, `instructions?`, `params?`, `messages?`, `outputModalities?`, `maxHistory?`, `greetingMessage?` |
 | `GeminiLive`     | Google Gemini Live API          | `apiKey`, `model`, `url?`, `voice?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                                        |
 | `VertexAI`       | Vertex AI Gemini Live           | `model`, `url?`, `projectId`, `location`, `adcCredentialsString`, `voice?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?` |
 | `XaiGrok`        | xAI Grok (`mllm.vendor`: `xai`) | `apiKey`, `url?`, `voice?`, `language?`, `sampleRate?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                     |
+| `QwenOmni`       | Alibaba Cloud Qwen Omni (CN)    | `apiKey`, `model`, `turnDetection`, `url?`, `voice?`, `greetingMessage?`, `failureMessage?` |
 
 `XAiSTT` and `XAiTTS` are the cascading-pipeline xAI wrappers. `XaiGrok` is the realtime MLLM wrapper.
 
@@ -132,7 +135,7 @@ See [MLLM Flow Guide](../guides/mllm-flow.md) for full examples.
 
 ## CN vendors (Chinese mainland)
 
-CN vendor classes use the same builder methods (`.withLlm()`, `.withStt()`, `.withTts()`, `.withAvatar()`). `client.area` does not restrict which explicit vendor classes you can pass, and it also affects the default ASR vendor when `.withStt()` is omitted:
+CN vendor classes use the same builder methods (`.withLlm()`, `.withStt()`, `.withTts()`, `.withMllm()`, `.withAvatar()`). `client.area` does not restrict which explicit vendor classes you can pass, and it also affects the default ASR vendor when `.withStt()` is omitted:
 
 - `Area.CN` defaults to `FengmingSTT`
 - all other areas default to `AresSTT`
@@ -140,6 +143,7 @@ CN vendor classes use the same builder methods (`.withLlm()`, `.withStt()`, `.wi
 | Category | Examples |
 |---|---|
 | LLM | `AliyunLLM`, `BytedanceLLM`, `DeepSeekLLM`, `TencentLLM`, `CustomLLM` |
+| MLLM | `QwenOmni` |
 | STT | `FengmingSTT`, `TencentSTT`, `MicrosoftCNSTT`, `XfyunSTT`, `XfyunBigModelSTT`, `XfyunDialectSTT` |
 | TTS | `GenericTTS` (shared with Global), `MiniMaxCNTTS`, `MicrosoftCNTTS`, `TencentTTS`, `CosyVoiceTTS`, `BytedanceDuplexTTS`, `StepFunTTS` |
 | Avatar | `SensetimeAvatar`, `SpatiusAvatar` |
@@ -150,7 +154,7 @@ See [Regional Routing](../guides/regional-routing.md) and [Vendor Reference](../
 
 Avatars provide a visual representation for the agent. Several avatar vendors require a specific TTS sample rate — this is enforced at both compile time and runtime.
 
-> Avatars currently require the cascading ASR + LLM + TTS pipeline. They are not supported with MLLM (`OpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`); combining the two throws at `Agent.toProperties()` and `AgentSession.start()`.
+> Avatars currently require the cascading ASR + LLM + TTS pipeline. They are not supported with MLLM (`OpenAIRealtime`, `AzureOpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`, `QwenOmni`); combining the two throws at `Agent.toProperties()` and `AgentSession.start()`.
 
 | Class              | Provider                                    | Required TTS sample rate |
 | ------------------ | ------------------------------------------- | ------------------------ |
@@ -162,7 +166,7 @@ Avatars provide a visual representation for the agent. Several avatar vendors re
 | `SensetimeAvatar`  | SenseTime (CN)                              | Provider-defined         |
 | `SpatiusAvatar`    | Spatius (CN)                                | Provider-defined         |
 
-CN LLM, STT, TTS, and avatar vendors (`AliyunLLM`, `FengmingSTT`, `MiniMaxCNTTS`, `SensetimeAvatar`, `SpatiusAvatar`, …) are listed in [Vendor Reference](../reference/vendors.md) and [Regional Routing](../guides/regional-routing.md).
+CN MLLM, LLM, STT, TTS, and avatar vendors (`QwenOmni`, `AliyunLLM`, `FengmingSTT`, `MiniMaxCNTTS`, `SensetimeAvatar`, `SpatiusAvatar`, …) are listed in [Vendor Reference](../reference/vendors.md) and [Regional Routing](../guides/regional-routing.md).
 
 See [Avatar Integration](../guides/avatars.md) for full examples and the sample-rate constraint details.
 

@@ -323,6 +323,7 @@ The following vendors share a similar pattern. See `src/agentkit/vendors/tts.ts`
 | `DeepgramTTS` | `apiKey`, `model`, `baseUrl?`, `sampleRate?`, `additionalParams?` |
 | `GradiumTTS` | `apiKey`, `url?`, `modelName?`, `voiceId?`, `sampleRate?`, `additionalParams?` |
 | `MistralTTS` | `apiKey`, `model?`, `voice?`, `additionalParams?` |
+| `TypecastTTS` | `apiKey`, `voiceId`, `model`, `additionalParams?`, `skipPatterns?` |
 | `GenericTTS` | `url`, `headers?`, `apiKey?`, `model?`, `voice?`, `speed?`, `sampleRate?`, `responseFormat?`, `instruction?`, `additionalParams?`, `skipPatterns?` |
 | `HumeAITTS` | `key`, `voiceId`, `provider`, `configId?`, `baseUrl?`, `speed?`, `trailingSilence?` |
 | `FishAudioTTS` | `key`, `referenceId`, `backend` |
@@ -377,7 +378,7 @@ When `.withStt()` is omitted, AgentKit now selects the wire ASR vendor from `cli
 | `GoogleSTT` | `projectId`, `location`, `adcCredentialsString`, `language`, `model?` |
 | `AmazonSTT` | `accessKey`, `secretKey`, `region`, `language` |
 | `AssemblyAISTT` | `apiKey`, `language`, `uri?` |
-| `AresSTT` | — |
+| `AresSTT` | `keywords?`, `additionalParams?` |
 | `SarvamSTT` | `apiKey`, `language` |
 | `XAiSTT` | `apiKey`, `language?`, `baseUrl?`, `sampleRate?`, `additionalParams?` |
 
@@ -404,6 +405,29 @@ new OpenAIRealtime(options: OpenAIRealtimeOptions)
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages for short-term memory |
 | `params` | `Record<string, unknown>` | No | Additional MLLM parameters |
 | `turnDetection` | `MllmTurnDetectionConfig` | No | MLLM turn detection configuration; overrides top-level `turn_detection` |
+
+### AzureOpenAIRealtime
+
+<!-- snippet: fragment -->
+```typescript
+new AzureOpenAIRealtime(options: AzureOpenAIRealtimeOptions)
+```
+
+Global Azure OpenAI Realtime wrapper. It emits `mllm.vendor = 'azure'`; `maxHistory` maps to the Azure-only top-level field `mllm.max_history`.
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | Azure OpenAI API key |
+| `url` | `string` | Yes | Azure OpenAI Realtime WebSocket URL |
+| `model` | `string` | No | Model or deployment model identifier |
+| `voice` | `string` | No | Voice identifier |
+| `instructions` | `string` | No | System instructions |
+| `maxHistory` | `number` | No | Number of cached conversation messages |
+| `greetingMessage` | `string` | No | Agent greeting message |
+| `outputModalities` | `string[]` | No | Output modalities |
+| `messages` | `Record<string, unknown>[]` | No | Conversation messages |
+| `params` | `AzureOpenAIRealtimeParams` | No | Azure parameters limited to `instructions`, `model`, and `voice` |
+| `turnDetection` | `MllmTurnDetectionConfig` | Yes | MLLM turn detection configuration |
 
 ### GeminiLive
 
@@ -472,6 +496,30 @@ new XaiGrok(options: XaiGrokOptions)
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages |
 | `params` | `Record<string, unknown>` | No | Additional xAI parameters |
 | `turnDetection` | `MllmTurnDetectionConfig` | No | MLLM turn detection configuration; overrides top-level `turn_detection` |
+
+### QwenOmni
+
+<!-- snippet: fragment -->
+```typescript
+new QwenOmni(options: QwenOmniOptions)
+```
+
+Chinese mainland Alibaba Cloud Qwen Omni Realtime wrapper. It emits `mllm.vendor = 'qwen_omni'` and is assignable to `CNMllmVendor`, not `GlobalMllmVendor`.
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | Alibaba Cloud DashScope API key |
+| `model` | `string` | Yes | Qwen Omni model identifier |
+| `url` | `string` | No | Custom Realtime WebSocket URL; the server-side CN endpoint is used when omitted |
+| `voice` | `string` | No | Voice identifier |
+| `instructions` | `string` | No | System instructions |
+| `greetingMessage` | `string` | No | Agent greeting message |
+| `failureMessage` | `string` | No | Message played when the model call fails |
+| `inputModalities` | `string[]` | No | Input modalities |
+| `outputModalities` | `string[]` | No | Output modalities |
+| `messages` | `Record<string, unknown>[]` | No | Conversation messages |
+| `params` | `Record<string, unknown>` | No | Additional Qwen Omni parameters |
+| `turnDetection` | `MllmTurnDetectionConfig` | Yes | MLLM turn detection configuration |
 
 ---
 
@@ -620,7 +668,7 @@ CN TTS helpers reuse shared vendor names where possible. `GenericTTS` is availab
 
 | Class | Key options |
 |---|---|
-| `FengmingSTT` | no vendor params |
+| `FengmingSTT` | optional `keywords`, `additionalParams` |
 | `TencentSTT` | `key`, `appId`, `secret`, `engineModelType`, `voiceId`; optional `language`, `additionalParams` |
 | `MicrosoftCNSTT` | `key`, `region`, `language` |
 | `XfyunSTT` | `apiKey`, `appId`, `apiSecret`, `language`; optional `additionalParams` |

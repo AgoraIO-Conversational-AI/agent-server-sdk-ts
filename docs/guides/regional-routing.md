@@ -35,17 +35,18 @@ const client = new AgoraClient({
 
 ## Vendor classes
 
-Import any supported vendor class and pass it to `.withStt()`, `.withLlm()`, and `.withTts()`. `client.area` does not restrict explicit provider choice, and it also determines the default ASR vendor when `.withStt()` is omitted:
+Import any supported vendor class and pass it to `.withStt()`, `.withLlm()`, `.withTts()`, or `.withMllm()`. `client.area` does not restrict explicit provider choice, and it also determines the default ASR vendor when `.withStt()` is omitted:
 
 - `Area.CN` defaults to `FengmingSTT`
 - all other areas default to `AresSTT`
 
 | Typical global providers | Typical CN providers |
 |---|---|
-| `DeepgramSTT`, `OpenAI`, `MiniMaxTTS`, `ElevenLabsTTS`, `GenericTTS`, … | `FengmingSTT`, `AliyunLLM`, `MiniMaxCNTTS`, `TencentTTS`, `GenericTTS`, … |
+| `DeepgramSTT`, `OpenAI`, `MiniMaxTTS`, `AzureOpenAIRealtime`, `GenericTTS`, … | `FengmingSTT`, `AliyunLLM`, `MiniMaxCNTTS`, `QwenOmni`, `GenericTTS`, … |
 
 See the tables below for the full catalog. You may combine any explicit vendor with any `client.area`.
 `GenericTTS` is included in both the exported `GlobalTtsVendor` and `CNTtsVendor` types.
+MLLM helpers retain their region in the exported `GlobalMllmVendor` and `CNMllmVendor` types: Azure is global and Qwen Omni is CN.
 
 Global client example:
 

@@ -349,5 +349,5 @@ const agentId = await session.start();
 
 - [Agent Reference](../reference/agent.md) — full API signatures
 - [Cascading Flow](./cascading-flow.md) — ASR → LLM → TTS setup
-- [MLLM Flow](./mllm-flow.md) — end-to-end audio with OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok
+- [MLLM Flow](./mllm-flow.md) — end-to-end audio with global providers or Chinese mainland Qwen Omni
 - [Regional Routing](./regional-routing.md) — client area and geofence

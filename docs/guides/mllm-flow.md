@@ -1,22 +1,24 @@
 ---
 sidebar_position: 2
 title: MLLM Flow (Multimodal)
-description: Use OpenAI Realtime, Gemini Live, Vertex AI, or xAI Grok for end-to-end audio processing.
+description: Use global or Chinese mainland MLLM providers for end-to-end audio processing.
 ---
 
 # MLLM Flow (Multimodal)
 
-In MLLM mode, a single multimodal model handles audio input and output end-to-end — no separate STT or TTS step. This reduces latency and is required for OpenAI Realtime, Gemini Live, Vertex AI, and xAI Grok.
+In MLLM mode, a single multimodal model handles audio input and output end-to-end — no separate STT or TTS step. AgentKit supports global OpenAI Realtime, Azure OpenAI Realtime, Gemini Live, Vertex AI, and xAI Grok providers, plus Qwen Omni for Chinese mainland deployments.
 
 ## When to use MLLM
 
 - You want the lowest-latency conversational experience
-- You are using OpenAI Realtime API, Google Gemini Live, Vertex AI Gemini Live, or xAI Grok Realtime
+- You are using OpenAI Realtime API, Azure OpenAI Realtime, Google Gemini Live, Vertex AI Gemini Live, xAI Grok Realtime, or Qwen Omni
 - You don't need fine-grained control over STT/TTS vendor selection
 
 ## Requirements
 
 Call `agent.withMllm(vendor)` — that's it. MLLM mode is enabled automatically through `mllm.enable`. The `withLlm()`, `withTts()`, and `withStt()` methods are not needed — the MLLM vendor handles everything.
+
+`AzureOpenAIRealtime` is a global MLLM (`GlobalMllmVendor`). `QwenOmni` is a Chinese mainland MLLM (`CNMllmVendor`). As with the other explicit vendor helpers, `client.area` controls Agora REST routing but does not prevent you from selecting a provider explicitly.
 
 ## Limitations
 
@@ -61,6 +63,31 @@ console.log('Realtime agent running:', agentId);
 
 // When done:
 await session.stop();
+```
+
+## Example: Azure OpenAI Realtime (global)
+
+```typescript
+import { AgoraClient, Area, Agent, AzureOpenAIRealtime } from 'agora-agents';
+
+const client = new AgoraClient({
+  area: Area.US,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+});
+
+const agent = new Agent({ client }).withMllm(new AzureOpenAIRealtime({
+  apiKey: 'your-azure-openai-key',
+  url: 'wss://example.openai.azure.com/openai/realtime',
+  params: {
+    instructions: 'You are a conversational AI agent developed by Agora.',
+    model: 'gpt-realtime-2',
+    voice: 'alloy',
+  },
+  outputModalities: ['audio'],
+  maxHistory: 32,
+  turnDetection: { mode: 'server_vad' },
+}));
 ```
 
 ## Example: Gemini Live
@@ -124,6 +151,26 @@ const session = agent.createSession({
 
 const agentId = await session.start();
 console.log('Grok agent running:', agentId);
+```
+
+## Example: Qwen Omni (Chinese mainland)
+
+```typescript
+import { AgoraClient, Area, Agent, QwenOmni } from 'agora-agents';
+
+const client = new AgoraClient({
+  area: Area.CN,
+  appId: 'your-app-id',
+  appCertificate: 'your-app-certificate',
+});
+
+const agent = new Agent({ client }).withMllm(new QwenOmni({
+  apiKey: 'your-dashscope-key',
+  model: 'qwen-omni-turbo-realtime',
+  voice: 'Cherry',
+  greetingMessage: 'Hello, Qwen Omni is ready.',
+  turnDetection: { mode: 'server_vad' },
+}));
 ```
 
 ## Turn detection in MLLM mode

@@ -12,7 +12,14 @@ import { Area } from "../core/domain/index.js";
 import { AgentSession } from "./AgentSession.js";
 import type { AgoraArea } from "./area.js";
 import { AudioScenario } from "./constants.js";
-import type { AvatarVendor, LlmVendor, SttVendor, TtsVendor } from "./region-vendors.js";
+import type {
+    AvatarVendor,
+    CNMllmVendor,
+    GlobalMllmVendor,
+    LlmVendor,
+    SttVendor,
+    TtsVendor,
+} from "./region-vendors.js";
 import { generateConvoAIToken } from "./token.js";
 import type {
     AdvancedFeatures,
@@ -34,7 +41,6 @@ import type {
     TurnDetectionConfig,
     TurnDetectionLanguage,
 } from "./types.js";
-import type { BaseMLLM } from "./vendors/base.js";
 
 const DEFAULT_TURN_DETECTION_LANGUAGE: TurnDetectionLanguage = "en-US";
 
@@ -299,7 +305,7 @@ export class Agent<TTSSampleRate extends number = number, TArea extends AgoraAre
      *
      * @param vendor - MLLM vendor instance (e.g., new VertexAI({ model: '...', projectId: '...', ... }))
      */
-    withMllm(vendor: BaseMLLM): Agent<TTSSampleRate, TArea> {
+    withMllm(vendor: GlobalMllmVendor | CNMllmVendor): Agent<TTSSampleRate, TArea> {
         const newAgent = this._clone();
         newAgent._mllm = { ...vendor.toConfig(), enable: true };
         if (newAgent._advancedFeatures?.enable_mllm !== undefined) {
@@ -478,7 +484,8 @@ export class Agent<TTSSampleRate extends number = number, TArea extends AgoraAre
 
     /**
      * Returns a new Agent with the specified maximum conversation history length.
-     * Applies to the standard LLM pipeline only; the v2.7 MLLM core schema has no max_history field.
+     * Applies to the standard LLM pipeline only. For Azure OpenAI Realtime MLLM,
+     * configure `maxHistory` on the MLLM vendor instead.
      *
      * @deprecated Configure max history on the LLM vendor instead.
      */

@@ -11,6 +11,7 @@ import {
     MicrosoftCNSTT,
     MicrosoftCNTTS,
     MiniMaxCNTTS,
+    QwenOmni,
     SensetimeAvatar,
     SpatiusAvatar,
     StepFunTTS,
@@ -25,6 +26,10 @@ import {
 describe("CN vendor helpers", () => {
     test("serializes CN STT vendors", () => {
         expect(new FengmingSTT().toConfig()).toMatchObject({ vendor: "fengming" });
+        expect(new FengmingSTT({ keywords: ["声网", "Agora"] }).toConfig()).toMatchObject({
+            vendor: "fengming",
+            params: { keywords: ["声网", "Agora"] },
+        });
 
         expect(
             new TencentSTT({
@@ -115,6 +120,21 @@ describe("CN vendor helpers", () => {
                 access_key_secret: "access-secret",
                 language: "zh-CN",
             },
+        });
+    });
+
+    test("serializes the CN Qwen Omni MLLM vendor", () => {
+        expect(
+            new QwenOmni({
+                apiKey: "dashscope-key",
+                model: "qwen-omni-turbo-realtime",
+                turnDetection: { mode: "server_vad" },
+            }).toConfig(),
+        ).toMatchObject({
+            vendor: "qwen_omni",
+            api_key: "dashscope-key",
+            params: { model: "qwen-omni-turbo-realtime" },
+            turn_detection: { mode: "server_vad" },
         });
     });
 

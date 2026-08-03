@@ -78,9 +78,9 @@ Set the STT vendor. Accepts global classes (`DeepgramSTT`, `SpeechmaticsSTT`, â€
 
 If you omit `withStt()`, AgentKit still sends an ASR config automatically based on `client.area`: `fengming` for `Area.CN`, otherwise `ares`.
 
-### `withMllm(vendor: BaseMLLM): Agent<TTSSampleRate, TArea>`
+### `withMllm(vendor: GlobalMllmVendor | CNMllmVendor): Agent<TTSSampleRate, TArea>`
 
-Set the MLLM vendor for multimodal mode. Pass `OpenAIRealtime`, `GeminiLive`, `VertexAI`, or `XaiGrok`. Calling `withMllm()` automatically sets `mllm.enable = true`. MLLM mode does not require `withTts()` / `withLlm()` / `withStt()`.
+Set the MLLM vendor for multimodal mode. Pass a global vendor (`OpenAIRealtime`, `AzureOpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`) or the Chinese mainland vendor `QwenOmni`. Calling `withMllm()` automatically sets `mllm.enable = true`. MLLM mode does not require `withTts()` / `withLlm()` / `withStt()`.
 
 > Avatars are only supported with the cascading ASR + LLM + TTS pipeline. Combining `withMllm()` with `withAvatar()` throws at `toProperties()` and `session.start()`.
 

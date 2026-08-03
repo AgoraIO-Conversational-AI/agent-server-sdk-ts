@@ -1,9 +1,11 @@
 import { AgoraClient } from "../../AgoraPoolClient.js";
 import { Area } from "../../core/domain/index.js";
 import { Agent } from "../Agent.js";
-import type { CNTtsVendor, GlobalTtsVendor } from "../region-vendors.js";
+import type { CNMllmVendor, CNTtsVendor, GlobalMllmVendor, GlobalTtsVendor } from "../region-vendors.js";
 import { AliyunLLM, FengmingSTT, MiniMaxCNTTS } from "../vendors/cn.js";
 import { OpenAI } from "../vendors/llm.js";
+import type { AzureOpenAIRealtimeOptions, AzureOpenAIRealtimeParams, QwenOmniOptions } from "../vendors/mllm.js";
+import { AzureOpenAIRealtime, QwenOmni } from "../vendors/mllm.js";
 import { DeepgramSTT } from "../vendors/stt.js";
 import { GenericTTS, MiniMaxTTS } from "../vendors/tts.js";
 
@@ -34,6 +36,44 @@ new Agent({ client }).withTts(
 );
 const globalGenericTts: GlobalTtsVendor = new GenericTTS({ url: "https://tts.example.com/v1/audio/speech" });
 new Agent({ client }).withTts(globalGenericTts);
+const globalMllm: GlobalMllmVendor = new AzureOpenAIRealtime({
+    apiKey: "azure-key",
+    url: "wss://example.openai.azure.com/openai/realtime",
+    turnDetection: { mode: "server_vad" },
+});
+new Agent({ client }).withMllm(globalMllm);
+
+type Assert<T extends true> = T;
+type IsExact<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+type IsRequired<T, K extends keyof T> = Pick<T, K> extends Required<Pick<T, K>> ? true : false;
+type _AzureOptionsExposeOnlySupportedFields = Assert<
+    IsExact<
+        keyof AzureOpenAIRealtimeOptions,
+        | "apiKey"
+        | "url"
+        | "model"
+        | "voice"
+        | "instructions"
+        | "maxHistory"
+        | "greetingMessage"
+        | "outputModalities"
+        | "messages"
+        | "params"
+        | "turnDetection"
+    >
+>;
+type _AzureParamsExposeOnlySupportedFields = Assert<
+    IsExact<keyof AzureOpenAIRealtimeParams, "instructions" | "model" | "voice">
+>;
+type _AzureTurnDetectionIsRequired = Assert<IsRequired<AzureOpenAIRealtimeOptions, "turnDetection">>;
+type _QwenTurnDetectionIsRequired = Assert<IsRequired<QwenOmniOptions, "turnDetection">>;
+
+// @ts-expect-error Qwen Omni is a Chinese mainland MLLM vendor.
+const _invalidGlobalMllm: GlobalMllmVendor = new QwenOmni({
+    apiKey: "key",
+    model: "qwen-omni-turbo-realtime",
+    turnDetection: { mode: "server_vad" },
+});
 
 {
     const client = new AgoraClient({
@@ -72,6 +112,18 @@ new Agent({ client }).withTts(globalGenericTts);
     );
     const cnGenericTts: CNTtsVendor = new GenericTTS({ url: "https://tts.example.cn/v1/audio/speech" });
     new Agent({ client }).withTts(cnGenericTts);
+    const cnMllm: CNMllmVendor = new QwenOmni({
+        apiKey: "key",
+        model: "qwen-omni-turbo-realtime",
+        turnDetection: { mode: "server_vad" },
+    });
+    new Agent({ client }).withMllm(cnMllm);
+    // @ts-expect-error Azure OpenAI Realtime is a global MLLM vendor.
+    const _invalidCnMllm: CNMllmVendor = new AzureOpenAIRealtime({
+        apiKey: "azure-key",
+        url: "wss://example.openai.azure.com/openai/realtime",
+        turnDetection: { mode: "server_vad" },
+    });
 }
 
 new Agent({ client }).withStt(new DeepgramSTT({ model: "nova-3", language: "en-US" }));

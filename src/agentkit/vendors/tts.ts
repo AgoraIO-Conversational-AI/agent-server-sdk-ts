@@ -576,6 +576,48 @@ export class MistralTTS extends BaseTTS {
     }
 }
 
+/** Constructor options for Typecast TTS. */
+export interface TypecastTTSOptions {
+    /** Typecast API key */
+    apiKey: string;
+    /** Typecast voice identifier */
+    voiceId: string;
+    /** Typecast TTS model name (e.g., 'ssfm-v30') */
+    model: string;
+    /** Additional vendor-specific parameters */
+    additionalParams?: Record<string, unknown>;
+    /** Skip patterns for bracketed content */
+    skipPatterns?: number[];
+}
+
+/** Typecast TTS vendor. */
+export class TypecastTTS extends BaseTTS {
+    private readonly options: TypecastTTSOptions;
+
+    constructor(options: TypecastTTSOptions) {
+        super();
+        requireString(options.apiKey, "apiKey", "TypecastTTS");
+        requireString(options.voiceId, "voiceId", "TypecastTTS");
+        requireString(options.model, "model", "TypecastTTS");
+        this.options = options;
+    }
+
+    toConfig(): TtsConfig {
+        const { apiKey, voiceId, model, additionalParams, skipPatterns } = this.options;
+
+        return {
+            vendor: "typecast",
+            params: {
+                ...additionalParams,
+                api_key: apiKey,
+                voice_id: voiceId,
+                model,
+            },
+            ...(skipPatterns && { skip_patterns: skipPatterns }),
+        };
+    }
+}
+
 /**
  * Constructor options for Hume AI TTS.
  */
