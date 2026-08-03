@@ -4,8 +4,57 @@ import type { AgoraArea } from "./agentkit/area.js";
 import { generateConvoAIToken } from "./agentkit/token.js";
 import type { BaseClientOptions, BaseRequestOptions } from "./BaseClient.js";
 import { AgoraClient as BaseAgoraClient } from "./Client.js";
-import { Pool } from "./core/domain/index.js";
+import { Area, CNAPIPath, GlobalAPIPath, Pool } from "./core/domain/index.js";
 import { AgoraError } from "./errors/index.js";
+
+const INTERNAL_API_BASE_URL_ENV = "AGORA_AGENTS_INTERNAL_API_BASE_URL";
+
+function getInternalApiBaseUrl(): string | undefined {
+    const baseUrl = process.env[INTERNAL_API_BASE_URL_ENV]?.trim();
+    return baseUrl || undefined;
+}
+
+function buildInternalApiUrl(baseUrl: string, area: AgoraArea): string {
+    let parsedUrl: URL;
+    try {
+        parsedUrl = new URL(baseUrl);
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`invalid ${INTERNAL_API_BASE_URL_ENV}: ${message}`);
+    }
+
+    const apiPath = area === Area.CN ? CNAPIPath : GlobalAPIPath;
+    parsedUrl.pathname = `${parsedUrl.pathname.replace(/\/+$/, "")}${apiPath}`;
+    return parsedUrl.toString();
+}
+
+class InternalFixedBaseUrlPool extends Pool {
+    constructor(
+        area: AgoraArea,
+        private readonly fixedBaseUrl: string,
+    ) {
+        super(area);
+    }
+
+    override selectBestDomain(_signal?: AbortSignal): Promise<void> {
+        return Promise.resolve();
+    }
+
+    override nextRegion(): void {
+        // Fixed internal endpoints intentionally do not participate in regional failover.
+    }
+
+    override getCurrentURL(): string {
+        return this.fixedBaseUrl;
+    }
+}
+
+function createClientPool(area: AgoraArea): Pool {
+    const internalBaseUrl = getInternalApiBaseUrl();
+    return internalBaseUrl
+        ? new InternalFixedBaseUrlPool(area, buildInternalApiUrl(internalBaseUrl, area))
+        : new Pool(area);
+}
 
 /**
  * Auth mode for the client:
@@ -107,7 +156,7 @@ export class AgoraClient<TArea extends AgoraArea = AgoraArea> extends BaseAgoraC
     public readonly area: TArea;
 
     constructor(options: AgoraClient.Options<TArea>) {
-        const pool = new Pool(options.area);
+        const pool = createClientPool(options.area);
 
         let authMode: AgoraAuthMode;
         let username: string;
