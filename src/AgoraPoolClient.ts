@@ -7,20 +7,20 @@ import { AgoraClient as BaseAgoraClient } from "./Client.js";
 import { Area, CNAPIPath, GlobalAPIPath, Pool } from "./core/domain/index.js";
 import { AgoraError } from "./errors/index.js";
 
-const INTERNAL_API_BASE_URL_ENV = "AGORA_AGENTS_INTERNAL_API_BASE_URL";
+const API_BASE_URL_ENV = "AGORA_AGENTS_API_BASE_URL";
 
-function getInternalApiBaseUrl(): string | undefined {
-    const baseUrl = process.env[INTERNAL_API_BASE_URL_ENV]?.trim();
+function getConfiguredApiBaseUrl(): string | undefined {
+    const baseUrl = process.env[API_BASE_URL_ENV]?.trim();
     return baseUrl || undefined;
 }
 
-function buildInternalApiUrl(baseUrl: string, area: AgoraArea): string {
+function buildApiUrl(baseUrl: string, area: AgoraArea): string {
     let parsedUrl: URL;
     try {
         parsedUrl = new URL(baseUrl);
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        throw new Error(`invalid ${INTERNAL_API_BASE_URL_ENV}: ${message}`);
+        throw new Error(`invalid ${API_BASE_URL_ENV}: ${message}`);
     }
 
     const apiPath = area === Area.CN ? CNAPIPath : GlobalAPIPath;
@@ -28,10 +28,10 @@ function buildInternalApiUrl(baseUrl: string, area: AgoraArea): string {
     return parsedUrl.toString();
 }
 
-class InternalFixedBaseUrlPool extends Pool {
+class ConfiguredBaseUrlPool extends Pool {
     constructor(
         area: AgoraArea,
-        private readonly fixedBaseUrl: string,
+        private readonly configuredBaseUrl: string,
     ) {
         super(area);
     }
@@ -41,19 +41,17 @@ class InternalFixedBaseUrlPool extends Pool {
     }
 
     override nextRegion(): void {
-        // Fixed internal endpoints intentionally do not participate in regional failover.
+        // Configured endpoints intentionally do not participate in regional failover.
     }
 
     override getCurrentURL(): string {
-        return this.fixedBaseUrl;
+        return this.configuredBaseUrl;
     }
 }
 
 function createClientPool(area: AgoraArea): Pool {
-    const internalBaseUrl = getInternalApiBaseUrl();
-    return internalBaseUrl
-        ? new InternalFixedBaseUrlPool(area, buildInternalApiUrl(internalBaseUrl, area))
-        : new Pool(area);
+    const configuredBaseUrl = getConfiguredApiBaseUrl();
+    return configuredBaseUrl ? new ConfiguredBaseUrlPool(area, buildApiUrl(configuredBaseUrl, area)) : new Pool(area);
 }
 
 /**
