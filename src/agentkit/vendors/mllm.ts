@@ -545,8 +545,8 @@ export interface QwenOmniOptions {
     apiKey: string;
     /** Qwen Omni model identifier */
     model: string;
-    /** Qwen Omni Realtime WebSocket URL. Uses the server-side CN endpoint when omitted. */
-    url?: string;
+    /** Qwen Omni Realtime WebSocket URL */
+    url: string;
     /** Voice identifier for audio output */
     voice?: string;
     /** System instructions that define agent behavior */
@@ -563,8 +563,8 @@ export interface QwenOmniOptions {
     messages?: Record<string, unknown>[];
     /** Additional Qwen Omni parameters */
     params?: Record<string, unknown>;
-    /** Required MLLM turn detection configuration. Overrides top-level turn_detection. */
-    turnDetection: MllmTurnDetectionConfig;
+    /** MLLM turn detection configuration. Overrides top-level turn_detection. */
+    turnDetection?: MllmTurnDetectionConfig;
 }
 
 /**
@@ -574,9 +574,9 @@ export interface QwenOmniOptions {
  * ```typescript
  * const agent = new Agent({ client }).withMllm(new QwenOmni({
  *   apiKey: process.env.DASHSCOPE_API_KEY,
- *   model: 'qwen-omni-turbo-realtime',
+ *   model: 'qwen3.5-omni-plus-realtime',
+ *   url: 'wss://dashscope.aliyuncs.com/api-ws/v1/realtime',
  *   greetingMessage: '你好，有什么可以帮你？',
- *   turnDetection: { mode: 'server_vad' },
  * }));
  * ```
  */
@@ -587,7 +587,7 @@ export class QwenOmni extends BaseCNMLLM {
         super();
         requireString(options.apiKey, "apiKey", "QwenOmni");
         requireString(options.model, "model", "QwenOmni");
-        requireObject(options.turnDetection, "turnDetection", "QwenOmni");
+        requireString(options.url, "url", "QwenOmni");
         this.options = options;
     }
 
@@ -610,7 +610,7 @@ export class QwenOmni extends BaseCNMLLM {
         return {
             vendor: "qwen_omni",
             api_key: apiKey,
-            ...(url !== undefined && { url }),
+            url,
             params: {
                 ...params,
                 model,
@@ -622,7 +622,7 @@ export class QwenOmni extends BaseCNMLLM {
             ...(inputModalities && { input_modalities: inputModalities }),
             ...(outputModalities && { output_modalities: outputModalities }),
             ...(messages && { messages }),
-            turn_detection: turnDetection,
+            ...(turnDetection && { turn_detection: turnDetection }),
         };
     }
 }

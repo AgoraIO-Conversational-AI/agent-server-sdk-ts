@@ -66,12 +66,14 @@ type _AzureParamsExposeOnlySupportedFields = Assert<
     IsExact<keyof AzureOpenAIRealtimeParams, "instructions" | "model" | "voice">
 >;
 type _AzureTurnDetectionIsRequired = Assert<IsRequired<AzureOpenAIRealtimeOptions, "turnDetection">>;
-type _QwenTurnDetectionIsRequired = Assert<IsRequired<QwenOmniOptions, "turnDetection">>;
+type _QwenUrlIsRequired = Assert<IsRequired<QwenOmniOptions, "url">>;
+type _QwenTurnDetectionIsOptional = Assert<IsExact<IsRequired<QwenOmniOptions, "turnDetection">, false>>;
 
 // @ts-expect-error Qwen Omni is a Chinese mainland MLLM vendor.
 const _invalidGlobalMllm: GlobalMllmVendor = new QwenOmni({
     apiKey: "key",
-    model: "qwen-omni-turbo-realtime",
+    model: "qwen3.5-omni-plus-realtime",
+    url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
     turnDetection: { mode: "server_vad" },
 });
 
@@ -114,8 +116,8 @@ const _invalidGlobalMllm: GlobalMllmVendor = new QwenOmni({
     new Agent({ client }).withTts(cnGenericTts);
     const cnMllm: CNMllmVendor = new QwenOmni({
         apiKey: "key",
-        model: "qwen-omni-turbo-realtime",
-        turnDetection: { mode: "server_vad" },
+        model: "qwen3.5-omni-plus-realtime",
+        url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
     });
     new Agent({ client }).withMllm(cnMllm);
     // @ts-expect-error Azure OpenAI Realtime is a global MLLM vendor.

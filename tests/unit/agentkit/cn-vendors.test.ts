@@ -127,14 +127,14 @@ describe("CN vendor helpers", () => {
         expect(
             new QwenOmni({
                 apiKey: "dashscope-key",
-                model: "qwen-omni-turbo-realtime",
-                turnDetection: { mode: "server_vad" },
+                model: "qwen3.5-omni-plus-realtime",
+                url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
             }).toConfig(),
         ).toMatchObject({
             vendor: "qwen_omni",
             api_key: "dashscope-key",
-            params: { model: "qwen-omni-turbo-realtime" },
-            turn_detection: { mode: "server_vad" },
+            url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
+            params: { model: "qwen3.5-omni-plus-realtime" },
         });
     });
 

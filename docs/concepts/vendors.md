@@ -115,7 +115,7 @@ MLLM (Multimodal LLM) vendors handle audio end-to-end — no separate STT or TTS
 | `GeminiLive`     | Google Gemini Live API          | `apiKey`, `model`, `url?`, `voice?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                                        |
 | `VertexAI`       | Vertex AI Gemini Live           | `model`, `url?`, `projectId`, `location`, `adcCredentialsString`, `voice?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?` |
 | `XaiGrok`        | xAI Grok (`mllm.vendor`: `xai`) | `apiKey`, `url?`, `voice?`, `language?`, `sampleRate?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                     |
-| `QwenOmni`       | Alibaba Cloud Qwen Omni (CN)    | `apiKey`, `model`, `turnDetection`, `url?`, `voice?`, `greetingMessage?`, `failureMessage?` |
+| `QwenOmni`       | Alibaba Cloud Qwen Omni (CN)    | `apiKey`, `model`, `url`, `voice?`, `greetingMessage?`, `failureMessage?`, `turnDetection?` |
 
 `XAiSTT` and `XAiTTS` are the cascading-pipeline xAI wrappers. `XaiGrok` is the realtime MLLM wrapper.
 
