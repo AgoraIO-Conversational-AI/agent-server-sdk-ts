@@ -1420,29 +1420,48 @@ describe("MLLM vendor coverage", () => {
         expect((config as Record<string, unknown>)?.params).toMatchObject({ voice: "eve" });
     });
 
-    test("QwenOmni serializes the CN qwen_omni vendor", () => {
-        const config = new QwenOmni({
-            apiKey: "dashscope-key",
-            model: "qwen-omni-turbo-realtime",
-            voice: "Cherry",
-            turnDetection: { mode: "server_vad" },
-        }).toConfig();
+    test("QwenOmni serializes the complete CN qwen_omni payload", () => {
+        const qwenClient = new AgoraClient({
+            area: Area.CN,
+            appId: "test-app-id",
+            appCertificate: "test-app-certificate",
+        });
+        const properties = new Agent({ client: qwenClient })
+            .withMllm(
+                new QwenOmni({
+                    apiKey: "xxxxxxxx",
+                    model: "qwen3.5-omni-plus-realtime",
+                    url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
+                }),
+            )
+            .toProperties({ ...SESSION_OPTS });
 
-        expect(config.vendor).toBe("qwen_omni");
-        expect(config.api_key).toBe("dashscope-key");
-        expect(config.params).toMatchObject({
-            model: "qwen-omni-turbo-realtime",
-            voice: "Cherry",
+        expect(properties.mllm).toEqual({
+            enable: true,
+            vendor: "qwen_omni",
+            url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
+            api_key: "xxxxxxxx",
+            params: {
+                model: "qwen3.5-omni-plus-realtime",
+            },
         });
         expect(
             new QwenOmni({
                 apiKey: "key",
-                model: "qwen-omni-turbo-realtime",
+                model: "qwen3.5-omni-plus-realtime",
+                url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
                 turnDetection: { mode: "server_vad" },
+            }).toConfig().turn_detection,
+        ).toEqual({ mode: "server_vad" });
+        expect(
+            new QwenOmni({
+                apiKey: "key",
+                model: "qwen3.5-omni-plus-realtime",
+                url: "wss://dashscope.aliyuncs.com/api-ws/v1/realtime",
             }).areaScope,
         ).toBe("cn");
-        expect(() => new QwenOmni({ apiKey: "key", model: "qwen-omni-turbo-realtime" } as never)).toThrow(
-            "QwenOmni requires turnDetection",
+        expect(() => new QwenOmni({ apiKey: "key", model: "qwen3.5-omni-plus-realtime" } as never)).toThrow(
+            "QwenOmni requires url",
         );
     });
 });

@@ -510,7 +510,7 @@ Chinese mainland Alibaba Cloud Qwen Omni Realtime wrapper. It emits `mllm.vendor
 |---|---|---|---|
 | `apiKey` | `string` | Yes | Alibaba Cloud DashScope API key |
 | `model` | `string` | Yes | Qwen Omni model identifier |
-| `url` | `string` | No | Custom Realtime WebSocket URL; the server-side CN endpoint is used when omitted |
+| `url` | `string` | Yes | Qwen Omni Realtime WebSocket URL |
 | `voice` | `string` | No | Voice identifier |
 | `instructions` | `string` | No | System instructions |
 | `greetingMessage` | `string` | No | Agent greeting message |
@@ -519,7 +519,7 @@ Chinese mainland Alibaba Cloud Qwen Omni Realtime wrapper. It emits `mllm.vendor
 | `outputModalities` | `string[]` | No | Output modalities |
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages |
 | `params` | `Record<string, unknown>` | No | Additional Qwen Omni parameters |
-| `turnDetection` | `MllmTurnDetectionConfig` | Yes | MLLM turn detection configuration |
+| `turnDetection` | `MllmTurnDetectionConfig` | No | MLLM turn detection configuration |
 
 ---
 

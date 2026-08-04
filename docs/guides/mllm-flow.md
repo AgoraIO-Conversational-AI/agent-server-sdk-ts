@@ -166,10 +166,10 @@ const client = new AgoraClient({
 
 const agent = new Agent({ client }).withMllm(new QwenOmni({
   apiKey: 'your-dashscope-key',
-  model: 'qwen-omni-turbo-realtime',
+  model: 'qwen3.5-omni-plus-realtime',
+  url: 'wss://dashscope.aliyuncs.com/api-ws/v1/realtime',
   voice: 'Cherry',
   greetingMessage: 'Hello, Qwen Omni is ready.',
-  turnDetection: { mode: 'server_vad' },
 }));
 ```
 
