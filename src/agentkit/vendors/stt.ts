@@ -371,7 +371,7 @@ export interface AssemblyAISTTOptions {
     /** Language code */
     language: string;
     /** AssemblyAI streaming WebSocket URL */
-    uri?: string;
+    ws_url?: string;
     /** Additional vendor-specific parameters */
     additionalParams?: Record<string, unknown>;
 }
@@ -396,7 +396,7 @@ export class AssemblyAISTT extends BaseSTT {
     }
 
     toConfig(): SttConfig {
-        const { apiKey, language, uri, additionalParams } = this.options;
+        const { apiKey, language, ws_url, additionalParams } = this.options;
 
         return {
             vendor: "assemblyai",
@@ -405,7 +405,7 @@ export class AssemblyAISTT extends BaseSTT {
                 ...additionalParams,
                 api_key: apiKey,
                 ...(language && { language }),
-                ...(uri && { uri }),
+                ...(ws_url && { ws_url }),
             },
         };
     }

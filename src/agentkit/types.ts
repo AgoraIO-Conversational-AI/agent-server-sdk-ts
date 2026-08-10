@@ -635,7 +635,7 @@ export interface AssemblyAiParams {
     /** Language code */
     language?: string;
     /** AssemblyAI streaming WebSocket URL */
-    uri?: string;
+    ws_url?: string;
     /** Additional AssemblyAI-specific parameters */
     [key: string]: unknown;
 }

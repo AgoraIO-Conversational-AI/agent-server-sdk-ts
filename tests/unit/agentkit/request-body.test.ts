@@ -765,14 +765,22 @@ describe("ASR vendor coverage", () => {
         expect((p.asr?.params as Record<string, unknown>)?.language_code).toBe("en-US");
     });
 
-    test("AssemblyAISTT serializes api_key and language in params", () => {
+    test("AssemblyAISTT serializes api_key, language, and ws_url in params", () => {
         const p = new Agent({ client: TEST_AGENT_CLIENT })
-            .withStt(new AssemblyAISTT({ apiKey: "assembly-key", language: "en-US" }))
+            .withStt(
+                new AssemblyAISTT({
+                    apiKey: "assembly-key",
+                    language: "en-US",
+                    ws_url: "wss://example.test/ws",
+                }),
+            )
             .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
 
         expect(p.asr?.vendor).toBe("assemblyai");
         expect((p.asr?.params as Record<string, unknown>)?.api_key).toBe("assembly-key");
         expect((p.asr?.params as Record<string, unknown>)?.language).toBe("en-US");
+        expect((p.asr?.params as Record<string, unknown>)?.ws_url).toBe("wss://example.test/ws");
+        expect(p.asr?.params).not.toHaveProperty("uri");
     });
 
     test("AresSTT produces no params key", () => {
