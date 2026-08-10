@@ -87,7 +87,7 @@ The `sampleRate` is critical when using avatars. See [Avatar Integration](../gui
 | `OpenAISTT`       | OpenAI Whisper    | `apiKey`, `model?`, `language?`, `prompt?`       |
 | `GoogleSTT`       | Google Speech     | `projectId`, `location`, `adcCredentialsString`, `language` |
 | `AmazonSTT`       | Amazon Transcribe | `accessKey`, `secretKey`, `region`, `language`   |
-| `AssemblyAISTT`   | AssemblyAI        | `apiKey`, `language`, `uri?`                     |
+| `AssemblyAISTT`   | AssemblyAI        | `apiKey`, `language`, `ws_url?`                  |
 | `AresSTT`         | Agora ARES        | `keywords?`, `additionalParams?`                 |
 | `SarvamSTT`       | Sarvam AI         | `apiKey`, `language`                             |
 | `XAiSTT`          | xAI               | `apiKey`, `language?`, `baseUrl?`, `sampleRate?` |
