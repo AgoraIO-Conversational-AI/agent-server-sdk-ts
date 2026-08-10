@@ -30,14 +30,20 @@ generations:
     cli_version: unknown
     generator_versions:
       fernapi/fern-typescript-node-sdk: 3.31.1
-current_generation: 1c26b7f0e4b7bf5aa462ff01dac2455903eb37c8
+  - commit_sha: ea02f9398069bf0c6ce9938f0c52e2c5d778dc5d
+    tree_hash: cfc4d107f22d15b72a534ad3c2d7f620a90f1be9
+    timestamp: 2026-08-10T06:40:22.002Z
+    cli_version: unknown
+    generator_versions:
+      fernapi/fern-typescript-node-sdk: 3.31.1
+current_generation: ea02f9398069bf0c6ce9938f0c52e2c5d778dc5d
 patches:
   - id: patch-fee3d812
     content_hash: sha256:a682f317c80be32b9fa689ae5d3584b7c9b1b2ada52a1560dcf51b0f3f82fbb7
     original_commit: fee3d8126a03bf95cb09c6b33ab2c32911ce8cf2
     original_message: "fix: update Anam avatar configuration to require avatar_id instead of persona_id"
     original_author: seymourtang <tangxianmeng@live.com>
-    base_generation: 1c26b7f0e4b7bf5aa462ff01dac2455903eb37c8
+    base_generation: ea02f9398069bf0c6ce9938f0c52e2c5d778dc5d
     files:
       - pnpm-workspace.yaml
     patch_content: |
@@ -58,4 +64,452 @@ patches:
         allowBuilds:
           esbuild: set this to true or false
           msw: set this to true or false
+    user_owned: true
+  - id: patch-8078c202
+    content_hash: sha256:8be0b3b31340d643b0ae4b70f0de3b0410b632cef7e117688b7483f38f0b7747
+    original_commit: 8078c202c81fd5caf258ed5af174dc15d255ccdc
+    original_message: "feat: implement internal fixed base URL support in AgoraClient"
+    original_author: seymourtang <tangxianmeng@live.com>
+    base_generation: ea02f9398069bf0c6ce9938f0c52e2c5d778dc5d
+    files:
+      - tests/unit/AgoraPoolClient.test.ts
+    patch_content: |
+      diff --git a/tests/unit/AgoraPoolClient.test.ts b/tests/unit/AgoraPoolClient.test.ts
+      new file mode 100644
+      index 0000000..31a4d4d
+      --- /dev/null
+      +++ b/tests/unit/AgoraPoolClient.test.ts
+      @@ -0,0 +1,103 @@
+      +import { afterEach, describe, expect, test, vi } from "vitest";
+      +import { Area } from "../../src/core/domain/index.js";
+      +import { AgoraClient } from "../../src/index.js";
+      +
+      +const API_BASE_URL_ENV = "AGORA_AGENTS_API_BASE_URL";
+      +
+      +function createClient(area: Area.US | Area.EU | Area.AP | Area.CN): AgoraClient {
+      +    return new AgoraClient({
+      +        area,
+      +        appId: "test-app-id",
+      +        appCertificate: "test-app-certificate",
+      +    });
+      +}
+      +
+      +afterEach(() => {
+      +    vi.unstubAllEnvs();
+      +});
+      +
+      +describe("AgoraClient configured base URL", () => {
+      +    test.each([
+      +        [Area.US, "https://api-test.agora.io/api/conversational-ai-agent"],
+      +        [Area.EU, "https://api-test.agora.io/api/conversational-ai-agent"],
+      +        [Area.AP, "https://api-test.agora.io/api/conversational-ai-agent"],
+      +        [Area.CN, "https://api-test.agora.io/cn/api/conversational-ai-agent"],
+      +    ] as const)("uses the area-specific API path for area %s", (area, expected) => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io/");
+      +
+      +        expect(createClient(area).getCurrentURL()).toBe(expected);
+      +    });
+      +
+      +    test("disables dynamic routing for the client and exposed pool", async () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+      +        const client = createClient(Area.US);
+      +        const expected = "https://api-test.agora.io/api/conversational-ai-agent";
+      +
+      +        for (let index = 0; index < 3; index += 1) {
+      +            client.nextRegion();
+      +            await client.selectBestDomain();
+      +            client.pool.nextRegion();
+      +            await client.pool.selectBestDomain();
+      +            expect(client.getCurrentURL()).toBe(expected);
+      +            expect(client.pool.getCurrentURL()).toBe(expected);
+      +        }
+      +    });
+      +
+      +    test("uses the configured base URL for API requests", async () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+      +        const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 204 }));
+      +        const client = new AgoraClient({
+      +            area: Area.CN,
+      +            appId: "test-app-id",
+      +            appCertificate: "test-app-certificate",
+      +            fetch: fetchMock,
+      +        });
+      +
+      +        client.nextRegion();
+      +        await client.selectBestDomain();
+      +        await client.agents.stop({ appid: "test-app-id", agentId: "test-agent-id" });
+      +
+      +        expect(fetchMock).toHaveBeenCalledOnce();
+      +        expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      +            "https://api-test.agora.io/cn/api/conversational-ai-agent/v2/projects/test-app-id/agents/test-agent-id/leave",
+      +        );
+      +    });
+      +
+      +    test.each([
+      +        ["https://staging.example.com/", "https://staging.example.com/api/conversational-ai-agent"],
+      +        ["http://localhost:8080", "http://localhost:8080/api/conversational-ai-agent"],
+      +        [
+      +            "https://user:password@staging.example.com/gateway?debug=true#section",
+      +            "https://user:password@staging.example.com/gateway/api/conversational-ai-agent?debug=true#section",
+      +        ],
+      +    ])("joins the API path onto %s", (baseUrl, expected) => {
+      +        vi.stubEnv(API_BASE_URL_ENV, baseUrl);
+      +
+      +        expect(createClient(Area.US).getCurrentURL()).toBe(expected);
+      +    });
+      +
+      +    test("keeps regional routing when the environment variable is empty", () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "   ");
+      +        const client = createClient(Area.US);
+      +
+      +        expect(client.getCurrentURL()).toBe("https://api-us-west-1.agora.io/api/conversational-ai-agent");
+      +        client.nextRegion();
+      +        expect(client.getCurrentURL()).toBe("https://api-us-east-1.agora.io/api/conversational-ai-agent");
+      +    });
+      +
+      +    test("captures the configured base URL when the client is constructed", () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+      +        const client = createClient(Area.CN);
+      +
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://staging.example.com");
+      +        client.nextRegion();
+      +
+      +        expect(client.getCurrentURL()).toBe("https://api-test.agora.io/cn/api/conversational-ai-agent");
+      +    });
+      +
+      +    test("rejects an invalid base URL", () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "://invalid");
+      +
+      +        expect(() => createClient(Area.US)).toThrow(`invalid ${API_BASE_URL_ENV}`);
+      +    });
+      +});
+    theirs_snapshot:
+      tests/unit/AgoraPoolClient.test.ts: |
+        import { afterEach, describe, expect, test, vi } from "vitest";
+        import { Area } from "../../src/core/domain/index.js";
+        import { AgoraClient } from "../../src/index.js";
+
+        const API_BASE_URL_ENV = "AGORA_AGENTS_API_BASE_URL";
+
+        function createClient(area: Area.US | Area.EU | Area.AP | Area.CN): AgoraClient {
+            return new AgoraClient({
+                area,
+                appId: "test-app-id",
+                appCertificate: "test-app-certificate",
+            });
+        }
+
+        afterEach(() => {
+            vi.unstubAllEnvs();
+        });
+
+        describe("AgoraClient configured base URL", () => {
+            test.each([
+                [Area.US, "https://api-test.agora.io/api/conversational-ai-agent"],
+                [Area.EU, "https://api-test.agora.io/api/conversational-ai-agent"],
+                [Area.AP, "https://api-test.agora.io/api/conversational-ai-agent"],
+                [Area.CN, "https://api-test.agora.io/cn/api/conversational-ai-agent"],
+            ] as const)("uses the area-specific API path for area %s", (area, expected) => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io/");
+
+                expect(createClient(area).getCurrentURL()).toBe(expected);
+            });
+
+            test("disables dynamic routing for the client and exposed pool", async () => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+                const client = createClient(Area.US);
+                const expected = "https://api-test.agora.io/api/conversational-ai-agent";
+
+                for (let index = 0; index < 3; index += 1) {
+                    client.nextRegion();
+                    await client.selectBestDomain();
+                    client.pool.nextRegion();
+                    await client.pool.selectBestDomain();
+                    expect(client.getCurrentURL()).toBe(expected);
+                    expect(client.pool.getCurrentURL()).toBe(expected);
+                }
+            });
+
+            test("uses the configured base URL for API requests", async () => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+                const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 204 }));
+                const client = new AgoraClient({
+                    area: Area.CN,
+                    appId: "test-app-id",
+                    appCertificate: "test-app-certificate",
+                    fetch: fetchMock,
+                });
+
+                client.nextRegion();
+                await client.selectBestDomain();
+                await client.agents.stop({ appid: "test-app-id", agentId: "test-agent-id" });
+
+                expect(fetchMock).toHaveBeenCalledOnce();
+                expect(fetchMock.mock.calls[0]?.[0]).toBe(
+                    "https://api-test.agora.io/cn/api/conversational-ai-agent/v2/projects/test-app-id/agents/test-agent-id/leave",
+                );
+            });
+
+            test.each([
+                ["https://staging.example.com/", "https://staging.example.com/api/conversational-ai-agent"],
+                ["http://localhost:8080", "http://localhost:8080/api/conversational-ai-agent"],
+                [
+                    "https://user:password@staging.example.com/gateway?debug=true#section",
+                    "https://user:password@staging.example.com/gateway/api/conversational-ai-agent?debug=true#section",
+                ],
+            ])("joins the API path onto %s", (baseUrl, expected) => {
+                vi.stubEnv(API_BASE_URL_ENV, baseUrl);
+
+                expect(createClient(Area.US).getCurrentURL()).toBe(expected);
+            });
+
+            test("keeps regional routing when the environment variable is empty", () => {
+                vi.stubEnv(API_BASE_URL_ENV, "   ");
+                const client = createClient(Area.US);
+
+                expect(client.getCurrentURL()).toBe("https://api-us-west-1.agora.io/api/conversational-ai-agent");
+                client.nextRegion();
+                expect(client.getCurrentURL()).toBe("https://api-us-east-1.agora.io/api/conversational-ai-agent");
+            });
+
+            test("captures the configured base URL when the client is constructed", () => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+                const client = createClient(Area.CN);
+
+                vi.stubEnv(API_BASE_URL_ENV, "https://staging.example.com");
+                client.nextRegion();
+
+                expect(client.getCurrentURL()).toBe("https://api-test.agora.io/cn/api/conversational-ai-agent");
+            });
+
+            test("rejects an invalid base URL", () => {
+                vi.stubEnv(API_BASE_URL_ENV, "://invalid");
+
+                expect(() => createClient(Area.US)).toThrow(`invalid ${API_BASE_URL_ENV}`);
+            });
+        });
+    user_owned: true
+  - id: patch-bf6e10d7
+    content_hash: sha256:8be0b3b31340d643b0ae4b70f0de3b0410b632cef7e117688b7483f38f0b7747
+    original_commit: bf6e10d79516d17968d12c7aef0da2e40602a51f
+    original_message: "refactor: update AgoraClient to use configurable API base URL"
+    original_author: seymourtang <tangxianmeng@live.com>
+    base_generation: ea02f9398069bf0c6ce9938f0c52e2c5d778dc5d
+    files:
+      - tests/unit/AgoraPoolClient.test.ts
+    patch_content: |
+      diff --git a/tests/unit/AgoraPoolClient.test.ts b/tests/unit/AgoraPoolClient.test.ts
+      new file mode 100644
+      index 0000000..31a4d4d
+      --- /dev/null
+      +++ b/tests/unit/AgoraPoolClient.test.ts
+      @@ -0,0 +1,103 @@
+      +import { afterEach, describe, expect, test, vi } from "vitest";
+      +import { Area } from "../../src/core/domain/index.js";
+      +import { AgoraClient } from "../../src/index.js";
+      +
+      +const API_BASE_URL_ENV = "AGORA_AGENTS_API_BASE_URL";
+      +
+      +function createClient(area: Area.US | Area.EU | Area.AP | Area.CN): AgoraClient {
+      +    return new AgoraClient({
+      +        area,
+      +        appId: "test-app-id",
+      +        appCertificate: "test-app-certificate",
+      +    });
+      +}
+      +
+      +afterEach(() => {
+      +    vi.unstubAllEnvs();
+      +});
+      +
+      +describe("AgoraClient configured base URL", () => {
+      +    test.each([
+      +        [Area.US, "https://api-test.agora.io/api/conversational-ai-agent"],
+      +        [Area.EU, "https://api-test.agora.io/api/conversational-ai-agent"],
+      +        [Area.AP, "https://api-test.agora.io/api/conversational-ai-agent"],
+      +        [Area.CN, "https://api-test.agora.io/cn/api/conversational-ai-agent"],
+      +    ] as const)("uses the area-specific API path for area %s", (area, expected) => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io/");
+      +
+      +        expect(createClient(area).getCurrentURL()).toBe(expected);
+      +    });
+      +
+      +    test("disables dynamic routing for the client and exposed pool", async () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+      +        const client = createClient(Area.US);
+      +        const expected = "https://api-test.agora.io/api/conversational-ai-agent";
+      +
+      +        for (let index = 0; index < 3; index += 1) {
+      +            client.nextRegion();
+      +            await client.selectBestDomain();
+      +            client.pool.nextRegion();
+      +            await client.pool.selectBestDomain();
+      +            expect(client.getCurrentURL()).toBe(expected);
+      +            expect(client.pool.getCurrentURL()).toBe(expected);
+      +        }
+      +    });
+      +
+      +    test("uses the configured base URL for API requests", async () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+      +        const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 204 }));
+      +        const client = new AgoraClient({
+      +            area: Area.CN,
+      +            appId: "test-app-id",
+      +            appCertificate: "test-app-certificate",
+      +            fetch: fetchMock,
+      +        });
+      +
+      +        client.nextRegion();
+      +        await client.selectBestDomain();
+      +        await client.agents.stop({ appid: "test-app-id", agentId: "test-agent-id" });
+      +
+      +        expect(fetchMock).toHaveBeenCalledOnce();
+      +        expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      +            "https://api-test.agora.io/cn/api/conversational-ai-agent/v2/projects/test-app-id/agents/test-agent-id/leave",
+      +        );
+      +    });
+      +
+      +    test.each([
+      +        ["https://staging.example.com/", "https://staging.example.com/api/conversational-ai-agent"],
+      +        ["http://localhost:8080", "http://localhost:8080/api/conversational-ai-agent"],
+      +        [
+      +            "https://user:password@staging.example.com/gateway?debug=true#section",
+      +            "https://user:password@staging.example.com/gateway/api/conversational-ai-agent?debug=true#section",
+      +        ],
+      +    ])("joins the API path onto %s", (baseUrl, expected) => {
+      +        vi.stubEnv(API_BASE_URL_ENV, baseUrl);
+      +
+      +        expect(createClient(Area.US).getCurrentURL()).toBe(expected);
+      +    });
+      +
+      +    test("keeps regional routing when the environment variable is empty", () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "   ");
+      +        const client = createClient(Area.US);
+      +
+      +        expect(client.getCurrentURL()).toBe("https://api-us-west-1.agora.io/api/conversational-ai-agent");
+      +        client.nextRegion();
+      +        expect(client.getCurrentURL()).toBe("https://api-us-east-1.agora.io/api/conversational-ai-agent");
+      +    });
+      +
+      +    test("captures the configured base URL when the client is constructed", () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+      +        const client = createClient(Area.CN);
+      +
+      +        vi.stubEnv(API_BASE_URL_ENV, "https://staging.example.com");
+      +        client.nextRegion();
+      +
+      +        expect(client.getCurrentURL()).toBe("https://api-test.agora.io/cn/api/conversational-ai-agent");
+      +    });
+      +
+      +    test("rejects an invalid base URL", () => {
+      +        vi.stubEnv(API_BASE_URL_ENV, "://invalid");
+      +
+      +        expect(() => createClient(Area.US)).toThrow(`invalid ${API_BASE_URL_ENV}`);
+      +    });
+      +});
+    theirs_snapshot:
+      tests/unit/AgoraPoolClient.test.ts: |
+        import { afterEach, describe, expect, test, vi } from "vitest";
+        import { Area } from "../../src/core/domain/index.js";
+        import { AgoraClient } from "../../src/index.js";
+
+        const API_BASE_URL_ENV = "AGORA_AGENTS_API_BASE_URL";
+
+        function createClient(area: Area.US | Area.EU | Area.AP | Area.CN): AgoraClient {
+            return new AgoraClient({
+                area,
+                appId: "test-app-id",
+                appCertificate: "test-app-certificate",
+            });
+        }
+
+        afterEach(() => {
+            vi.unstubAllEnvs();
+        });
+
+        describe("AgoraClient configured base URL", () => {
+            test.each([
+                [Area.US, "https://api-test.agora.io/api/conversational-ai-agent"],
+                [Area.EU, "https://api-test.agora.io/api/conversational-ai-agent"],
+                [Area.AP, "https://api-test.agora.io/api/conversational-ai-agent"],
+                [Area.CN, "https://api-test.agora.io/cn/api/conversational-ai-agent"],
+            ] as const)("uses the area-specific API path for area %s", (area, expected) => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io/");
+
+                expect(createClient(area).getCurrentURL()).toBe(expected);
+            });
+
+            test("disables dynamic routing for the client and exposed pool", async () => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+                const client = createClient(Area.US);
+                const expected = "https://api-test.agora.io/api/conversational-ai-agent";
+
+                for (let index = 0; index < 3; index += 1) {
+                    client.nextRegion();
+                    await client.selectBestDomain();
+                    client.pool.nextRegion();
+                    await client.pool.selectBestDomain();
+                    expect(client.getCurrentURL()).toBe(expected);
+                    expect(client.pool.getCurrentURL()).toBe(expected);
+                }
+            });
+
+            test("uses the configured base URL for API requests", async () => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+                const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 204 }));
+                const client = new AgoraClient({
+                    area: Area.CN,
+                    appId: "test-app-id",
+                    appCertificate: "test-app-certificate",
+                    fetch: fetchMock,
+                });
+
+                client.nextRegion();
+                await client.selectBestDomain();
+                await client.agents.stop({ appid: "test-app-id", agentId: "test-agent-id" });
+
+                expect(fetchMock).toHaveBeenCalledOnce();
+                expect(fetchMock.mock.calls[0]?.[0]).toBe(
+                    "https://api-test.agora.io/cn/api/conversational-ai-agent/v2/projects/test-app-id/agents/test-agent-id/leave",
+                );
+            });
+
+            test.each([
+                ["https://staging.example.com/", "https://staging.example.com/api/conversational-ai-agent"],
+                ["http://localhost:8080", "http://localhost:8080/api/conversational-ai-agent"],
+                [
+                    "https://user:password@staging.example.com/gateway?debug=true#section",
+                    "https://user:password@staging.example.com/gateway/api/conversational-ai-agent?debug=true#section",
+                ],
+            ])("joins the API path onto %s", (baseUrl, expected) => {
+                vi.stubEnv(API_BASE_URL_ENV, baseUrl);
+
+                expect(createClient(Area.US).getCurrentURL()).toBe(expected);
+            });
+
+            test("keeps regional routing when the environment variable is empty", () => {
+                vi.stubEnv(API_BASE_URL_ENV, "   ");
+                const client = createClient(Area.US);
+
+                expect(client.getCurrentURL()).toBe("https://api-us-west-1.agora.io/api/conversational-ai-agent");
+                client.nextRegion();
+                expect(client.getCurrentURL()).toBe("https://api-us-east-1.agora.io/api/conversational-ai-agent");
+            });
+
+            test("captures the configured base URL when the client is constructed", () => {
+                vi.stubEnv(API_BASE_URL_ENV, "https://api-test.agora.io");
+                const client = createClient(Area.CN);
+
+                vi.stubEnv(API_BASE_URL_ENV, "https://staging.example.com");
+                client.nextRegion();
+
+                expect(client.getCurrentURL()).toBe("https://api-test.agora.io/cn/api/conversational-ai-agent");
+            });
+
+            test("rejects an invalid base URL", () => {
+                vi.stubEnv(API_BASE_URL_ENV, "://invalid");
+
+                expect(() => createClient(Area.US)).toThrow(`invalid ${API_BASE_URL_ENV}`);
+            });
+        });
     user_owned: true
