@@ -19,9 +19,7 @@ function isDeepgramManagedModel(model: string | undefined): model is DeepgramPre
 /**
  * Constructor options for Speechmatics STT.
  */
-export interface SpeechmaticsSTTOptions {
-    /** Speechmatics API key */
-    apiKey: string;
+interface SpeechmaticsSTTCommonOptions {
     /** Language code (e.g., 'en', 'es', 'fr') */
     language: string;
     /** Model name */
@@ -32,13 +30,28 @@ export interface SpeechmaticsSTTOptions {
     additionalParams?: Record<string, unknown>;
 }
 
+export type SpeechmaticsSTTOptions = SpeechmaticsSTTCommonOptions &
+    (
+        | {
+              /** Speechmatics API key */
+              key: string;
+              /** @deprecated Use `key` instead. This alias is normalized to the REST API's `key` field. */
+              apiKey?: string;
+          }
+        | {
+              key?: undefined;
+              /** @deprecated Use `key` instead. This alias is normalized to the REST API's `key` field. */
+              apiKey: string;
+          }
+    );
+
 /**
  * Speechmatics STT vendor.
  *
  * @example
  * ```typescript
  * const stt = new SpeechmaticsSTT({
- *   apiKey: process.env.SPEECHMATICS_API_KEY,
+ *   key: process.env.SPEECHMATICS_API_KEY,
  *   language: 'en',
  * });
  * ```
@@ -52,18 +65,21 @@ export class SpeechmaticsSTT extends BaseSTT {
     }
 
     toConfig(): SttConfig {
-        const { apiKey, language, model, uri, additionalParams } = this.options;
+        const { key, apiKey, language, model, uri, additionalParams } = this.options;
+        const wireKey = key ?? apiKey;
+        _requireString(wireKey, "key", "SpeechmaticsSTT");
+        const params = {
+            ...additionalParams,
+            key: wireKey,
+            language,
+            ...(model !== undefined && { model }),
+            ...(uri !== undefined && { uri }),
+        };
+        delete (params as Record<string, unknown>).api_key;
 
         return {
             vendor: "speechmatics",
-            params: {
-                // additionalParams spread first so that explicit fields always win.
-                ...additionalParams,
-                api_key: apiKey,
-                language,
-                ...(model !== undefined && { model }),
-                ...(uri !== undefined && { uri }),
-            },
+            params,
         };
     }
 }
