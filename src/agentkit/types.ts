@@ -9,13 +9,13 @@ import type {
     AmazonTts as AmazonTtsType,
     Asr,
     AsrLanguage,
-    GeminiAsrParams as GeminiAsrParamsType,
     CartesiaTtsParams as CartesiaTtsParamsType,
     CartesiaTts as CartesiaTtsType,
     ElevenLabsTtsParams as ElevenLabsTtsParamsType,
     ElevenLabsTts as ElevenLabsTtsType,
     FishAudioTtsParams as FishAudioTtsParamsType,
     FishAudioTts as FishAudioTtsType,
+    GeminiAsrParams as GeminiAsrParamsType,
     GenericHttpTtsParams as GenericTtsParamsType,
     GenericHttpTts as GenericTtsType,
     GetAgentsResponse,
@@ -29,10 +29,10 @@ import type {
     HumeAiTts as HumeAiTtsType,
     ListAgentsResponse,
     Llm,
-    LlmTool as LlmToolType,
     LlmToolExecution as LlmToolExecutionType,
     LlmToolFunction as LlmToolFunctionType,
     LlmToolServer as LlmToolServerType,
+    LlmTool as LlmToolType,
     MicrosoftTtsParams as MicrosoftTtsParamsType,
     MicrosoftTts as MicrosoftTtsType,
     MinimaxTtsParams as MinimaxTtsParamsType,
@@ -289,8 +289,7 @@ export type FillerWordsContent = StartAgentsRequest.Properties.FillerWords.Conte
 export type FillerWordsContentStaticConfig = StartAgentsRequest.Properties.FillerWords.Content.StaticConfig;
 
 /** Generated filler word configuration (`content.generated_config`). */
-export type FillerWordsContentGeneratedConfig =
-    StartAgentsRequest.Properties.FillerWords.Content.GeneratedConfig;
+export type FillerWordsContentGeneratedConfig = StartAgentsRequest.Properties.FillerWords.Content.GeneratedConfig;
 
 /** LLM provider used to generate filler words. */
 export type FillerWordsContentGeneratedLlmProvider =
