@@ -29,6 +29,8 @@ export interface Mllm {
     output_modalities?: string[] | null;
     /** Agent greeting message. */
     greeting_message?: string;
+    /** Greeting message for the MLLM session. */
+    greeting?: string;
     /** Agent failure message. */
     failure_message?: string;
     /** MLLM provider. */
@@ -47,6 +49,7 @@ export namespace Mllm {
         Vertexai: "vertexai",
         Xai: "xai",
         QwenOmni: "qwen_omni",
+        OpenaiGptLive: "openai_gpt_live",
     } as const;
     export type Vendor = (typeof Vendor)[keyof typeof Vendor];
 }
