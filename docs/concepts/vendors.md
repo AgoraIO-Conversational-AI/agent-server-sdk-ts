@@ -86,6 +86,7 @@ The `sampleRate` is critical when using avatars. See [Avatar Integration](../gui
 | `MicrosoftSTT`    | Azure Speech      | `key`, `region`, `language`                      |
 | `OpenAISTT`       | OpenAI Whisper    | `apiKey`, `model?`, `language?`, `prompt?`       |
 | `GoogleSTT`       | Google Speech     | `projectId`, `location`, `adcCredentialsString`, `language` |
+| `GeminiSTT`       | Google Gemini ASR | `apiKey`, `model`, `sampleRate?`, `language?`, `wordTimestamp?` |
 | `AmazonSTT`       | Amazon Transcribe | `accessKey`, `secretKey`, `region`, `language`   |
 | `AssemblyAISTT`   | AssemblyAI        | `apiKey`, `language`, `ws_url?`                  |
 | `AresSTT`         | Agora ARES        | `keywords?`, `additionalParams?`                 |
@@ -104,13 +105,31 @@ const stt = new DeepgramSTT({
 });
 ```
 
+`GeminiSTT` serializes its API key, model, and optional transcription settings
+into the generated Gemini ASR configuration:
+
+```typescript
+import { GeminiSTT } from 'agora-agents';
+
+const stt = new GeminiSTT({
+  apiKey: 'your-gemini-key',
+  model: 'gemini-transcribe',
+  language: 'en-US',
+  wordTimestamp: true,
+});
+```
+
+ARES and Fengming hotwords are sent as the top-level `asr.keywords` field;
+additional provider-specific fields remain under `asr.params`.
+
 ## MLLM vendors
 
 MLLM (Multimodal LLM) vendors handle audio end-to-end — no separate STT or TTS step. Call `agent.withMllm(vendor)` and MLLM mode is enabled automatically; no separate `advancedFeatures` flag is needed.
 
 | Class            | Provider                        | Key constructor params                                                                                                                                                                    |
 | ---------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OpenAIRealtime` | OpenAI Realtime API             | `apiKey`, `model?`, `url?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                                                 |
+| `OpenAIRealtime` | OpenAI Realtime API (`mllm.vendor: openai`) | `apiKey`, `model?`, `url?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?` |
+| `OpenAIGptLive` | OpenAI GPT Live (`mllm.vendor: openai_gpt_live`) | `apiKey`, `model?`, `url?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?` |
 | `AzureOpenAIRealtime` | Azure OpenAI Realtime (global) | `apiKey`, `url`, `turnDetection`, `model?`, `voice?`, `instructions?`, `params?`, `messages?`, `outputModalities?`, `maxHistory?`, `greetingMessage?` |
 | `GeminiLive`     | Google Gemini Live API          | `apiKey`, `model`, `url?`, `voice?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?`                                        |
 | `VertexAI`       | Vertex AI Gemini Live           | `model`, `url?`, `projectId`, `location`, `adcCredentialsString`, `voice?`, `greetingMessage?`, `failureMessage?`, `inputModalities?`, `outputModalities?`, `messages?`, `turnDetection?` |

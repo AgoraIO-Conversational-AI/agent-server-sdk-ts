@@ -21,15 +21,14 @@ export class FengmingSTT extends BaseCNSTT {
 
     toConfig(): SttConfig {
         const { keywords, additionalParams } = this.options;
-        const hasParams =
-            keywords !== undefined || (additionalParams !== undefined && Object.keys(additionalParams).length > 0);
+        const hasParams = additionalParams !== undefined && Object.keys(additionalParams).length > 0;
 
         return {
             vendor: "fengming",
+            ...(keywords !== undefined && { keywords }),
             ...(hasParams && {
                 params: {
                     ...additionalParams,
-                    ...(keywords !== undefined && { keywords }),
                 },
             }),
         } as unknown as SttConfig;
@@ -566,6 +565,7 @@ function cnLlmConfig(options: CNLlmCommonOptions, vendor: string): LlmConfig {
         greeting_configs: options.greetingConfigs,
         template_variables: options.templateVariables,
         mcp_servers: options.mcpServers,
+        tools: options.tools,
     };
 }
 

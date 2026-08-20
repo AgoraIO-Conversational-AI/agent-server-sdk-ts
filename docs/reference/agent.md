@@ -80,7 +80,7 @@ If you omit `withStt()`, AgentKit still sends an ASR config automatically based 
 
 ### `withMllm(vendor: GlobalMllmVendor | CNMllmVendor): Agent<TTSSampleRate, TArea>`
 
-Set the MLLM vendor for multimodal mode. Pass a global vendor (`OpenAIRealtime`, `AzureOpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`) or the Chinese mainland vendor `QwenOmni`. Calling `withMllm()` automatically sets `mllm.enable = true`. MLLM mode does not require `withTts()` / `withLlm()` / `withStt()`.
+Set the MLLM vendor for multimodal mode. Pass a global vendor (`OpenAIRealtime`, `OpenAIGptLive`, `AzureOpenAIRealtime`, `GeminiLive`, `VertexAI`, `XaiGrok`) or the Chinese mainland vendor `QwenOmni`. Calling `withMllm()` automatically sets `mllm.enable = true`. MLLM mode does not require `withTts()` / `withLlm()` / `withStt()`.
 
 > Avatars are only supported with the cascading ASR + LLM + TTS pipeline. Combining `withMllm()` with `withAvatar()` throws at `toProperties()` and `session.start()`.
 
@@ -118,7 +118,9 @@ Set advanced features (e.g. `enable_rtm`).
 
 ### `withTools(enabled = true): Agent<TTSSampleRate, TArea>`
 
-Enable or disable MCP tool invocation by setting `advanced_features.enable_tools`.
+Enable or disable tool invocation by setting `advanced_features.enable_tools`.
+This shared switch is required for both `llm.mcp_servers` and the inline
+`llm.tools` REST tool definitions.
 
 ### `withParameters(parameters: SessionParamsInput): Agent<TTSSampleRate, TArea>`
 
@@ -251,8 +253,12 @@ In the cascading pipeline, `toProperties()` also fills in a default `asr` block 
 
 Public aliases over Fern-generated types include `LlmConfig`, `SttConfig`, `AsrConfig` (= `SttConfig`), `MllmConfig`, `AvatarConfig`, session/conversation types, and think types (`ThinkOnListeningAction`, etc.).
 
+LLM configs also expose `LlmTool`, `LlmToolFunction`, `LlmToolServer`, and
+`LlmToolExecution` for inline synchronous REST tools. These are distinct from
+MCP servers configured through `mcp_servers`.
+
 Builder vendor unions: `LlmVendor`, `TtsVendor<SR>`, `SttVendor`, `AvatarVendor<SR>` (class instances accepted by `.withLlm()` / `.withTts()` / `.withStt()` / `.withAvatar()`).
 
 Wire vendor name aliases: `AsrVendorName` (ASR vendor string), `AvatarWireVendor` (avatar vendor string on `AvatarConfig`).
 
-Think value constants: `ThinkOnListeningActionInject`, `ThinkOnListeningActionInterrupt`, `ThinkOnListeningActionIgnore`, `ThinkOnThinkingActionInterrupt`, `ThinkOnThinkingActionIgnore`, `ThinkOnSpeakingActionInterrupt`, `ThinkOnSpeakingActionIgnore`.
+Think value constants include `ThinkOnListeningActionInject`, `ThinkOnListeningActionInterrupt`, `ThinkOnListeningActionIgnore`, and `ThinkOnListeningActionAppend`; corresponding `Append` constants are also available for thinking and speaking states. `append` queues the instruction until the current state finishes without interrupting the active interaction.

@@ -308,6 +308,46 @@ export class GoogleSTT extends BaseSTT {
     }
 }
 
+/** Constructor options for Google Gemini ASR. */
+export interface GeminiSTTOptions {
+    /** Google Gemini API key. */
+    apiKey: string;
+    /** Gemini transcription model identifier. */
+    model: string;
+    /** Audio sample rate in Hz. */
+    sampleRate?: number;
+    /** Language code for speech recognition. */
+    language?: string;
+    /** Include word-level timestamps in transcription results. */
+    wordTimestamp?: boolean;
+    /** Additional vendor-specific parameters. */
+    additionalParams?: Record<string, unknown>;
+}
+
+/** Google Gemini ASR vendor. */
+export class GeminiSTT extends BaseSTT {
+    constructor(private readonly options: GeminiSTTOptions) {
+        super();
+        _requireString(options.apiKey, "apiKey", "GeminiSTT");
+        _requireString(options.model, "model", "GeminiSTT");
+    }
+
+    toConfig(): SttConfig {
+        const { apiKey, model, sampleRate, language, wordTimestamp, additionalParams } = this.options;
+        return {
+            vendor: "gemini",
+            params: {
+                ...additionalParams,
+                api_key: apiKey,
+                model,
+                ...(sampleRate !== undefined && { sample_rate: sampleRate }),
+                ...(language !== undefined && { language }),
+                ...(wordTimestamp !== undefined && { word_timestamp: wordTimestamp }),
+            },
+        };
+    }
+}
+
 /**
  * Constructor options for Amazon Transcribe STT.
  */
@@ -439,15 +479,14 @@ export class AresSTT extends BaseSTT {
 
     toConfig(): SttConfig {
         const { keywords, additionalParams } = this.options;
-        const hasParams =
-            keywords !== undefined || (additionalParams !== undefined && Object.keys(additionalParams).length > 0);
+        const hasParams = additionalParams !== undefined && Object.keys(additionalParams).length > 0;
 
         return {
             vendor: "ares",
+            ...(keywords !== undefined && { keywords }),
             ...(hasParams && {
                 params: {
                     ...additionalParams,
-                    ...(keywords !== undefined && { keywords }),
                 },
             }),
         };

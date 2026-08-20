@@ -123,6 +123,69 @@ export class OpenAIRealtime extends BaseMLLM {
     }
 }
 
+/** Constructor options for the OpenAI GPT Live MLLM vendor. */
+export interface OpenAIGptLiveOptions {
+    apiKey: string;
+    model?: string;
+    voice?: string;
+    instructions?: string;
+    inputAudioTranscription?: Record<string, unknown>;
+    url?: string;
+    greetingMessage?: string;
+    inputModalities?: string[];
+    outputModalities?: string[];
+    messages?: Record<string, unknown>[];
+    params?: Record<string, unknown>;
+    turnDetection?: MllmTurnDetectionConfig;
+    failureMessage?: string;
+}
+
+/** OpenAI GPT Live MLLM vendor (`mllm.vendor = "openai_gpt_live"`). */
+export class OpenAIGptLive extends BaseMLLM {
+    constructor(private readonly options: OpenAIGptLiveOptions) {
+        super();
+    }
+
+    toConfig(): MllmConfig {
+        const {
+            apiKey,
+            model,
+            voice,
+            instructions,
+            inputAudioTranscription,
+            url,
+            greetingMessage,
+            inputModalities,
+            outputModalities,
+            messages,
+            params,
+            turnDetection,
+            failureMessage,
+        } = this.options;
+        const mergedParams = {
+            ...(model !== undefined && { model }),
+            ...params,
+            ...(voice !== undefined && { voice }),
+            ...(instructions !== undefined && { instructions }),
+            ...(inputAudioTranscription !== undefined && { input_audio_transcription: inputAudioTranscription }),
+        };
+        const hasParams = Object.keys(mergedParams).length > 0;
+
+        return {
+            vendor: "openai_gpt_live",
+            api_key: apiKey,
+            url: url || "wss://api.openai.com/v1/live",
+            ...(hasParams && { params: mergedParams }),
+            ...(greetingMessage && { greeting_message: greetingMessage }),
+            ...(inputModalities && { input_modalities: inputModalities }),
+            ...(outputModalities && { output_modalities: outputModalities }),
+            ...(messages && { messages }),
+            ...(failureMessage && { failure_message: failureMessage }),
+            ...(turnDetection && { turn_detection: turnDetection }),
+        };
+    }
+}
+
 /** Parameters accepted by Azure OpenAI Realtime. */
 export interface AzureOpenAIRealtimeParams {
     /** System instructions that define agent behavior */
