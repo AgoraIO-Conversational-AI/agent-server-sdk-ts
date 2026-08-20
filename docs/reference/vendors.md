@@ -427,7 +427,7 @@ Global Azure OpenAI Realtime wrapper. It emits `mllm.vendor = 'azure'`; `maxHist
 | `outputModalities` | `string[]` | No | Output modalities |
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages |
 | `params` | `AzureOpenAIRealtimeParams` | No | Azure parameters limited to `instructions`, `model`, and `voice` |
-| `turnDetection` | `MllmTurnDetectionConfig` | Yes | MLLM turn detection configuration |
+| `turnDetection` | `MllmTurnDetectionConfig` | No | MLLM turn detection configuration |
 
 ### GeminiLive
 

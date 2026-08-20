@@ -1384,9 +1384,11 @@ describe("MLLM vendor coverage", () => {
                 turnDetection: { mode: "server_vad" },
             }).areaScope,
         ).toBe("global");
-        expect(() => new AzureOpenAIRealtime({ apiKey: "key", url: "wss://example.com" } as never)).toThrow(
-            "AzureOpenAIRealtime requires turnDetection",
-        );
+        expect(new AzureOpenAIRealtime({ apiKey: "key", url: "wss://example.com" }).toConfig()).toEqual({
+            vendor: "azure",
+            api_key: "key",
+            url: "wss://example.com",
+        });
     });
 
     test("GeminiLive toConfig has vendor=gemini and api_key", () => {
