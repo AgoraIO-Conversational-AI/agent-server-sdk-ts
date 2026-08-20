@@ -29,6 +29,8 @@ export * from "./FengmingAsr.js";
 export * from "./FengmingAsrParams.js";
 export * from "./FishAudioTts.js";
 export * from "./FishAudioTtsParams.js";
+export * from "./GeminiAsr.js";
+export * from "./GeminiAsrParams.js";
 export * from "./GenericHttpTts.js";
 export * from "./GenericHttpTtsParams.js";
 export * from "./GoogleAsr.js";

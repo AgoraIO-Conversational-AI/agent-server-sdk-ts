@@ -42,14 +42,20 @@ generations:
     cli_version: unknown
     generator_versions:
       fernapi/fern-typescript-node-sdk: 3.31.1
-current_generation: 1f08d27f733887cba7f89c5ef2ea3b0a549481f8
+  - commit_sha: 61f60d8619b3dce924f468e1343815bbf4183c5c
+    tree_hash: fa7ef61c61657d92520d7146e36e45aafffcb7c6
+    timestamp: 2026-08-20T08:02:22.484Z
+    cli_version: unknown
+    generator_versions:
+      fernapi/fern-typescript-node-sdk: 3.31.1
+current_generation: 61f60d8619b3dce924f468e1343815bbf4183c5c
 patches:
   - id: patch-fee3d812
     content_hash: sha256:a682f317c80be32b9fa689ae5d3584b7c9b1b2ada52a1560dcf51b0f3f82fbb7
     original_commit: fee3d8126a03bf95cb09c6b33ab2c32911ce8cf2
     original_message: "fix: update Anam avatar configuration to require avatar_id instead of persona_id"
     original_author: seymourtang <tangxianmeng@live.com>
-    base_generation: 1f08d27f733887cba7f89c5ef2ea3b0a549481f8
+    base_generation: 61f60d8619b3dce924f468e1343815bbf4183c5c
     files:
       - pnpm-workspace.yaml
     patch_content: |
@@ -76,7 +82,7 @@ patches:
     original_commit: 8078c202c81fd5caf258ed5af174dc15d255ccdc
     original_message: "feat: implement internal fixed base URL support in AgoraClient"
     original_author: seymourtang <tangxianmeng@live.com>
-    base_generation: 1f08d27f733887cba7f89c5ef2ea3b0a549481f8
+    base_generation: 61f60d8619b3dce924f468e1343815bbf4183c5c
     files:
       - tests/unit/AgoraPoolClient.test.ts
     patch_content: |
@@ -300,7 +306,7 @@ patches:
     original_commit: bf6e10d79516d17968d12c7aef0da2e40602a51f
     original_message: "refactor: update AgoraClient to use configurable API base URL"
     original_author: seymourtang <tangxianmeng@live.com>
-    base_generation: 1f08d27f733887cba7f89c5ef2ea3b0a549481f8
+    base_generation: 61f60d8619b3dce924f468e1343815bbf4183c5c
     files:
       - tests/unit/AgoraPoolClient.test.ts
     patch_content: |
