@@ -105,6 +105,7 @@ new OpenAI(options: OpenAIOptions)
 | `greetingAudioUrl` | `string` | No | Publicly accessible greeting audio URL |
 | `greetingConfigs` | `LlmGreetingConfigs` | No | Greeting playback configuration |
 | `templateVariables` | `Record<string, string>` | No | Template variables for messages |
+| `tools` | `LlmTool[]` | No | Inline synchronous REST function-calling tools; separate from MCP. Requires `agent.withTools(true)`. |
 
 For supported Agora-managed models, `apiKey` is optional:
 
@@ -376,17 +377,23 @@ When `.withStt()` is omitted, AgentKit now selects the wire ASR vendor from `cli
 | `MicrosoftSTT` | `key`, `region`, `language` |
 | `OpenAISTT` | `apiKey`, `model?`, `language?`, `prompt?`, `inputAudioTranscription?` |
 | `GoogleSTT` | `projectId`, `location`, `adcCredentialsString`, `language`, `model?` |
+| `GeminiSTT` | `apiKey`, `model`, `sampleRate?`, `language?`, `wordTimestamp?`, `additionalParams?` |
 | `AmazonSTT` | `accessKey`, `secretKey`, `region`, `language` |
 | `AssemblyAISTT` | `apiKey`, `language`, `ws_url?` |
 | `AresSTT` | `keywords?`, `additionalParams?` |
 | `SarvamSTT` | `apiKey`, `language` |
 | `XAiSTT` | `apiKey`, `language?`, `baseUrl?`, `sampleRate?`, `additionalParams?` |
 
+`AresSTT` and `FengmingSTT` serialize `keywords` to the top-level ASR field
+(`asr.keywords`). Additional provider fields remain under `asr.params`.
+
 ---
 
 ## MLLM vendors
 
 ### OpenAIRealtime
+
+The legacy OpenAI Realtime wrapper emits `mllm.vendor = 'openai'`.
 
 <!-- snippet: fragment -->
 ```typescript
@@ -405,6 +412,30 @@ new OpenAIRealtime(options: OpenAIRealtimeOptions)
 | `messages` | `Record<string, unknown>[]` | No | Conversation messages for short-term memory |
 | `params` | `Record<string, unknown>` | No | Additional MLLM parameters |
 | `turnDetection` | `MllmTurnDetectionConfig` | No | MLLM turn detection configuration; overrides top-level `turn_detection` |
+
+### OpenAIGptLive
+
+`OpenAIGptLive` is a separate vendor for `mllm.vendor = 'openai_gpt_live'`.
+Its `greetingMessage` option is serialized to `mllm.greeting_message`.
+This vendor does not use the generated `greeting` field.
+
+<!-- snippet: fragment -->
+```typescript
+new OpenAIGptLive(options: OpenAIGptLiveOptions)
+```
+
+| Option | Type | Required | Description |
+|---|---|---|---|
+| `apiKey` | `string` | Yes | OpenAI API key |
+| `model` | `string` | No | Model name |
+| `url` | `string` | No | WebSocket URL (defaults to `wss://api.openai.com/v1/live`) |
+| `greetingMessage` | `string` | No | MLLM greeting sent as `mllm.greeting_message` |
+| `failureMessage` | `string` | No | Message played when the model call fails |
+| `inputModalities` | `string[]` | No | Input modalities |
+| `outputModalities` | `string[]` | No | Output modalities |
+| `messages` | `Record<string, unknown>[]` | No | Conversation messages |
+| `params` | `Record<string, unknown>` | No | Additional MLLM parameters |
+| `turnDetection` | `MllmTurnDetectionConfig` | No | MLLM turn detection configuration |
 
 ### AzureOpenAIRealtime
 
@@ -431,7 +462,6 @@ Global Azure OpenAI Realtime wrapper. It emits `mllm.vendor = 'azure'`; `maxHist
 
 ### GeminiLive
 
-<!-- snippet: fragment -->
 ```typescript
 new GeminiLive(options: GeminiLiveOptions)
 ```

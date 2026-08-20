@@ -1,7 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
 import { AgoraClient } from "../../../src/AgoraPoolClient.js";
 import { Agent } from "../../../src/agentkit/Agent.js";
-import { AudioScenario } from "../../../src/agentkit/constants.js";
+import {
+    AudioScenario,
+    ThinkOnListeningActionAppend,
+    ThinkOnSpeakingActionAppend,
+    ThinkOnThinkingActionAppend,
+} from "../../../src/agentkit/constants.js";
 import { AnamAvatar } from "../../../src/agentkit/vendors/avatar.js";
 import { SpatiusAvatar } from "../../../src/agentkit/vendors/cn.js";
 import {
@@ -18,6 +23,7 @@ import {
 import {
     AzureOpenAIRealtime,
     GeminiLive,
+    OpenAIGptLive,
     OpenAIRealtime,
     QwenOmni,
     VertexAI,
@@ -28,6 +34,7 @@ import {
     AresSTT,
     AssemblyAISTT,
     DeepgramSTT,
+    GeminiSTT,
     GoogleSTT,
     MicrosoftSTT,
     OpenAISTT,
@@ -645,6 +652,7 @@ describe("Scenario 8 — MLLM mode", () => {
                 model: "gemini-live-2.5-flash",
                 voice: "Aoede",
                 instructions: "Be helpful",
+                greetingMessage: "Hello from Gemini",
             }),
         );
 
@@ -652,6 +660,7 @@ describe("Scenario 8 — MLLM mode", () => {
         expect(properties.mllm?.vendor).toBe("gemini");
         expect(properties.mllm?.enable).toBe(true);
         expect((properties.mllm as Record<string, unknown>)?.api_key).toBe("gemini-key");
+        expect((properties.mllm as Record<string, unknown>)?.greeting).toBeUndefined();
         expect((properties.mllm as Record<string, unknown>)?.url).toBe("");
         expect((properties.mllm as Record<string, unknown>)?.params).toMatchObject({
             model: "gemini-live-2.5-flash",
@@ -746,6 +755,27 @@ describe("ASR vendor coverage", () => {
         expect((p.asr?.params as Record<string, unknown>)?.model).toBe("long");
     });
 
+    test("GeminiSTT serializes Gemini params", () => {
+        const config = new GeminiSTT({
+            apiKey: "gemini-key",
+            model: "gemini-transcribe",
+            sampleRate: 16000,
+            language: "en-US",
+            wordTimestamp: true,
+        }).toConfig();
+
+        expect(config).toMatchObject({
+            vendor: "gemini",
+            params: {
+                api_key: "gemini-key",
+                model: "gemini-transcribe",
+                sample_rate: 16000,
+                language: "en-US",
+                word_timestamp: true,
+            },
+        });
+    });
+
     test("AmazonSTT serializes access_key_id, secret_access_key, region, language_code", () => {
         const p = new Agent({ client: TEST_AGENT_CLIENT })
             .withStt(
@@ -797,10 +827,8 @@ describe("ASR vendor coverage", () => {
             .withStt(new AresSTT({ keywords: ["Agora", "Shengwang"], additionalParams: { custom: true } }))
             .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
 
-        expect(p.asr?.params).toMatchObject({
-            custom: true,
-            keywords: ["Agora", "Shengwang"],
-        });
+        expect(p.asr?.keywords).toEqual(["Agora", "Shengwang"]);
+        expect(p.asr?.params).toMatchObject({ custom: true });
     });
 
     test("SpeechmaticsSTT serializes api_key and language in params", () => {
@@ -1013,6 +1041,126 @@ describe("LLM vendor coverage", () => {
         expect(p.llm?.api_key).toBe("dify-key");
         expect(p.llm?.url).toBe("https://api.dify.ai/v1");
         expect(p.llm?.style).toBe("dify");
+    });
+
+    test("OpenAI serializes inline REST tools", () => {
+        const config = new OpenAI({
+            apiKey: "openai-key",
+            model: "gpt-4o-mini",
+            url: "https://api.openai.com/v1/chat/completions",
+            tools: [
+                {
+                    type: "function",
+                    function: {
+                        name: "lookup_order",
+                        parameters: { type: "object", properties: { orderId: { type: "string" } } },
+                    },
+                    server: {
+                        method: "GET",
+                        url: "https://example.com/orders/{{args.orderId}}",
+                    },
+                },
+            ],
+        }).toConfig();
+
+        expect(config.tools).toHaveLength(1);
+        expect(config.tools?.[0]?.server.url).toBe("https://example.com/orders/{{args.orderId}}");
+    });
+
+    test("tools and MCP servers share the enable_tools advanced feature", () => {
+        const properties = new Agent({ client: TEST_AGENT_CLIENT })
+            .withTools()
+            .withLlm(
+                new OpenAI({
+                    apiKey: "openai-key",
+                    model: "gpt-4o-mini",
+                    url: "https://api.openai.com/v1/chat/completions",
+                    mcpServers: [{ name: "orders", url: "https://mcp.example.com" }],
+                    tools: [
+                        {
+                            type: "function",
+                            function: {
+                                name: "lookup_order",
+                                parameters: { type: "object", properties: { orderId: { type: "string" } } },
+                            },
+                            server: {
+                                method: "GET",
+                                url: "https://example.com/orders/{{args.orderId}}",
+                            },
+                        },
+                    ],
+                }),
+            )
+            .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
+
+        expect(properties.advanced_features?.enable_tools).toBe(true);
+        expect(properties.llm?.tools).toHaveLength(1);
+        expect(properties.llm?.mcp_servers).toEqual([
+            { name: "orders", url: "https://mcp.example.com", transport: "streamable_http" },
+        ]);
+    });
+
+    test("tools and MCP servers do not implicitly enable tool invocation", () => {
+        const properties = new Agent({ client: TEST_AGENT_CLIENT })
+            .withLlm(
+                new OpenAI({
+                    apiKey: "openai-key",
+                    model: "gpt-4o-mini",
+                    url: "https://api.openai.com/v1/chat/completions",
+                    mcpServers: [{ name: "orders", url: "https://mcp.example.com" }],
+                    tools: [
+                        {
+                            type: "function",
+                            function: {
+                                name: "lookup_order",
+                                parameters: { type: "object", properties: { orderId: { type: "string" } } },
+                            },
+                            server: {
+                                method: "GET",
+                                url: "https://example.com/orders/{{args.orderId}}",
+                            },
+                        },
+                    ],
+                }),
+            )
+            .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
+
+        expect(properties.advanced_features?.enable_tools).toBeUndefined();
+        expect(properties.llm?.tools).toHaveLength(1);
+        expect(properties.llm?.mcp_servers).toHaveLength(1);
+    });
+});
+
+describe("Agent tool and filler configuration", () => {
+    test("generated filler words preserve generated config and static fallback", () => {
+        const properties = new Agent({ client: TEST_AGENT_CLIENT })
+            .withFillerWords({
+                enable: true,
+                content: {
+                    mode: "generated",
+                    static_config: { phrases: ["One moment"], selection_rule: "shuffle" },
+                    generated_config: {
+                        llm_provider: {
+                            base_url: "https://example.com/v1/chat/completions",
+                            api_key: "filler-key",
+                            params: { model: "filler-model" },
+                        },
+                        prompt: "Generate a short filler.",
+                        fallback_strategy: "static",
+                    },
+                },
+            })
+            .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
+
+        expect(properties.filler_words?.content?.mode).toBe("generated");
+        expect(properties.filler_words?.content?.static_config?.phrases).toEqual(["One moment"]);
+        expect(properties.filler_words?.content?.generated_config?.llm_provider.api_key).toBe("filler-key");
+    });
+
+    test("think append constants use the generated append actions", () => {
+        expect(ThinkOnListeningActionAppend).toBe("append");
+        expect(ThinkOnThinkingActionAppend).toBe("append");
+        expect(ThinkOnSpeakingActionAppend).toBe("append");
     });
 });
 
@@ -1304,6 +1452,19 @@ describe("MLLM vendor coverage", () => {
             model: "gpt-4o-realtime-preview",
             voice: "alloy",
         });
+    });
+
+    test("OpenAIGptLive toConfig has its dedicated vendor and greeting", () => {
+        const config = new OpenAIGptLive({
+            apiKey: "rt-key",
+            model: "gpt-4o-realtime-preview",
+            greetingMessage: "Hello live",
+        }).toConfig();
+
+        expect(config.vendor).toBe("openai_gpt_live");
+        expect((config as Record<string, unknown>)?.url).toBe("wss://api.openai.com/v1/live");
+        expect((config as Record<string, unknown>)?.greeting_message).toBe("Hello live");
+        expect((config as Record<string, unknown>)?.greeting).toBeUndefined();
     });
 
     test("OpenAIRealtime toConfig preserves a custom url", () => {

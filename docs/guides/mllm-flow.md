@@ -6,7 +6,7 @@ description: Use global or Chinese mainland MLLM providers for end-to-end audio 
 
 # MLLM Flow (Multimodal)
 
-In MLLM mode, a single multimodal model handles audio input and output end-to-end — no separate STT or TTS step. AgentKit supports global OpenAI Realtime, Azure OpenAI Realtime, Gemini Live, Vertex AI, and xAI Grok providers, plus Qwen Omni for Chinese mainland deployments.
+In MLLM mode, a single multimodal model handles audio input and output end-to-end — no separate STT or TTS step. AgentKit supports global OpenAI Realtime (`mllm.vendor = 'openai'`), OpenAI GPT Live (`mllm.vendor = 'openai_gpt_live'`), Azure OpenAI Realtime, Gemini Live, Vertex AI, and xAI Grok providers, plus Qwen Omni for Chinese mainland deployments.
 
 ## When to use MLLM
 

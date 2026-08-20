@@ -441,7 +441,8 @@ export class Agent<TTSSampleRate extends number = number, TArea extends AgoraAre
     }
 
     /**
-     * Returns a new Agent with MCP tool invocation enabled or disabled.
+     * Returns a new Agent with MCP and inline LLM tool invocation enabled or disabled.
+     * Both `llm.mcp_servers` and `llm.tools` require `advanced_features.enable_tools`.
      */
     withTools(enabled = true): Agent<TTSSampleRate, TArea> {
         const newAgent = this._clone();

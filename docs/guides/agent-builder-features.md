@@ -16,7 +16,8 @@ Every example assumes an `AgoraClient` is created first and passed to `new Agent
 |---|---|---|
 | `sal` | `withSal(config)` | Selective Attention Locking — speaker recognition and noise suppression |
 | `advancedFeatures` | `withAdvancedFeatures(features)` | Enable MLLM, RTM, SAL, tools |
-| `tools` | `withTools(enabled)` | Enable MCP tool invocation |
+| `tools` | `withTools(enabled)` | Enable MCP and inline REST tool invocation |
+| `llm.tools` | LLM vendor `tools` option | Define inline synchronous REST function-calling tools |
 | `parameters` | `withParameters(params)` | Silence config, farewell config, data channel |
 | `failureMessage` | LLM/MLLM vendor option | Message spoken when LLM fails |
 | `maxHistory` | LLM vendor option | Max conversation turns in LLM context |
@@ -84,7 +85,8 @@ const mllmAgent = new Agent({ client })
 const rtmAgent = new Agent({ client })
   .withAdvancedFeatures({ enable_rtm: true });
 
-// Enable tool invocation via MCP
+// Enable tool invocation for both MCP servers and inline LLM REST tools.
+// This must be enabled when either tool definition is configured.
 const toolsAgent = new Agent({ client })
   .withTools();
 ```
@@ -255,6 +257,59 @@ const agent = new Agent({ client })
   .withLlm(/* ... */)
   .withTts(/* ... */)
   .withStt(/* ... */);
+```
+
+Generated filler words can use an OpenAI-compatible provider. Static phrases
+are still required because they are used as the fallback when generation is
+not ready, fails, or returns an empty response:
+
+```typescript
+.withFillerWords({
+  enable: true,
+  trigger: { mode: 'fixed_time', fixed_time_config: { response_wait_ms: 2000 } },
+  content: {
+    mode: 'generated',
+    static_config: {
+      phrases: ['One moment please.', 'Let me check that.'],
+      selection_rule: 'shuffle',
+    },
+    generated_config: {
+      llm_provider: {
+        base_url: 'https://api.openai.com/v1/chat/completions',
+        api_key: 'your-filler-llm-key',
+        params: { model: 'gpt-4o-mini' },
+      },
+      prompt: 'Generate a short conversational filler phrase.',
+      fallback_strategy: 'static',
+    },
+  },
+})
+```
+
+The `tools` option on standard text LLM vendors is separate from MCP. It
+defines synchronous REST tools using `type: 'function'`, a JSON Schema under
+`function.parameters`, and a `server` with `GET` or `POST` plus a URL template:
+
+Call `.withTools(true)` on the agent as well; `llm.tools` is ignored unless
+`advanced_features.enable_tools` is enabled.
+
+```typescript
+new OpenAI({
+  apiKey: 'your-openai-key',
+  model: 'gpt-4o-mini',
+  url: 'https://api.openai.com/v1/chat/completions',
+  tools: [{
+    type: 'function',
+    function: {
+      name: 'lookup_order',
+      parameters: { type: 'object', properties: { orderId: { type: 'string' } } },
+    },
+    server: {
+      method: 'GET',
+      url: 'https://example.com/orders/{{args.orderId}}',
+    },
+  }],
+})
 ```
 
 ## Getters

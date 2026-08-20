@@ -28,7 +28,7 @@ describe("CN vendor helpers", () => {
         expect(new FengmingSTT().toConfig()).toMatchObject({ vendor: "fengming" });
         expect(new FengmingSTT({ keywords: ["声网", "Agora"] }).toConfig()).toMatchObject({
             vendor: "fengming",
-            params: { keywords: ["声网", "Agora"] },
+            keywords: ["声网", "Agora"],
         });
 
         expect(

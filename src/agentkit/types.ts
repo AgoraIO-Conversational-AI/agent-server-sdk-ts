@@ -15,6 +15,7 @@ import type {
     ElevenLabsTts as ElevenLabsTtsType,
     FishAudioTtsParams as FishAudioTtsParamsType,
     FishAudioTts as FishAudioTtsType,
+    GeminiAsrParams as GeminiAsrParamsType,
     GenericHttpTtsParams as GenericTtsParamsType,
     GenericHttpTts as GenericTtsType,
     GetAgentsResponse,
@@ -28,6 +29,10 @@ import type {
     HumeAiTts as HumeAiTtsType,
     ListAgentsResponse,
     Llm,
+    LlmToolExecution as LlmToolExecutionType,
+    LlmToolFunction as LlmToolFunctionType,
+    LlmToolServer as LlmToolServerType,
+    LlmTool as LlmToolType,
     MicrosoftTtsParams as MicrosoftTtsParamsType,
     MicrosoftTts as MicrosoftTtsType,
     MinimaxTtsParams as MinimaxTtsParamsType,
@@ -83,6 +88,7 @@ export type SttConfig =
     | { vendor: "microsoft"; language?: TurnDetectionLanguage; params: MicrosoftAsrParams }
     | { vendor: "openai"; language?: TurnDetectionLanguage; params: OpenAiAsrParams }
     | { vendor: "google"; language?: TurnDetectionLanguage; params: GoogleAsrParams }
+    | { vendor: "gemini"; language?: TurnDetectionLanguage; params: GeminiAsrParams }
     | { vendor: "amazon"; language?: TurnDetectionLanguage; params: AmazonAsrParams }
     | { vendor: "assemblyai"; language?: TurnDetectionLanguage; params: AssemblyAiParams }
     | { vendor: "ares"; language?: TurnDetectionLanguage; params?: AresParams }
@@ -98,6 +104,12 @@ export type AsrVendorName = string;
 
 /** TTS (Text-to-Speech) configuration - discriminated union */
 export type TtsConfig = Tts;
+
+/** Inline synchronous REST tool exposed to a standard text LLM. */
+export type LlmTool = LlmToolType;
+export type LlmToolExecution = LlmToolExecutionType;
+export type LlmToolFunction = LlmToolFunctionType;
+export type LlmToolServer = LlmToolServerType;
 
 /** MLLM (Multimodal LLM) configuration */
 export type MllmConfig = Mllm;
@@ -276,6 +288,16 @@ export type FillerWordsContent = StartAgentsRequest.Properties.FillerWords.Conte
 /** Static filler word content config (`content.static_config`) */
 export type FillerWordsContentStaticConfig = StartAgentsRequest.Properties.FillerWords.Content.StaticConfig;
 
+/** Generated filler word configuration (`content.generated_config`). */
+export type FillerWordsContentGeneratedConfig = StartAgentsRequest.Properties.FillerWords.Content.GeneratedConfig;
+
+/** LLM provider used to generate filler words. */
+export type FillerWordsContentGeneratedLlmProvider =
+    StartAgentsRequest.Properties.FillerWords.Content.GeneratedConfig.LlmProvider;
+
+/** Filler word content mode: `static` or `generated`. */
+export type FillerWordsContentMode = StartAgentsRequest.Properties.FillerWords.Content.Mode;
+
 /** Filler word selection rule: `"shuffle"` | `"round_robin"` */
 export type FillerWordsContentSelectionRule =
     StartAgentsRequest.Properties.FillerWords.Content.StaticConfig.SelectionRule;
@@ -295,6 +317,9 @@ export type LlmGreetingConfigsMode = Llm.GreetingConfigs.UninterruptibleAsrPolic
 
 /** MCP server config item (`llm.mcp_servers[]`) */
 export type McpServersItem = Record<string, unknown>;
+
+/** Gemini ASR configuration parameters. */
+export type GeminiAsrParams = GeminiAsrParamsType;
 
 // =============================================================================
 // Agent Configuration (combines all the above)

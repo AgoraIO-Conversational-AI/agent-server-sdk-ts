@@ -40,6 +40,10 @@ export const Geofence: typeof StartAgentsRequestNS.Properties.Geofence = StartAg
 export const FillerWordsSelectionRule: typeof StartAgentsRequestNS.Properties.FillerWords.Content.StaticConfig.SelectionRule =
     StartAgentsRequestNS.Properties.FillerWords.Content.StaticConfig.SelectionRule;
 
+/** Filler word content mode: `static` | `generated`. */
+export const FillerWordsContentModeValues: typeof StartAgentsRequestNS.Properties.FillerWords.Content.Mode =
+    StartAgentsRequestNS.Properties.FillerWords.Content.Mode;
+
 /**
  * Turn detection type (deprecated; use `TurnDetectionNestedConfig.EndOfSpeech` instead).
  * - `AgoraVad`: Agora VAD
@@ -109,6 +113,10 @@ export const ThinkOnListeningActionInterrupt: AgentThinkRequestNS.OnListeningAct
 export const ThinkOnListeningActionIgnore: AgentThinkRequestNS.OnListeningAction =
     AgentThinkRequestNS.OnListeningAction.Ignore;
 
+/** Queue the think instruction until the current listening turn completes. */
+export const ThinkOnListeningActionAppend: AgentThinkRequestNS.OnListeningAction =
+    AgentThinkRequestNS.OnListeningAction.Append;
+
 /** Think action when the agent is thinking: interrupt and start a new turn. */
 export const ThinkOnThinkingActionInterrupt: AgentThinkRequestNS.OnThinkingAction =
     AgentThinkRequestNS.OnThinkingAction.Interrupt;
@@ -117,6 +125,10 @@ export const ThinkOnThinkingActionInterrupt: AgentThinkRequestNS.OnThinkingActio
 export const ThinkOnThinkingActionIgnore: AgentThinkRequestNS.OnThinkingAction =
     AgentThinkRequestNS.OnThinkingAction.Ignore;
 
+/** Queue the think instruction until the current LLM turn completes. */
+export const ThinkOnThinkingActionAppend: AgentThinkRequestNS.OnThinkingAction =
+    AgentThinkRequestNS.OnThinkingAction.Append;
+
 /** Think action when the agent is speaking: interrupt and start a new turn. */
 export const ThinkOnSpeakingActionInterrupt: AgentThinkRequestNS.OnSpeakingAction =
     AgentThinkRequestNS.OnSpeakingAction.Interrupt;
@@ -124,3 +136,7 @@ export const ThinkOnSpeakingActionInterrupt: AgentThinkRequestNS.OnSpeakingActio
 /** Think action when the agent is speaking: ignore the request. */
 export const ThinkOnSpeakingActionIgnore: AgentThinkRequestNS.OnSpeakingAction =
     AgentThinkRequestNS.OnSpeakingAction.Ignore;
+
+/** Queue the think instruction until the current TTS playback completes. */
+export const ThinkOnSpeakingActionAppend: AgentThinkRequestNS.OnSpeakingAction =
+    AgentThinkRequestNS.OnSpeakingAction.Append;
