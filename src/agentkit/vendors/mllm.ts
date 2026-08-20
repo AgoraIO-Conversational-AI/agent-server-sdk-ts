@@ -155,8 +155,8 @@ export interface AzureOpenAIRealtimeOptions {
     messages?: Record<string, unknown>[];
     /** Azure Realtime model parameters */
     params?: AzureOpenAIRealtimeParams;
-    /** Required MLLM turn detection configuration. Overrides top-level turn_detection. */
-    turnDetection: MllmTurnDetectionConfig;
+    /** MLLM turn detection configuration. Overrides top-level turn_detection. */
+    turnDetection?: MllmTurnDetectionConfig;
 }
 
 /**
@@ -180,7 +180,6 @@ export class AzureOpenAIRealtime extends BaseMLLM {
         super();
         requireString(options.apiKey, "apiKey", "AzureOpenAIRealtime");
         requireString(options.url, "url", "AzureOpenAIRealtime");
-        requireObject(options.turnDetection, "turnDetection", "AzureOpenAIRealtime");
         this.options = options;
     }
 
@@ -217,7 +216,7 @@ export class AzureOpenAIRealtime extends BaseMLLM {
             ...(greetingMessage && { greeting_message: greetingMessage }),
             ...(outputModalities && { output_modalities: outputModalities }),
             ...(messages && { messages }),
-            turn_detection: turnDetection,
+            ...(turnDetection && { turn_detection: turnDetection }),
         };
     }
 }

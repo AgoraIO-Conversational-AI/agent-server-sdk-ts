@@ -39,7 +39,6 @@ new Agent({ client }).withTts(globalGenericTts);
 const globalMllm: GlobalMllmVendor = new AzureOpenAIRealtime({
     apiKey: "azure-key",
     url: "wss://example.openai.azure.com/openai/realtime",
-    turnDetection: { mode: "server_vad" },
 });
 new Agent({ client }).withMllm(globalMllm);
 
@@ -65,7 +64,7 @@ type _AzureOptionsExposeOnlySupportedFields = Assert<
 type _AzureParamsExposeOnlySupportedFields = Assert<
     IsExact<keyof AzureOpenAIRealtimeParams, "instructions" | "model" | "voice">
 >;
-type _AzureTurnDetectionIsRequired = Assert<IsRequired<AzureOpenAIRealtimeOptions, "turnDetection">>;
+type _AzureTurnDetectionIsOptional = Assert<IsExact<IsRequired<AzureOpenAIRealtimeOptions, "turnDetection">, false>>;
 type _QwenUrlIsRequired = Assert<IsRequired<QwenOmniOptions, "url">>;
 type _QwenTurnDetectionIsOptional = Assert<IsExact<IsRequired<QwenOmniOptions, "turnDetection">, false>>;
 
@@ -124,7 +123,6 @@ const _invalidGlobalMllm: GlobalMllmVendor = new QwenOmni({
     const _invalidCnMllm: CNMllmVendor = new AzureOpenAIRealtime({
         apiKey: "azure-key",
         url: "wss://example.openai.azure.com/openai/realtime",
-        turnDetection: { mode: "server_vad" },
     });
 }
 
