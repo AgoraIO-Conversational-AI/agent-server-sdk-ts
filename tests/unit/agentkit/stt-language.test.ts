@@ -55,7 +55,7 @@ describe("STT language serialization", () => {
             vendor: "speechmatics",
             language: "en-US",
             params: {
-                api_key: "stt-key",
+                key: "stt-key",
                 language: "en",
             },
         });
@@ -77,7 +77,7 @@ describe("STT language serialization", () => {
             vendor: "speechmatics",
             language: "en-US",
             params: {
-                api_key: "stt-key",
+                key: "stt-key",
                 language: "en",
             },
         });

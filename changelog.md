@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [v2.6.1] — 2026-08-19
+
+### Fixed
+
+- **Speechmatics credential field** — `SpeechmaticsSTT` now emits the REST-compatible `asr.params.key`. The `key` option is preferred; deprecated `apiKey` remains supported and is normalized to `key`.
+
 ## [v2.6.0] — 2026-08-10
 
 ### Added
@@ -19,6 +25,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **AssemblyAI STT WebSocket URL** — `AssemblyAISTTOptions.uri` is renamed to `ws_url` and now serializes as `asr.params.ws_url`. This is a breaking rename; callers passing `uri` must update the option name.
 - **Qwen Omni options** — `url` is required and `turnDetection` is optional on `QwenOmniOptions`.
 - **Generated core refresh** — regenerated from the latest API schema (`fern-typescript-node-sdk` 3.31.1), typing `FengmingAsr.params` and `AresAsrParams` instead of leaving them as open records.
+
 
 ## [v2.2.0] — 2026-06-05
 
