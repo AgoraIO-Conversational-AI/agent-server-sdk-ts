@@ -161,7 +161,7 @@ export class AgentSession {
     private _agentsClient: AgentsClient;
     private _agentManagementClient: AgentManagementClient;
     private _previewFeatures: readonly PreviewFeature[] = [];
-    private _sessionBaseUrl: string;
+    private _sessionBaseUrl?: string;
     private _agentId: string | null = null;
     private _status: "idle" | "starting" | "running" | "stopping" | "stopped" | "error" = "idle";
     private _eventHandlers: Map<AgentSessionEvent, Set<AgentSessionEventHandler>> = new Map();
@@ -188,7 +188,12 @@ export class AgentSession {
         this._authMode = (options.client as { authMode?: AgoraAuthMode }).authMode ?? "basic";
         this._agentsClient = options.client.agents;
         this._agentManagementClient = options.client.agentManagement;
-        this._sessionBaseUrl = options.client.getCurrentURL();
+        this._sessionBaseUrl = this._clientCurrentUrl();
+    }
+
+    private _clientCurrentUrl(): string | undefined {
+        const getCurrentURL = (this._client as unknown as { getCurrentURL?: () => string }).getCurrentURL;
+        return typeof getCurrentURL === "function" ? getCurrentURL.call(this._client) : undefined;
     }
 
     /**
@@ -621,7 +626,7 @@ export class AgentSession {
             } else {
                 this._agentsClient = this._client.agents;
                 this._agentManagementClient = this._client.agentManagement;
-                this._sessionBaseUrl = this._client.getCurrentURL();
+                this._sessionBaseUrl = this._clientCurrentUrl();
             }
 
             const request: Agora.StartAgentsRequest = {
