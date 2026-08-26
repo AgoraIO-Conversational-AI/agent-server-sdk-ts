@@ -110,8 +110,8 @@ export type {
 } from "./preview/index.js";
 export {
     createPreviewRoute,
-    GeminiSTTModels,
     GeminiSTT,
+    GeminiSTTModels,
     PREVIEW_API_BASE_URL,
     PREVIEW_FEATURE_HEADER,
     PreviewFeatures,
