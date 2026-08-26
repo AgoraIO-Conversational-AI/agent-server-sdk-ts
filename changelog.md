@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [v2.7.0] — 2026-08-26
+
+### Added
+
+- **Preview endpoint support** — `AgoraClient` detects preview vendors from the resolved session body and routes only that session to the preview gateway with a pinned `agora-feature` header.
+- **Gemini preview ASR** — `GeminiSTT` (`gemini-3.5-transcribe-live`), a cascading ASR stage served only by the preview gateway.
+- **Gemini ASR language selection** — `languageCodes` serializes to `params.language_codes`, replacing the singular `params.language` this vendor previously sent. Omitted from the request when unset, which is how the provider spells auto-detect. `GeminiSTT` has no `language` option: the top-level `asr.language` comes from `turnDetection.language`, as it does for every STT vendor.
+- **Gemini ASR custom vocabulary** — `customVocabulary` biases recognition toward supplied words and phrases via `params.custom_vocabulary`. Omitted from the request when unset.
+- **Session-scoped routing** — GA sessions and direct client calls, including `stopAgent()`, remain on regional production endpoints.
+- **Debug redaction** — `redactSecrets` and `redactHeadersForDebug` replace vendor API keys, RTC tokens, and the App ID with `[REDACTED]` in `debug: true` output. Empty strings stay visible so an unset environment variable remains diagnosable. Neither mutates its input.
+- **Gemini ASR typing** — `SttConfig` accepts `vendor: "gemini"`; the generated `Asr` union models production vendors only.
+
+### Fixed
+
+- **Gemini ASR parameter compatibility** — `wordTimestamp` is now omitted unless explicitly set. Enabling it together with `customVocabulary` fails locally instead of sending a combination Gemini does not support.
+- **Malformed credentials no longer produce an empty token** — `agora-token` returns `""` rather than throwing when `appId` or `appCertificate` is not exactly 32 characters, so a value with a trailing newline or a truncated paste was sent as `token: ""` and failed at the gateway with an error naming neither field. The token builders now throw locally and say which field is the wrong length. Credential values are never included in the message.
+
+### Documentation
+
+- Added [Preview Endpoint](docs/guides/preview-endpoint.md), covering the gate header, intake-node failure signatures, and how to add a future preview family.
+- Documented every field `Agent.toProperties` injects into a vendor config, and why a preview provider must be verified against the resolved request body rather than the vendor class output — a value written under a spelling the route ignores fails silently.
+
 ## [v2.6.1] — 2026-08-19
 
 ### Fixed

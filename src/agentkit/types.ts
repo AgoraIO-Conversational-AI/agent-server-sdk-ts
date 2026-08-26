@@ -88,6 +88,7 @@ export type SttConfig =
     | { vendor: "ares"; language?: TurnDetectionLanguage; params?: AresParams }
     | { vendor: "sarvam"; language?: TurnDetectionLanguage; params: SarvamAsrParams }
     | { vendor: "xai"; language?: TurnDetectionLanguage; params: XAiAsrParams }
+    | { vendor: "gemini"; language?: TurnDetectionLanguage; params: GeminiAsrParams }
     | Asr; // Fallback for shorthand/untyped configs
 
 /** ASR configuration — alias for {@link SttConfig} (wire field: `asr`). */
@@ -670,6 +671,42 @@ export interface SarvamAsrParams {
  */
 export type XAiAsr = XAiAsrType;
 export type XAiAsrParams = XAiAsrParamsType;
+
+/**
+ * Gemini STT parameters (preview).
+ *
+ * Served only by the preview endpoint and routed automatically by AgentSession.
+ * Not part of the generated `Asr` union, so the variant
+ * is declared here until the provider ships on the production gateway.
+ */
+export interface GeminiAsrParams {
+    /** Google API key */
+    api_key: string;
+    /** Model name (e.g., 'gemini-3.5-transcribe-live') */
+    model: string;
+    /** Audio sample rate in Hz */
+    sample_rate?: number;
+    /**
+     * Languages to transcribe (e.g., `['en-US']`).
+     *
+     * Omit the field or send `[]` to let the model auto-detect. Note this is
+     * `language_codes` — an array — not the singular `language` other ASR
+     * vendors take.
+     */
+    language_codes?: string[];
+    /**
+     * Words and phrases to bias recognition toward (e.g., product names,
+     * jargon). Optional.
+     */
+    custom_vocabulary?: string[];
+    /**
+     * Emit per-word timestamps in transcription results. Cannot be `true`
+     * when `custom_vocabulary` is set.
+     */
+    word_timestamp?: boolean;
+    /** Additional Gemini-specific parameters */
+    [key: string]: unknown;
+}
 
 // =============================================================================
 // TTS Vendor-Specific Types (re-exports for convenience)
