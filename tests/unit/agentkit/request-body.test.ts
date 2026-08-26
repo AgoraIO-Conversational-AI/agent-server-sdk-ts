@@ -765,14 +765,22 @@ describe("ASR vendor coverage", () => {
         expect((p.asr?.params as Record<string, unknown>)?.language_code).toBe("en-US");
     });
 
-    test("AssemblyAISTT serializes api_key and language in params", () => {
+    test("AssemblyAISTT serializes api_key, language, and ws_url in params", () => {
         const p = new Agent({ client: TEST_AGENT_CLIENT })
-            .withStt(new AssemblyAISTT({ apiKey: "assembly-key", language: "en-US" }))
+            .withStt(
+                new AssemblyAISTT({
+                    apiKey: "assembly-key",
+                    language: "en-US",
+                    ws_url: "wss://example.test/ws",
+                }),
+            )
             .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
 
         expect(p.asr?.vendor).toBe("assemblyai");
         expect((p.asr?.params as Record<string, unknown>)?.api_key).toBe("assembly-key");
         expect((p.asr?.params as Record<string, unknown>)?.language).toBe("en-US");
+        expect((p.asr?.params as Record<string, unknown>)?.ws_url).toBe("wss://example.test/ws");
+        expect(p.asr?.params).not.toHaveProperty("uri");
     });
 
     test("AresSTT produces no params key", () => {
@@ -795,14 +803,22 @@ describe("ASR vendor coverage", () => {
         });
     });
 
-    test("SpeechmaticsSTT serializes api_key and language in params", () => {
+    test("SpeechmaticsSTT normalizes deprecated apiKey to key", () => {
         const p = new Agent({ client: TEST_AGENT_CLIENT })
             .withStt(new SpeechmaticsSTT({ apiKey: "sm-key", language: "en" }))
             .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
 
         expect(p.asr?.vendor).toBe("speechmatics");
-        expect((p.asr?.params as Record<string, unknown>)?.api_key).toBe("sm-key");
+        expect((p.asr?.params as Record<string, unknown>)?.key).toBe("sm-key");
+        expect((p.asr?.params as Record<string, unknown>)?.api_key).toBeUndefined();
         expect((p.asr?.params as Record<string, unknown>)?.language).toBe("en");
+    });
+
+    test("SpeechmaticsSTT supports key and prefers it over deprecated apiKey", () => {
+        const config = new SpeechmaticsSTT({ key: "new-key", apiKey: "legacy-key", language: "en" }).toConfig();
+
+        expect(config.params).toMatchObject({ key: "new-key", language: "en" });
+        expect((config.params as Record<string, unknown>).api_key).toBeUndefined();
     });
 
     test("SarvamSTT serializes api_key in params", () => {

@@ -81,13 +81,13 @@ The `sampleRate` is critical when using avatars. See [Avatar Integration](../gui
 
 | Class             | Provider          | Key constructor params                           |
 | ----------------- | ----------------- | ------------------------------------------------ |
-| `SpeechmaticsSTT` | Speechmatics      | `apiKey`, `language`, `uri?`                     |
+| `SpeechmaticsSTT` | Speechmatics      | `key`, `language`, `uri?`; deprecated `apiKey?`  |
 | `DeepgramSTT`     | Deepgram          | `model` for Agora-managed `nova-2`/`nova-3`; `apiKey` for BYOK; `language?`, `smartFormat?`, `keyterm?` |
 | `MicrosoftSTT`    | Azure Speech      | `key`, `region`, `language`                      |
 | `OpenAISTT`       | OpenAI Whisper    | `apiKey`, `model?`, `language?`, `prompt?`       |
 | `GoogleSTT`       | Google Speech     | `projectId`, `location`, `adcCredentialsString`, `language` |
 | `AmazonSTT`       | Amazon Transcribe | `accessKey`, `secretKey`, `region`, `language`   |
-| `AssemblyAISTT`   | AssemblyAI        | `apiKey`, `language`, `uri?`                     |
+| `AssemblyAISTT`   | AssemblyAI        | `apiKey`, `language`, `ws_url?`                  |
 | `AresSTT`         | Agora ARES        | `keywords?`, `additionalParams?`                 |
 | `SarvamSTT`       | Sarvam AI         | `apiKey`, `language`                             |
 | `XAiSTT`          | xAI               | `apiKey`, `language?`, `baseUrl?`, `sampleRate?` |

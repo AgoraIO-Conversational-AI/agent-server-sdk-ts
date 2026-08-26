@@ -372,15 +372,17 @@ When `.withStt()` is omitted, AgentKit now selects the wire ASR vendor from `cli
 
 | Class | Key params |
 |---|---|
-| `SpeechmaticsSTT` | `apiKey`, `language`, `uri?` |
+| `SpeechmaticsSTT` | `key`, `language`, `uri?`; deprecated `apiKey?` alias |
 | `MicrosoftSTT` | `key`, `region`, `language` |
 | `OpenAISTT` | `apiKey`, `model?`, `language?`, `prompt?`, `inputAudioTranscription?` |
 | `GoogleSTT` | `projectId`, `location`, `adcCredentialsString`, `language`, `model?` |
 | `AmazonSTT` | `accessKey`, `secretKey`, `region`, `language` |
-| `AssemblyAISTT` | `apiKey`, `language`, `uri?` |
+| `AssemblyAISTT` | `apiKey`, `language`, `ws_url?` |
 | `AresSTT` | `keywords?`, `additionalParams?` |
 | `SarvamSTT` | `apiKey`, `language` |
 | `XAiSTT` | `apiKey`, `language?`, `baseUrl?`, `sampleRate?`, `additionalParams?` |
+
+`SpeechmaticsSTT` always serializes its credential as `asr.params.key`. The deprecated `apiKey` option remains accepted for backward compatibility and is normalized to `key`; when both are provided, `key` takes precedence.
 
 ---
 

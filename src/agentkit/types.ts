@@ -529,7 +529,9 @@ export type LlmConfig =
  */
 export interface SpeechmaticsParams {
     /** Speechmatics API key for authentication (required) */
-    api_key: string;
+    key: string;
+    /** @deprecated The REST API expects `key`; use `key` instead. */
+    api_key?: string;
     /** Language code for transcription (e.g., 'en', 'es', 'fr') (required) */
     language: string;
     /** Speechmatics streaming WebSocket URL */
@@ -636,7 +638,7 @@ export interface AssemblyAiParams {
     /** Language code */
     language?: string;
     /** AssemblyAI streaming WebSocket URL */
-    uri?: string;
+    ws_url?: string;
     /** Additional AssemblyAI-specific parameters */
     [key: string]: unknown;
 }

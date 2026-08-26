@@ -273,14 +273,14 @@ export class Agent<TTSSampleRate extends number = number, TArea extends AgoraAre
     /**
      * Returns a new Agent with the specified STT vendor.
      *
-     * @param vendor - STT vendor instance (e.g., new SpeechmaticsSTT({ apiKey: '...', language: 'en' }))
+     * @param vendor - STT vendor instance (e.g., new SpeechmaticsSTT({ key: '...', language: 'en' }))
      *
      * @example
      * ```typescript
      * import { SpeechmaticsSTT } from 'agora-agents';
      *
      * agent.withStt(new SpeechmaticsSTT({
-     *   apiKey: 'your-key',
+     *   key: 'your-key',
      *   language: 'en',
      * }));
      * ```
