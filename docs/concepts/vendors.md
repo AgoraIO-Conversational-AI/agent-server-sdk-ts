@@ -104,6 +104,8 @@ const stt = new DeepgramSTT({
 });
 ```
 
+> **Preview providers** — `GeminiSTT` (ASR) is served by the preview gateway; `AgoraClient` routes its sessions automatically. See [Preview Endpoint](../guides/preview-endpoint.md).
+
 ## MLLM vendors
 
 MLLM (Multimodal LLM) vendors handle audio end-to-end — no separate STT or TTS step. Call `agent.withMllm(vendor)` and MLLM mode is enabled automatically; no separate `advancedFeatures` flag is needed.

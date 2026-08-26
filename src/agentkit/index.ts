@@ -86,6 +86,7 @@ export {
     ThinkOnThinkingActionInterrupt,
     TurnDetectionTypeValues,
 } from "./constants.js";
+export { REDACTED, redactHeadersForDebug, redactSecrets } from "./debug.js";
 export type {
     AgentPreset,
     AsrPreset,
@@ -99,6 +100,24 @@ export type {
     TtsPreset,
 } from "./presets.js";
 export { AgentPresets, normalizePresetInput } from "./presets.js";
+// Preview endpoint: session routing, providers, and feature gating.
+// Temporary surface — removed when these providers ship on the production gateway.
+export type {
+    GeminiSTTModel,
+    GeminiSTTOptions,
+    PreviewFeature,
+    PreviewRoute,
+} from "./preview/index.js";
+export {
+    createPreviewRoute,
+    GeminiSTTModels,
+    GeminiSTT,
+    PREVIEW_API_BASE_URL,
+    PREVIEW_FEATURE_HEADER,
+    PreviewFeatures,
+    previewRequestHeaders,
+    requiredPreviewFeatures,
+} from "./preview/index.js";
 export type {
     AvatarVendor,
     CNAvatarVendor,
@@ -162,6 +181,7 @@ export type {
     FillerWordsTriggerFixedTimeConfig,
     FishAudioTts,
     FishAudioTtsParams,
+    GeminiAsrParams,
     GenericTts,
     GenericTtsParams,
     GeofenceArea,
