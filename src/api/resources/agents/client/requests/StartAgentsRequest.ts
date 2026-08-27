@@ -115,10 +115,7 @@ export namespace StartAgentsRequest {
         labels?: Record<string, string>;
         /** RTC media encryption configuration. */
         rtc?: Properties.Rtc;
-        /**
-         * Filler word configuration. Plays filler words while waiting for LLM responses to reduce user anxiety and improve conversation flow.
-         * When `enable` is `true`, `content.static_config.phrases` must be present and non-empty, even when `content.mode` is `generated`, because generated mode still falls back to static filler words.
-         */
+        /** Filler word configuration. Plays filler words while waiting for LLM responses to reduce user anxiety and improve conversation flow. */
         filler_words?: Properties.FillerWords;
         /** Agent configuration parameters. */
         parameters?: Properties.Parameters;
@@ -600,7 +597,6 @@ export namespace StartAgentsRequest {
 
         /**
          * Filler word configuration. Plays filler words while waiting for LLM responses to reduce user anxiety and improve conversation flow.
-         * When `enable` is `true`, `content.static_config.phrases` must be present and non-empty, even when `content.mode` is `generated`, because generated mode still falls back to static filler words.
          */
         export interface FillerWords {
             /**
@@ -646,15 +642,12 @@ export namespace StartAgentsRequest {
                 /**
                  * Filler word content mode:
                  * - `static`: Static filler words. Uses a predefined list of filler words.
-                 * - `generated`: LLM-generated filler words based on the last user message. Falls back to static filler words when generation is not ready, fails, or returns empty text.
+                 * - `generated`: LLM-generated filler words based on the last user message.
                  */
                 mode?: Content.Mode;
-                /**
-                 * Static filler word configuration. Required when `mode` is `static`.
-                 * Also required whenever `filler_words.enable` is `true`, including when `mode` is `generated`, because generated mode uses static filler words as fallback.
-                 */
+                /** Static filler word configuration. Required when `mode` is `static`. */
                 static_config?: Content.StaticConfig;
-                /** Generated filler word configuration. Required when `content.mode` is `generated`. */
+                /** Optional configuration for generated filler words. When omitted, the service uses its default generator settings. */
                 generated_config?: Content.GeneratedConfig;
             }
 
@@ -662,7 +655,7 @@ export namespace StartAgentsRequest {
                 /**
                  * Filler word content mode:
                  * - `static`: Static filler words. Uses a predefined list of filler words.
-                 * - `generated`: LLM-generated filler words based on the last user message. Falls back to static filler words when generation is not ready, fails, or returns empty text.
+                 * - `generated`: LLM-generated filler words based on the last user message.
                  */
                 export const Mode = {
                     Static: "static",
@@ -672,7 +665,6 @@ export namespace StartAgentsRequest {
 
                 /**
                  * Static filler word configuration. Required when `mode` is `static`.
-                 * Also required whenever `filler_words.enable` is `true`, including when `mode` is `generated`, because generated mode uses static filler words as fallback.
                  */
                 export interface StaticConfig {
                     /** List of filler word phrases. Maximum 100 filler words, each not exceeding 50 English words. */
@@ -699,15 +691,15 @@ export namespace StartAgentsRequest {
                 }
 
                 /**
-                 * Generated filler word configuration. Required when `content.mode` is `generated`.
+                 * Optional configuration for generated filler words. When omitted, the service uses its default generator settings.
                  */
                 export interface GeneratedConfig {
                     /** OpenAI-compatible LLM provider used to generate filler words. Runs in parallel with the main business LLM and only uses the last user message as input. */
-                    llm_provider: GeneratedConfig.LlmProvider;
+                    llm_provider?: GeneratedConfig.LlmProvider;
                     /** System prompt used to generate a short filler phrase based on the last user message. The generated text should be conversational and must not answer the user's question. */
-                    prompt: string;
+                    prompt?: string;
                     /** Fallback strategy when generated filler text is not ready, fails, or returns empty text. Phase 1 only supports `static`. */
-                    fallback_strategy: "static";
+                    fallback_strategy?: "static";
                 }
 
                 export namespace GeneratedConfig {
@@ -715,8 +707,8 @@ export namespace StartAgentsRequest {
                      * OpenAI-compatible LLM provider used to generate filler words. Runs in parallel with the main business LLM and only uses the last user message as input.
                      */
                     export interface LlmProvider {
-                        /** Base URL of the OpenAI-compatible chat completions endpoint. If the URL does not end with `/chat/completions`, the engine appends it automatically. */
-                        base_url: string;
+                        /** URL of the OpenAI-compatible chat completions endpoint. If the URL does not end with `/chat/completions`, the engine appends it automatically. */
+                        url: string;
                         /** API key for authenticating requests to the filler LLM provider. */
                         api_key: string;
                         /** Additional request parameters merged into the generated filler LLM request body, such as `model`. */
