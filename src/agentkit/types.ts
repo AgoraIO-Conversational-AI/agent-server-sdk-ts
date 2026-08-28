@@ -277,6 +277,13 @@ export type FillerWordsContent = StartAgentsRequest.Properties.FillerWords.Conte
 /** Static filler word content config (`content.static_config`) */
 export type FillerWordsContentStaticConfig = StartAgentsRequest.Properties.FillerWords.Content.StaticConfig;
 
+/** Generated filler word content configuration. */
+export type FillerWordsContentGeneratedConfig = StartAgentsRequest.Properties.FillerWords.Content.GeneratedConfig;
+
+/** OpenAI-compatible provider settings for generated filler words. */
+export type FillerWordsGeneratedLlmProvider =
+    StartAgentsRequest.Properties.FillerWords.Content.GeneratedConfig.LlmProvider;
+
 /** Filler word selection rule: `"shuffle"` | `"round_robin"` */
 export type FillerWordsContentSelectionRule =
     StartAgentsRequest.Properties.FillerWords.Content.StaticConfig.SelectionRule;
