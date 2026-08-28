@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Added
+
+- **Generated filler words** — `FillerWordsConfig` now supports `content.mode: "generated"` with an optional OpenAI-compatible `llm_provider` (`url`, `api_key`, and request `params`), custom `prompt`, and `fallback_strategy`. AgentKit also exports `FillerWordsContentGeneratedConfig` and `FillerWordsGeneratedLlmProvider` aliases.
+
 ## [v2.7.0] — 2026-08-26
 
 ### Added

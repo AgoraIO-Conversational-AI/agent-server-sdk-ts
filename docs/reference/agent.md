@@ -157,6 +157,12 @@ Set RTC configuration.
 
 Set filler words configuration (played while waiting for LLM response).
 
+Use `content.mode: 'generated'` with an optional `generated_config` to generate
+short filler phrases through an OpenAI-compatible provider. The provider uses
+`llm_provider.url`, `api_key`, and optional request `params`; `prompt` and
+`fallback_strategy: 'static'` are optional. When generated text is unavailable,
+the service applies its configured fallback behavior.
+
 ## Getter properties
 
 | Property | Type | Description |
