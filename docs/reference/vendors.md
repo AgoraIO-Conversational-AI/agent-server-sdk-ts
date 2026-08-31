@@ -105,6 +105,7 @@ new OpenAI(options: OpenAIOptions)
 | `greetingAudioUrl` | `string` | No | Publicly accessible greeting audio URL |
 | `greetingConfigs` | `LlmGreetingConfigs` | No | Greeting playback configuration |
 | `templateVariables` | `Record<string, string>` | No | Template variables for messages |
+| `tools` | `LlmTool[]` | No | Inline synchronous REST function-calling tools; requires `agent.withTools(true)` |
 
 For supported Agora-managed models, `apiKey` is optional:
 

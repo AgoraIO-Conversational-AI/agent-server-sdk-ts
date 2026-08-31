@@ -28,6 +28,10 @@ import type {
     HumeAiTts as HumeAiTtsType,
     ListAgentsResponse,
     Llm,
+    LlmToolExecution as LlmToolExecutionType,
+    LlmToolFunction as LlmToolFunctionType,
+    LlmToolServer as LlmToolServerType,
+    LlmTool as LlmToolType,
     MicrosoftTtsParams as MicrosoftTtsParamsType,
     MicrosoftTts as MicrosoftTtsType,
     MinimaxTtsParams as MinimaxTtsParamsType,
@@ -104,6 +108,12 @@ export type AsrVendorName = string;
 
 /** TTS (Text-to-Speech) configuration - discriminated union */
 export type TtsConfig = Tts;
+
+/** Inline synchronous REST tool exposed to a standard text LLM. */
+export type LlmTool = LlmToolType;
+export type LlmToolExecution = LlmToolExecutionType;
+export type LlmToolFunction = LlmToolFunctionType;
+export type LlmToolServer = LlmToolServerType;
 
 /** MLLM (Multimodal LLM) configuration */
 export type MllmConfig = Mllm;
@@ -517,6 +527,8 @@ interface BaseLlmConfig {
     template_variables?: Record<string, string>;
     /** MCP server configurations enabling the agent to call tools from external services */
     mcp_servers?: McpServersItem[];
+    /** Inline synchronous REST tools exposed to the LLM for function calling */
+    tools?: LlmTool[];
 }
 
 /**

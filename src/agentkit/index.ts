@@ -205,6 +205,10 @@ export type {
     LlmGreetingConfigs,
     LlmGreetingConfigsMode,
     LlmStyle,
+    LlmTool,
+    LlmToolExecution,
+    LlmToolFunction,
+    LlmToolServer,
     McpServersItem,
     // TTS vendor-specific types
     MicrosoftTts,

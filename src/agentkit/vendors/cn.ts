@@ -561,6 +561,7 @@ function cnLlmConfig(options: CNLlmCommonOptions, vendor: string): LlmConfig {
         greeting_configs: options.greetingConfigs,
         template_variables: options.templateVariables,
         mcp_servers: options.mcpServers,
+        tools: options.tools,
     };
 }
 

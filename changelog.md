@@ -8,6 +8,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Added
 
+- **Inline REST tools for text LLMs** — All global and Chinese mainland LLM vendor helpers now accept typed `tools: LlmTool[]` definitions and serialize them to `llm.tools`. AgentKit exports `LlmTool`, `LlmToolFunction`, `LlmToolServer`, and `LlmToolExecution`; call `Agent.withTools(true)` to enable invocation for inline REST tools or MCP servers.
 - **Generated filler words** — `FillerWordsConfig` now supports `content.mode: "generated"` with an optional OpenAI-compatible `llm_provider` (`url`, `api_key`, and request `params`), custom `prompt`, and `fallback_strategy`. AgentKit also exports `FillerWordsContentGeneratedConfig` and `FillerWordsGeneratedLlmProvider` aliases.
 
 ## [v2.7.0] — 2026-08-26
