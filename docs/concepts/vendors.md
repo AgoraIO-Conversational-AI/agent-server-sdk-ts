@@ -92,6 +92,8 @@ The `sampleRate` is critical when using avatars. See [Avatar Integration](../gui
 | `SarvamSTT`       | Sarvam AI         | `apiKey`, `language`                             |
 | `XAiSTT`          | xAI               | `apiKey`, `language?`, `baseUrl?`, `sampleRate?` |
 
+`AresSTT` and `FengmingSTT` serialize `keywords` at the ASR top level (`asr.keywords`), while arbitrary fields passed through `additionalParams` are kept under `asr.params`.
+
 <!-- snippet: executable -->
 
 ```typescript

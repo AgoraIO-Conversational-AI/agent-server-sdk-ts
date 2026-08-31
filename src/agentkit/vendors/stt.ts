@@ -455,17 +455,12 @@ export class AresSTT extends BaseSTT {
 
     toConfig(): SttConfig {
         const { keywords, additionalParams } = this.options;
-        const hasParams =
-            keywords !== undefined || (additionalParams !== undefined && Object.keys(additionalParams).length > 0);
+        const hasParams = additionalParams !== undefined && Object.keys(additionalParams).length > 0;
 
         return {
             vendor: "ares",
-            ...(hasParams && {
-                params: {
-                    ...additionalParams,
-                    ...(keywords !== undefined && { keywords }),
-                },
-            }),
+            ...(keywords !== undefined && { keywords }),
+            ...(hasParams && { params: { ...additionalParams } }),
         };
     }
 }

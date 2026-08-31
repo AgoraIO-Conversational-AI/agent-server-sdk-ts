@@ -45,7 +45,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - **Azure OpenAI Realtime MLLM** — `AzureOpenAIRealtime` emits `mllm.vendor: "azure"` and supports `maxHistory`, serialized as the new `max_history` field on the MLLM config.
 - **Qwen Omni Realtime MLLM (Chinese mainland)** — `QwenOmni` emits `mllm.vendor: "qwen_omni"`, alongside the new `BaseCNMLLM` base class and `GlobalMllmVendor` / `CNMllmVendor` region types. `Agent.withMllm()` now accepts `GlobalMllmVendor | CNMllmVendor` instead of `BaseMLLM`, so region mismatches are caught at compile time.
 - **Typecast TTS** — `TypecastTTS` vendor taking `apiKey`, `voiceId`, and `model`, with generated `TypecastTts` / `TypecastTtsParams` core types.
-- **ASR hotwords** — `keywords` on `AresSTT` and on `FengmingSTT` via the new `FengmingSTTOptions`, serialized as `asr.params.keywords`.
+- **ASR hotwords** — `keywords` on `AresSTT` and `FengmingSTT` serialize at the top level as `asr.keywords`; both vendors continue to accept additional vendor parameters through `additionalParams`, serialized under `asr.params`.
 - **Configurable API base URL** — setting `AGORA_AGENTS_API_BASE_URL` pins `AgoraClient` to that host (with the area-appropriate API path appended) and opts the client out of regional failover.
 
 ### Changed

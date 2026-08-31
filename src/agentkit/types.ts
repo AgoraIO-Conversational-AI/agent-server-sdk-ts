@@ -73,7 +73,12 @@ export type LlmStyle = Llm.Style;
  * When using shorthand strings or minimal configs, the untyped variant is available.
  */
 export type SttConfig =
-    | { vendor: "fengming"; language?: TurnDetectionLanguage; params?: Record<string, unknown> }
+    | {
+          vendor: "fengming";
+          language?: TurnDetectionLanguage;
+          keywords?: string[];
+          params?: Record<string, unknown>;
+      }
     | { vendor: "tencent"; language?: TurnDetectionLanguage; params?: Record<string, unknown> }
     | { vendor: "xfyun"; language?: TurnDetectionLanguage; params?: Record<string, unknown> }
     | { vendor: "xfyun_bigmodel"; language?: TurnDetectionLanguage; params?: Record<string, unknown> }
@@ -85,7 +90,7 @@ export type SttConfig =
     | { vendor: "google"; language?: TurnDetectionLanguage; params: GoogleAsrParams }
     | { vendor: "amazon"; language?: TurnDetectionLanguage; params: AmazonAsrParams }
     | { vendor: "assemblyai"; language?: TurnDetectionLanguage; params: AssemblyAiParams }
-    | { vendor: "ares"; language?: TurnDetectionLanguage; params?: AresParams }
+    | { vendor: "ares"; language?: TurnDetectionLanguage; keywords?: string[]; params?: AresParams }
     | { vendor: "sarvam"; language?: TurnDetectionLanguage; params: SarvamAsrParams }
     | { vendor: "xai"; language?: TurnDetectionLanguage; params: XAiAsrParams }
     | { vendor: "gemini"; language?: TurnDetectionLanguage; params: GeminiAsrParams }

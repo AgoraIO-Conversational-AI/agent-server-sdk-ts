@@ -797,10 +797,12 @@ describe("ASR vendor coverage", () => {
             .withStt(new AresSTT({ keywords: ["Agora", "Shengwang"], additionalParams: { custom: true } }))
             .toProperties({ ...SESSION_OPTS, ...ALLOW_ALL });
 
-        expect(p.asr?.params).toMatchObject({
-            custom: true,
+        expect(p.asr).toMatchObject({
+            vendor: "ares",
             keywords: ["Agora", "Shengwang"],
+            params: { custom: true },
         });
+        expect(p.asr?.params).not.toHaveProperty("keywords");
     });
 
     test("SpeechmaticsSTT normalizes deprecated apiKey to key", () => {
