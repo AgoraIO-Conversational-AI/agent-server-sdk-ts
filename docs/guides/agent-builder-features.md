@@ -16,7 +16,8 @@ Every example assumes an `AgoraClient` is created first and passed to `new Agent
 |---|---|---|
 | `sal` | `withSal(config)` | Selective Attention Locking — speaker recognition and noise suppression |
 | `advancedFeatures` | `withAdvancedFeatures(features)` | Enable MLLM, RTM, SAL, tools |
-| `tools` | `withTools(enabled)` | Enable MCP tool invocation |
+| `tools` | `withTools(enabled)` | Enable MCP and inline REST tool invocation |
+| `llm.tools` | LLM vendor `tools` option | Define inline synchronous REST function-calling tools |
 | `parameters` | `withParameters(params)` | Silence config, farewell config, data channel |
 | `failureMessage` | LLM/MLLM vendor option | Message spoken when LLM fails |
 | `maxHistory` | LLM vendor option | Max conversation turns in LLM context |
@@ -84,7 +85,8 @@ const mllmAgent = new Agent({ client })
 const rtmAgent = new Agent({ client })
   .withAdvancedFeatures({ enable_rtm: true });
 
-// Enable tool invocation via MCP
+// Enable tool invocation for both MCP servers and inline LLM REST tools.
+// This must be enabled when either tool definition is configured.
 const toolsAgent = new Agent({ client })
   .withTools();
 ```
