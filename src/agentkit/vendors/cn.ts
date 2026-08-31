@@ -21,18 +21,13 @@ export class FengmingSTT extends BaseCNSTT {
 
     toConfig(): SttConfig {
         const { keywords, additionalParams } = this.options;
-        const hasParams =
-            keywords !== undefined || (additionalParams !== undefined && Object.keys(additionalParams).length > 0);
+        const hasParams = additionalParams !== undefined && Object.keys(additionalParams).length > 0;
 
         return {
             vendor: "fengming",
-            ...(hasParams && {
-                params: {
-                    ...additionalParams,
-                    ...(keywords !== undefined && { keywords }),
-                },
-            }),
-        } as unknown as SttConfig;
+            ...(keywords !== undefined && { keywords }),
+            ...(hasParams && { params: { ...additionalParams } }),
+        };
     }
 }
 

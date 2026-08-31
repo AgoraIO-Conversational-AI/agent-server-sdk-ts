@@ -382,6 +382,8 @@ When `.withStt()` is omitted, AgentKit now selects the wire ASR vendor from `cli
 | `SarvamSTT` | `apiKey`, `language` |
 | `XAiSTT` | `apiKey`, `language?`, `baseUrl?`, `sampleRate?`, `additionalParams?` |
 
+For both `AresSTT` and `FengmingSTT`, `keywords` is serialized at the ASR top level as `asr.keywords`. Extra vendor fields supplied through `additionalParams` remain supported and are serialized under `asr.params`.
+
 `SpeechmaticsSTT` always serializes its credential as `asr.params.key`. The deprecated `apiKey` option remains accepted for backward compatibility and is normalized to `key`; when both are provided, `key` takes precedence.
 
 ---

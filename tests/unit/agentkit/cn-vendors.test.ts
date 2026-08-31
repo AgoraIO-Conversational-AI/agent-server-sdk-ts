@@ -26,10 +26,13 @@ import {
 describe("CN vendor helpers", () => {
     test("serializes CN STT vendors", () => {
         expect(new FengmingSTT().toConfig()).toMatchObject({ vendor: "fengming" });
-        expect(new FengmingSTT({ keywords: ["声网", "Agora"] }).toConfig()).toMatchObject({
-            vendor: "fengming",
-            params: { keywords: ["声网", "Agora"] },
-        });
+        expect(new FengmingSTT({ keywords: ["声网", "Agora"], additionalParams: { custom: true } }).toConfig()).toEqual(
+            {
+                vendor: "fengming",
+                keywords: ["声网", "Agora"],
+                params: { custom: true },
+            },
+        );
 
         expect(
             new TencentSTT({
