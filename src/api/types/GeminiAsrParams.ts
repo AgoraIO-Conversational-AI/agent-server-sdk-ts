@@ -4,16 +4,16 @@
  * Google Gemini ASR configuration parameters.
  */
 export interface GeminiAsrParams {
-    /** Google Gemini API key */
+    /** The Google Gemini API key used to authenticate requests. */
     api_key: string;
-    /** Google Gemini model to use for transcription */
+    /** The Gemini transcription model identifier. */
     model: string;
-    /** Audio sample rate in Hz */
+    /** The audio sample rate in Hz. */
     sample_rate?: number | null;
-    /** Language code for speech recognition */
-    language: string;
-    /** Whether to include word-level timestamps in transcription results */
-    word_timestamp: boolean;
+    /** The language code for speech recognition. This takes precedence over the top-level `asr.language` value. */
+    language?: string;
+    /** Whether to include word-level timestamps in the transcription results. */
+    word_timestamp?: boolean;
     /** Accepts any additional properties */
     [key: string]: any;
 }
