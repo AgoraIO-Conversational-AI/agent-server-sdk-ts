@@ -35,12 +35,6 @@ import {
     type PresetInput,
     resolveSessionPresets,
 } from "./presets.js";
-import {
-    createPreviewRoute,
-    type PreviewFeature,
-    previewRequestHeaders,
-    requiredPreviewFeatures,
-} from "./preview/client.js";
 import { ExpiresIn as ExpiresInHelper, generateConvoAIToken } from "./token.js";
 import type {
     AgentConfigUpdate,
@@ -160,7 +154,6 @@ export class AgentSession {
     private readonly _authMode: AgoraAuthMode;
     private _agentsClient: AgentsClient;
     private _agentManagementClient: AgentManagementClient;
-    private _previewFeatures: readonly PreviewFeature[] = [];
     private _sessionBaseUrl?: string;
     private _agentId: string | null = null;
     private _status: "idle" | "starting" | "running" | "stopping" | "stopped" | "error" = "idle";
@@ -223,18 +216,14 @@ export class AgentSession {
         return { Authorization: `agora token=${token}` };
     }
 
-    /** Auth plus the route gate, with the gate pinned last. */
+    /** Per-request authentication headers. */
     private _requestHeaders(): Record<string, string> | undefined {
-        const headers = this._convoAIHeaders();
-        return this._previewFeatures.length > 0 ? previewRequestHeaders(this._previewFeatures, headers) : headers;
+        return this._convoAIHeaders();
     }
 
     /**
      * Client-level default headers, for debug logging only.
      *
-     * These carry the preview `agora-feature` gate, which the generated client
-     * merges in below the SDK's view — so without this the header that decides
-     * whether a request reaches a preview provider is invisible in debug output.
      * Reaches into `_options` the same way `authMode` is read in the constructor;
      * supplier-valued headers are skipped rather than resolved, since debug
      * logging must not trigger side effects.
@@ -617,17 +606,9 @@ export class AgentSession {
             });
             const enrichedProperties = this._enrichAvatarParams(resolved.properties, expiresIn);
             this._validateEnrichedAvatarConfig(enrichedProperties);
-            this._previewFeatures = requiredPreviewFeatures(enrichedProperties);
-            if (this._previewFeatures.length > 0) {
-                const route = createPreviewRoute(this._client, this._previewFeatures);
-                this._agentsClient = route.agents;
-                this._agentManagementClient = route.agentManagement;
-                this._sessionBaseUrl = route.baseUrl;
-            } else {
-                this._agentsClient = this._client.agents;
-                this._agentManagementClient = this._client.agentManagement;
-                this._sessionBaseUrl = this._clientCurrentUrl();
-            }
+            this._agentsClient = this._client.agents;
+            this._agentManagementClient = this._client.agentManagement;
+            this._sessionBaseUrl = this._clientCurrentUrl();
 
             const request: Agora.StartAgentsRequest = {
                 appid: this._appId,

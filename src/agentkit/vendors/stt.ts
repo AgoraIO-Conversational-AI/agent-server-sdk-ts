@@ -16,6 +16,47 @@ function isDeepgramManagedModel(model: string | undefined): model is DeepgramPre
     return model !== undefined && DeepgramPresetModels.includes(model.trim().toLowerCase() as DeepgramPresetModel);
 }
 
+/** Constructor options for Google Gemini STT. */
+export interface GeminiSTTOptions {
+    /** Google Gemini API key. */
+    apiKey: string;
+    /** Gemini transcription model (for example, `gemini-3.7-transcribe-live`). */
+    model: string;
+    /** Language code for speech recognition (for example, `en-US`). */
+    language?: string;
+    /** Whether to include word-level timestamps in transcription results. */
+    wordTimestamp?: boolean;
+    /** Additional vendor-specific parameters. Explicit options take precedence. */
+    additionalParams?: Record<string, unknown>;
+}
+
+/** Google Gemini STT vendor. */
+export class GeminiSTT extends BaseSTT {
+    private readonly options: GeminiSTTOptions;
+
+    constructor(options: GeminiSTTOptions) {
+        super();
+        _requireString(options.apiKey, "apiKey", "GeminiSTT");
+        _requireString(options.model, "model", "GeminiSTT");
+        this.options = options;
+    }
+
+    toConfig(): SttConfig {
+        const { apiKey, model, language, wordTimestamp, additionalParams } = this.options;
+
+        return {
+            vendor: "gemini",
+            params: {
+                ...additionalParams,
+                api_key: apiKey,
+                model,
+                ...(language !== undefined && { language }),
+                ...(wordTimestamp !== undefined && { word_timestamp: wordTimestamp }),
+            },
+        };
+    }
+}
+
 /**
  * Constructor options for Speechmatics STT.
  */

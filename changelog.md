@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 - **Inline REST tools for text LLMs** — All global and Chinese mainland LLM vendor helpers now accept typed `tools: LlmTool[]` definitions and serialize them to `llm.tools`. AgentKit exports `LlmTool`, `LlmToolFunction`, `LlmToolServer`, and `LlmToolExecution`; call `Agent.withTools(true)` to enable invocation for inline REST tools or MCP servers.
 - **Generated filler words** — `FillerWordsConfig` now supports `content.mode: "generated"` with an optional OpenAI-compatible `llm_provider` (`url`, `api_key`, and request `params`), custom `prompt`, and `fallback_strategy`. AgentKit also exports `FillerWordsContentGeneratedConfig` and `FillerWordsGeneratedLlmProvider` aliases.
+- **Gemini ASR** — `GeminiSTT` is now a global production vendor backed by the Fern-generated schema. It supports `apiKey`, `model`, `language`, and `wordTimestamp`; sessions use the normal regional endpoint.
+
+### Removed
+
+- **Gemini preview routing** — Removed the preview endpoint, `agora-feature` gate, preview-only fields, and related public preview helpers. Generic `debug: true` request logging and credential redaction remain available.
 
 ## [v2.7.0] — 2026-08-26
 
